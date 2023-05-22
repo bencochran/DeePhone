@@ -9,7 +9,13 @@ import path from 'path';
 
 import logger from './logger.js';
 import type { DownloadedEpisode, Part } from './podcast.js';
-import { enqueueNewCall, getCallState, endCallState, incrementCallWaitingMessageCount } from './call-states.js';
+import {
+  enqueueNewCall,
+  getCallState,
+  endCallState,
+  incrementCallWaitingMessageCount,
+  loggableStatus,
+} from './call-states.js';
 
 const app = express();
 app.enable('trust proxy');
@@ -137,7 +143,7 @@ app.post('/voice', async (req, res) => {
 
   const status = getCallState(voiceRequest.CallSid);
 
-  logger.info(`${status ? 'Continued' : 'New'} call from ${voiceRequest.From}`, { voiceRequest, status });
+  logger.info(`${status ? 'Continued' : 'New'} call from ${voiceRequest.From}`, { voiceRequest, status: loggableStatus(status) });
 
   let voiceResponse: twilio.twiml.VoiceResponse;
   if (!status) {

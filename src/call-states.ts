@@ -98,3 +98,18 @@ export function getCallState(id: string) {
 export function endCallState(id: string) {
   delete callStates[id];
 }
+
+export function loggableStatus(status: InProgressCall | null): Record<string, any> | null {
+  if (!status) {
+    return null;
+  }
+  const { state, waitingMessageCount } = status;
+  let loggableState: Record<string, any>;
+  if ('parts' in state) {
+    const { parts , ...rest} = state;
+    loggableState = { ...rest, partsLeft: parts.length };
+  } else {
+    loggableState = state;
+  }
+  return { state: loggableState, waitingMessageCount };
+}
