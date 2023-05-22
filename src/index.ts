@@ -3,25 +3,11 @@ import 'dotenv/config'
 import express from 'express';
 import http from 'http';
 import { twiml } from 'twilio';
-import { createLogger, transports, format, config } from 'winston';
 import Parser from 'rss-parser';
 import { format as dateFormat, formatDistance } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 
-const logger = createLogger({
-  levels: config.syslog.levels,
-  transports: [new transports.Console()],
-  level: process.env.LOGGER_LEVEL ?? 'info',
-  format: process.env.LOGGER_FORMAT === 'human'
-    ? format.combine(
-        format.colorize(),
-        format.timestamp(),
-        format.printf(({ timestamp, level, message }) => {
-          return `[${timestamp}] ${level}: ${message}`;
-        })
-      )
-    : format.json(),
-});
+import logger from './logger';
 
 interface Feed {}
 
