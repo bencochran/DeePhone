@@ -13,11 +13,46 @@ import { fetchLatestEpisode, chopEpisode } from './podcast.js';
 
 const app = express();
 app.enable('trust proxy');
+app.use(express.urlencoded({ extended: false }));
 
 const requestQueue = new PQueue({ concurrency: 1 });
 
-app.post('/voice', async (_req, res) => {
+interface VoiceRequest {
+  CallSid: string;
+  AccountSid: string;
+  From: string;
+  To: string;
+  CallStatus: 'queued' | 'ringing' | 'in-progress' | 'completed' | 'busy' | 'failed or no-answer';
+  ApiVersion: string;
+  Direction: 'inbound' | 'outbound-api' | 'outbound-dial';
+  ForwardedFrom?: string;
+  CallerName?: string;
+  ParentCallSid?: string;
+  CallToken: string;
+
+  FromCity?: string;
+  FromState?: string;
+  FromZip?: string;
+  FromCountry?: string;
+
+  ToCity?: string;
+  ToState?: string;
+  ToZip?: string;
+  ToCountry?: string;
+}
+
+interface VoiceStatusCallbackRequest extends VoiceRequest {
+  CallDuration: string;
+  RecordingUrl?: string;
+  RecordingSid?: string;
+  RecordingDuration?: string;
+}
+
+app.post('/voice', async (req, res) => {
+  const voiceRequest: VoiceRequest = req.body;
   const voiceResponse = new twilio.twiml.VoiceResponse();
+
+  logger.info(`New call from ${voiceRequest.From}`, { voiceRequest });
 
   try {
     const latestEpisode = await requestQueue.add(async () => {
@@ -47,6 +82,14 @@ app.post('/voice', async (_req, res) => {
     logger.error('Unable to fetch latest episode', { error });
     voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello. Unfortunately there was a problem loading the latest Ted Radio Hour. Please call again later.`);
   }
+  res.type('text/xml');
+  res.send(voiceResponse.toString());
+});
+
+app.post('/voice/status-callback', async (req, res) => {
+  const voiceRequest: VoiceStatusCallbackRequest = req.body;
+  logger.info(`Status from ${voiceRequest.From}, status: ${voiceRequest.CallStatus}, duration: ${voiceRequest.CallDuration}`, { voiceRequest });
+  const voiceResponse = new twilio.twiml.VoiceResponse();
   res.type('text/xml');
   res.send(voiceResponse.toString());
 });
