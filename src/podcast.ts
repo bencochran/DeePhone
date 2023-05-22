@@ -80,13 +80,16 @@ export async function fetchLatestEpisode(): Promise<DownloadedEpisode | null> {
 }
 
 export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
-  // TODO: Don't re-chop an already chopped episode
-
   const inputFile = path.resolve('downloads/media', episode.filename);
   const desinationDir = path.resolve('downloads/media', episode.guid);
   const desinationFile = path.resolve(desinationDir, '%03d.mp3');
 
-  if (!fs.existsSync(desinationDir)) {
+  if (fs.existsSync(desinationDir)) {
+    const files = await fs.promises.readdir(desinationDir);
+    if (files.length > 0) {
+      return files.map(f => ({ filename: f }));
+    }
+  } else {
     await fs.promises.mkdir(desinationDir, { recursive: true });
   }
 
@@ -138,7 +141,9 @@ export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
   await new Promise<void>((resolve, reject) => {
     const proc = spawn('ffmpeg', segmentArgs, { stdio: ['ignore', process.stdout, process.stderr ]});
     proc.once('error', (error) => {
-      // Delete broken files?
+      // Make sure we delete any broken files
+      fs.promises.rm(desinationDir, { recursive: true, force: true });
+
       reject(error);
     });
     proc.once('close', () => {
