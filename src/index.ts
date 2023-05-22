@@ -51,6 +51,10 @@ function initialAnswerResponse() {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   const today = utcToZonedTime(new Date(), 'America/New_York');
   const formattedToday = dateFormat(today, 'eeee, MMMM do');
+
+  // A bit of pause at the start so we don’t answer halfway though the first ring
+  voiceResponse.pause({ length: 3 });
+
   voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello.`);
   voiceResponse.pause({ length: 1 });
   voiceResponse.say({ voice: 'Polly.Matthew' }, `Today is ${formattedToday}.`);
