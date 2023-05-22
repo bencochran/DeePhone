@@ -36,6 +36,7 @@ interface Part {
 }
 
 const MIN_EPISODE_FILE_SIZE_MB = 2;
+const MIN_SILENCE_SPLIT_DURATION = 0.75
 
 async function downloadEpisode(episode: Episode): Promise<DownloadedEpisode> {
   const filename = `${episode.guid}.mp3`;
@@ -96,16 +97,53 @@ async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
     await fs.promises.mkdir(desinationDir, { recursive: true });
   }
 
-  const args = [
+  // Detect periods of silence
+
+  const silencedetectArgs = [
+    '-i', inputFile,
+    '-filter_complex', `[0:a]silencedetect=n=-30dB:d=${MIN_SILENCE_SPLIT_DURATION}[outa]`,
+    '-map', '[outa]',
+    '-f', 's16le',
+    '-y', '/dev/null',
+  ];
+
+  const output = await new Promise<string>((resolve, reject) => {
+    const proc = spawn('ffmpeg', silencedetectArgs);
+    let result = '';
+    proc.stdout?.on('data', (data) => {
+      result += data.toString();
+    });
+    proc.stderr?.on('data', (data) => {
+      result += data.toString();
+    });
+    proc.once('error', (error) => {
+      reject(error);
+    });
+    proc.once('close', () => {
+      resolve(result);
+    });
+  });
+
+  const startTimes: string[] = [];
+  const startMatches = output.matchAll(/silence_start: ([\d\.]+)/g);
+  for (const match of startMatches) {
+    startTimes.push(match[1]);
+  }
+
+  // Split on those periods of silence
+
+  const segmentArgs = [
     '-i', inputFile,
     '-f', 'segment',
-    '-segment_time', '30', // 30 second chunks
-    '-c', 'copy',
+    '-segment_times', startTimes.join(','),
+    '-reset_timestamps', '1',
+    '-map', '0:a',
+    '-c:a', 'copy',
     desinationFile,
   ];
 
   await new Promise<void>((resolve, reject) => {
-    const proc = spawn('ffmpeg', args, { stdio: ['ignore', process.stdout, process.stderr ]});
+    const proc = spawn('ffmpeg', segmentArgs, { stdio: ['ignore', process.stdout, process.stderr ]});
     proc.once('error', (error) => {
       // Delete broken files?
       reject(error);
