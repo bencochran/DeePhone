@@ -97,7 +97,7 @@ function playEpisodeResponse(episode: DownloadedEpisode, parts: Part[], waitingC
   const formattedAgo = formatDistance(latest, today, { addSuffix: true });
 
   if (waitingCount === 0) {
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `Here’s the latest Ted Radio Hour from ${formattedLatest} (${formattedAgo}).`);
+    voiceResponse.say({ voice: 'Polly.Matthew' }, `Here’s the latest Ted Radio Hour from ${formattedAgo}, ${formattedLatest}.`);
   } else {
     voiceResponse.say({ voice: 'Polly.Matthew' }, `Here it is.`);
     voiceResponse.pause({ length: 1 });
