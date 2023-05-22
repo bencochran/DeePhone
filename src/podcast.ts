@@ -55,7 +55,7 @@ export async function downloadEpisode(episode: Episode): Promise<DownloadedEpiso
   return { ...episode, filename };
 }
 
-export async function fetchLatestEpisode(): Promise<DownloadedEpisode | null> {
+export async function fetchLatestEpisode(): Promise<Episode | null> {
   const parser: Parser<Feed, Item> = new Parser();
   const feed = await parser.parseURL('https://feeds.npr.org/510298/podcast.xml');
 
@@ -75,8 +75,7 @@ export async function fetchLatestEpisode(): Promise<DownloadedEpisode | null> {
   if (episodes.length === 0) {
     return null;
   }
-  const [latest] = episodes;
-  return await downloadEpisode(latest);
+  return episodes[0];
 }
 
 export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {

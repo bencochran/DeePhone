@@ -6,23 +6,22 @@ import twilio from 'twilio';
 import { format as dateFormat, formatDistance } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import path from 'path';
-import PQueue from 'p-queue';
 
 import logger from './logger.js';
-import { fetchLatestEpisode, chopEpisode } from './podcast.js';
+import type { DownloadedEpisode, Part } from './podcast.js';
+import { enqueueNewCall, getCallState, endCallState, incrementCallWaitingMessageCount } from './call-states.js';
 
 const app = express();
 app.enable('trust proxy');
 app.use(express.urlencoded({ extended: false }));
 
-const requestQueue = new PQueue({ concurrency: 1 });
 
 interface VoiceRequest {
   CallSid: string;
   AccountSid: string;
   From: string;
   To: string;
-  CallStatus: 'queued' | 'ringing' | 'in-progress' | 'completed' | 'busy' | 'failed or no-answer';
+  CallStatus: 'queued' | 'ringing' | 'in-progress' | 'completed' | 'busy' | 'failed' | 'no-answer';
   ApiVersion: string;
   Direction: 'inbound' | 'outbound-api' | 'outbound-dial';
   ForwardedFrom?: string;
@@ -48,40 +47,109 @@ interface VoiceStatusCallbackRequest extends VoiceRequest {
   RecordingDuration?: string;
 }
 
+function initialAnswerResponse() {
+  const voiceResponse = new twilio.twiml.VoiceResponse();
+  const today = utcToZonedTime(new Date(), 'America/New_York');
+  const formattedToday = dateFormat(today, 'eeee, MMMM do');
+  voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello.`);
+  voiceResponse.pause({ length: 1 });
+  voiceResponse.say({ voice: 'Polly.Matthew' }, `Today is ${formattedToday}.`);
+  voiceResponse.pause({ length: 1 });
+  voiceResponse.redirect('/voice');
+  return voiceResponse;
+}
+
+function waitingResponse(waitingCount: number) {
+  const voiceResponse = new twilio.twiml.VoiceResponse();
+  if (waitingCount === 0) {
+    voiceResponse.pause({ length: 1 });
+    voiceResponse.say({ voice: 'Polly.Matthew' }, `Give me just a moment to find the latest episode.`);
+  } else if (waitingCount === 1) {
+    voiceResponse.say({ voice: 'Polly.Matthew' }, `It’s taking a second, but I should have it ready soon.`);
+    voiceResponse.pause({ length: 3 });
+  } else if (waitingCount === 2) {
+    voiceResponse.say({ voice: 'Polly.Matthew' }, `I’m still working on it. Please bear with me.`);
+    voiceResponse.pause({ length: 7 });
+  } else if (waitingCount === 3) {
+    voiceResponse.say({ voice: 'Polly.Matthew' }, `Sorry about this. I’m still loading the episode.`);
+    voiceResponse.pause({ length: 7 });
+  } else if (waitingCount === 4) {
+    voiceResponse.say({ voice: 'Polly.Matthew' }, `I’m still here. Things are a little slow today. Please stand by.`);
+    voiceResponse.pause({ length: 10 });
+  } else {
+    voiceResponse.say({ voice: 'Polly.Matthew' }, `Sorry, still trying.`);
+    voiceResponse.pause({ length: 7 });
+  }
+  voiceResponse.pause({ length: 7 });
+  voiceResponse.redirect('/voice');
+  return voiceResponse;
+}
+
+function playEpisodeResponse(episode: DownloadedEpisode, parts: Part[], waitingCount: number) {
+  const voiceResponse = new twilio.twiml.VoiceResponse();
+  const today = utcToZonedTime(new Date(), 'America/New_York');
+  const latest = utcToZonedTime(episode.date, 'America/New_York');
+  const formattedLatest = dateFormat(latest, 'eeee, MMMM do');
+  const formattedAgo = formatDistance(latest, today, { addSuffix: true });
+
+  if (waitingCount === 0) {
+    voiceResponse.say({ voice: 'Polly.Matthew' }, `Here’s the latest Ted Radio Hour from ${formattedLatest} (${formattedAgo}).`);
+  } else {
+    voiceResponse.say({ voice: 'Polly.Matthew' }, `Here it is.`);
+    voiceResponse.pause({ length: 1 });
+    voiceResponse.say({ voice: 'Polly.Matthew' }, `The latest Ted Radio Hour from ${formattedLatest} (${formattedAgo}).`);
+  }
+  parts.forEach((part) => {
+    voiceResponse.play(`/media/${episode.guid}/${part.filename}`);
+  });
+  voiceResponse.pause({ length: 2 });
+  voiceResponse.say({ voice: 'Polly.Matthew' }, `I hope you enjoyed the episode. Have a great day.`);
+  voiceResponse.pause({ length: 1 });
+  voiceResponse.say({ voice: 'Polly.Matthew' }, `Goodbye.`);
+  voiceResponse.pause({ length: 2 });
+  return voiceResponse;
+}
+
+function noEpisodeResponse() {
+  const voiceResponse = new twilio.twiml.VoiceResponse();
+  voiceResponse.say({ voice: 'Polly.Matthew' }, `Sorry, I was unable to find the latest Ted Radio Hour. Please call again later.`);
+  voiceResponse.pause({ length: 1 });
+  voiceResponse.say({ voice: 'Polly.Matthew' }, `Goodbye.`);
+  voiceResponse.pause({ length: 2 });
+  return voiceResponse;
+}
+
+function errorResponse() {
+  const voiceResponse = new twilio.twiml.VoiceResponse();
+  voiceResponse.say({ voice: 'Polly.Matthew' }, `Unfortunately, there was a problem loading the latest Ted Radio Hour. Please call again later.`);
+  voiceResponse.pause({ length: 1 });
+  voiceResponse.say({ voice: 'Polly.Matthew' }, `Goodbye.`);
+  voiceResponse.pause({ length: 2 });
+  return voiceResponse;
+}
+
 app.post('/voice', async (req, res) => {
   const voiceRequest: VoiceRequest = req.body;
-  const voiceResponse = new twilio.twiml.VoiceResponse();
 
-  logger.info(`New call from ${voiceRequest.From}`, { voiceRequest });
+  const status = getCallState(voiceRequest.CallSid);
 
-  try {
-    const latestEpisode = await requestQueue.add(async () => {
-      const latestEpisode = await fetchLatestEpisode()
-      const parts = latestEpisode && await chopEpisode(latestEpisode);
-      if (latestEpisode && parts && parts.length > 0) {
-        return { ...latestEpisode, parts };
-      }
-      return null;
-    });
-    if (latestEpisode) {
-      const today = utcToZonedTime(new Date(), 'America/New_York');
-      const latest = utcToZonedTime(latestEpisode.date, 'America/New_York');
-      const formattedToday = dateFormat(today, 'eeee, MMMM do');
-      const formattedLatest = dateFormat(latest, 'eeee, MMMM do');
-      const formattedAgo = formatDistance(latest, today, { addSuffix: true });
+  logger.info(`${status ? 'Continued' : 'New'} call from ${voiceRequest.From}`, { voiceRequest, status });
 
-      voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello. Today is ${formattedToday}. Here is the latest Ted Radio Hour from ${formattedLatest} (${formattedAgo}).`);
-      latestEpisode.parts.forEach((part) => {
-        voiceResponse.play(`/media/${latestEpisode.guid}/${part.filename}`);
-      });
-    } else {
-      logger.warning('Unable to find latest episode');
-      voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello. I was unable to find the latest Ted Radio Hour. Please call again later.`);
-    }
-  } catch (error) {
-    logger.error('Unable to fetch latest episode', { error });
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello. Unfortunately there was a problem loading the latest Ted Radio Hour. Please call again later.`);
+  let voiceResponse: twilio.twiml.VoiceResponse;
+  if (!status) {
+    enqueueNewCall(voiceRequest.CallSid);
+    voiceResponse = initialAnswerResponse();
+  } else if (status.state.status === 'playing-episode') {
+    voiceResponse = playEpisodeResponse(status.state.episode, status.state.parts, status.waitingMessageCount);
+  } else if (status.state.status === 'no-episode') {
+    voiceResponse = noEpisodeResponse();
+  } else if (status.state.status === 'episode-error') {
+    voiceResponse = errorResponse();
+  } else {
+    incrementCallWaitingMessageCount(voiceRequest.CallSid);
+    voiceResponse = waitingResponse(status.waitingMessageCount)
   }
+
   res.type('text/xml');
   res.send(voiceResponse.toString());
 });
@@ -89,6 +157,9 @@ app.post('/voice', async (req, res) => {
 app.post('/voice/status-callback', async (req, res) => {
   const voiceRequest: VoiceStatusCallbackRequest = req.body;
   logger.info(`Status from ${voiceRequest.From}, status: ${voiceRequest.CallStatus}, duration: ${voiceRequest.CallDuration}`, { voiceRequest });
+  if (voiceRequest.CallStatus === 'completed' || voiceRequest.CallStatus === 'failed') {
+    endCallState(voiceRequest.CallSid);
+  }
   const voiceResponse = new twilio.twiml.VoiceResponse();
   res.type('text/xml');
   res.send(voiceResponse.toString());
