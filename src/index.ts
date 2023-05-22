@@ -55,9 +55,9 @@ function initialAnswerResponse() {
   // A bit of pause at the start so we don’t answer halfway though the first ring
   voiceResponse.pause({ length: 3 });
 
-  voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello.`);
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Hello.`);
   voiceResponse.pause({ length: 1 });
-  voiceResponse.say({ voice: 'Polly.Matthew' }, `Today is ${formattedToday}.`);
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Today is ${formattedToday}.`);
   voiceResponse.pause({ length: 1 });
   voiceResponse.redirect('/voice');
   return voiceResponse;
@@ -67,21 +67,21 @@ function waitingResponse(waitingCount: number) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   if (waitingCount === 0) {
     voiceResponse.pause({ length: 1 });
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `Give me just a moment to find the latest episode.`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Give me just a moment to find the latest episode.`);
   } else if (waitingCount === 1) {
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `It’s taking a second, but I should have it ready soon.`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `It’s taking a second, but I should have it ready soon.`);
     voiceResponse.pause({ length: 3 });
   } else if (waitingCount === 2) {
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `I’m still working on it. Please bear with me.`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `I’m still working on it. Please bear with me.`);
     voiceResponse.pause({ length: 7 });
   } else if (waitingCount === 3) {
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `Sorry about this. I’m still loading the episode.`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Sorry about this. I’m still loading the episode.`);
     voiceResponse.pause({ length: 7 });
   } else if (waitingCount === 4) {
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `I’m still here. Things are a little slow today. Please stand by.`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `I’m still here. Things are a little slow today. Please stand by.`);
     voiceResponse.pause({ length: 10 });
   } else {
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `Sorry, still trying.`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Sorry, still trying.`);
     voiceResponse.pause({ length: 7 });
   }
   voiceResponse.pause({ length: 7 });
@@ -97,37 +97,37 @@ function playEpisodeResponse(episode: DownloadedEpisode, parts: Part[], waitingC
   const formattedAgo = formatDistance(latest, today, { addSuffix: true });
 
   if (waitingCount === 0) {
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `Here’s the latest Ted Radio Hour from ${formattedAgo}, ${formattedLatest}.`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Here’s the latest Ted Radio Hour from ${formattedAgo}, ${formattedLatest}.`);
   } else {
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `Here it is.`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Here it is.`);
     voiceResponse.pause({ length: 1 });
-    voiceResponse.say({ voice: 'Polly.Matthew' }, `The latest Ted Radio Hour from ${formattedLatest} (${formattedAgo}).`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `The latest Ted Radio Hour from ${formattedLatest} (${formattedAgo}).`);
   }
   parts.forEach((part) => {
     voiceResponse.play(`/media/${episode.guid}/${part.filename}`);
   });
   voiceResponse.pause({ length: 2 });
-  voiceResponse.say({ voice: 'Polly.Matthew' }, `I hope you enjoyed the episode. Have a great day.`);
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `I hope you enjoyed the episode. Have a great day.`);
   voiceResponse.pause({ length: 1 });
-  voiceResponse.say({ voice: 'Polly.Matthew' }, `Goodbye.`);
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Goodbye.`);
   voiceResponse.pause({ length: 2 });
   return voiceResponse;
 }
 
 function noEpisodeResponse() {
   const voiceResponse = new twilio.twiml.VoiceResponse();
-  voiceResponse.say({ voice: 'Polly.Matthew' }, `Sorry, I was unable to find the latest Ted Radio Hour. Please call again later.`);
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Sorry, I was unable to find the latest Ted Radio Hour. Please call again later.`);
   voiceResponse.pause({ length: 1 });
-  voiceResponse.say({ voice: 'Polly.Matthew' }, `Goodbye.`);
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Goodbye.`);
   voiceResponse.pause({ length: 2 });
   return voiceResponse;
 }
 
 function errorResponse() {
   const voiceResponse = new twilio.twiml.VoiceResponse();
-  voiceResponse.say({ voice: 'Polly.Matthew' }, `Unfortunately, there was a problem loading the latest Ted Radio Hour. Please call again later.`);
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Unfortunately, there was a problem loading the latest Ted Radio Hour. Please call again later.`);
   voiceResponse.pause({ length: 1 });
-  voiceResponse.say({ voice: 'Polly.Matthew' }, `Goodbye.`);
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Goodbye.`);
   voiceResponse.pause({ length: 2 });
   return voiceResponse;
 }
