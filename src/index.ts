@@ -8,6 +8,7 @@ import { format as dateFormat, formatDistance } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import fs from 'fs';
 import path from 'path';
+import { spawn } from 'child_process';
 
 import logger from './logger';
 import download from './download';
@@ -27,6 +28,10 @@ interface Episode {
 }
 
 interface DownloadedEpisode extends Episode {
+  filename: string;
+}
+
+interface Part {
   filename: string;
 }
 
@@ -77,8 +82,41 @@ async function fetchLatestEpisode(): Promise<DownloadedEpisode | null> {
     return null;
   }
   const [latest] = episodes;
-  const downloaded = await downloadEpisode(latest);
-  return downloaded;
+  return await downloadEpisode(latest);
+}
+
+async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
+  // TODO: Don't re-chop an already chopped episode
+
+  const inputFile = path.resolve('downloads/media', episode.filename);
+  const desinationDir = path.resolve('downloads/media', episode.guid);
+  const desinationFile = path.resolve(desinationDir, '%03d.mp3');
+
+  if (!fs.existsSync(desinationDir)) {
+    await fs.promises.mkdir(desinationDir, { recursive: true });
+  }
+
+  const args = [
+    '-i', inputFile,
+    '-f', 'segment',
+    '-segment_time', '30', // 30 second chunks
+    '-c', 'copy',
+    desinationFile,
+  ];
+
+  await new Promise<void>((resolve, reject) => {
+    const proc = spawn('ffmpeg', args, { stdio: ['ignore', process.stdout, process.stderr ]});
+    proc.once('error', (error) => {
+      // Delete broken files?
+      reject(error);
+    });
+    proc.once('close', () => {
+      resolve();
+    });
+  });
+
+  const files = await fs.promises.readdir(desinationDir);
+  return files.map(f => ({ filename: f }));
 }
 
 const app = express();
@@ -95,14 +133,14 @@ app.post('/voice', async (_req, res) => {
       const formattedToday = dateFormat(today, 'eeee, MMMM do');
       const formattedLatest = dateFormat(latest, 'eeee, MMMM do');
       const formattedAgo = formatDistance(latest, today, { addSuffix: true });
-      voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello. Today is ${formattedToday}. Here is the latest Ted Radio Hour from ${formattedLatest} (${formattedAgo}). It may take a moment to begin playing.`);
 
-      // TODO: Per Twilio: <Play>ing a file that is longer than 40 minutes can
-      // result in a dropped call. If you need to <Play> a file longer than 40
-      // minutes, consider splitting it up into smaller chunks.
-      // voiceResponse.play(latestEpisode.url);
-      voiceResponse.play(`/media/${latestEpisode.filename}`);
+      const parts = await chopEpisode(latestEpisode);
+      voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello. Today is ${formattedToday}. Here is the latest Ted Radio Hour from ${formattedLatest} (${formattedAgo}).`);
+      parts.forEach((part) => {
+        voiceResponse.play(`/media/${latestEpisode.guid}/${part.filename}`);
+      });
     } else {
+      logger.warning('Unable to find latest episode');
       voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello. I was unable to find the latest Ted Radio Hour. Please call again later.`);
     }
   } catch (error) {
