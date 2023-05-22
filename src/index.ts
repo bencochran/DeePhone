@@ -55,7 +55,7 @@ function initialAnswerResponse() {
   // A bit of pause at the start so we don’t answer halfway though the first ring
   voiceResponse.pause({ length: 3 });
 
-  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Hello.`);
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Hello, you're listening to Ted Radio Hour.`);
   voiceResponse.pause({ length: 1 });
   voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Today is ${formattedToday}.`);
   voiceResponse.pause({ length: 1 });
@@ -97,11 +97,11 @@ function playEpisodeResponse(episode: DownloadedEpisode, parts: Part[], waitingC
   const formattedAgo = formatDistance(latest, today, { addSuffix: true });
 
   if (waitingCount === 0) {
-    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Here’s the latest Ted Radio Hour from ${formattedAgo}, ${formattedLatest}.`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Here’s the latest episode from ${formattedAgo}, ${formattedLatest}.`);
   } else {
     voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Here it is.`);
     voiceResponse.pause({ length: 1 });
-    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `The latest Ted Radio Hour from ${formattedLatest} (${formattedAgo}).`);
+    voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `The latest episode from ${formattedAgo}, ${formattedLatest}.`);
   }
   parts.forEach((part) => {
     voiceResponse.play(`/media/${episode.guid}/${part.filename}`);
