@@ -3,8 +3,8 @@ import path from 'path';
 import Parser from 'rss-parser';
 import { spawn } from 'child_process';
 
-import logger from './logger';
-import download from './download';
+import logger from './logger.js';
+import download from './download.js';
 
 const MIN_EPISODE_FILE_SIZE_MB = 2;
 const MIN_SILENCE_SPLIT_DURATION = 0.75

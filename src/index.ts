@@ -2,22 +2,32 @@ import 'dotenv/config'
 
 import express from 'express';
 import http from 'http';
-import { twiml } from 'twilio';
+import twilio from 'twilio';
 import { format as dateFormat, formatDistance } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import path from 'path';
+import PQueue from 'p-queue';
 
-import logger from './logger';
-import { fetchLatestEpisode, chopEpisode } from './podcast';
+import logger from './logger.js';
+import { fetchLatestEpisode, chopEpisode } from './podcast.js';
 
 const app = express();
 app.enable('trust proxy');
 
+const requestQueue = new PQueue({ concurrency: 1 });
+
 app.post('/voice', async (_req, res) => {
-  const voiceResponse = new twiml.VoiceResponse();
+  const voiceResponse = new twilio.twiml.VoiceResponse();
 
   try {
-    const latestEpisode = await fetchLatestEpisode();
+    const latestEpisode = await requestQueue.add(async () => {
+      const latestEpisode = await fetchLatestEpisode()
+      const parts = latestEpisode && await chopEpisode(latestEpisode);
+      if (latestEpisode && parts && parts.length > 0) {
+        return { ...latestEpisode, parts };
+      }
+      return null;
+    });
     if (latestEpisode) {
       const today = utcToZonedTime(new Date(), 'America/New_York');
       const latest = utcToZonedTime(latestEpisode.date, 'America/New_York');
@@ -25,9 +35,8 @@ app.post('/voice', async (_req, res) => {
       const formattedLatest = dateFormat(latest, 'eeee, MMMM do');
       const formattedAgo = formatDistance(latest, today, { addSuffix: true });
 
-      const parts = await chopEpisode(latestEpisode);
       voiceResponse.say({ voice: 'Polly.Matthew' }, `Hello. Today is ${formattedToday}. Here is the latest Ted Radio Hour from ${formattedLatest} (${formattedAgo}).`);
-      parts.forEach((part) => {
+      latestEpisode.parts.forEach((part) => {
         voiceResponse.play(`/media/${latestEpisode.guid}/${part.filename}`);
       });
     } else {
