@@ -16,42 +16,12 @@ import {
   incrementCallWaitingMessageCount,
   loggableStatus,
 } from './call-states.js';
+import type { VoiceRequest, VoiceStatusCallbackRequest } from './twilio-utilities.js';
+import { geocodeVoiceRequestFrom } from './twilio-utilities.js';
 
 const app = express();
 app.enable('trust proxy');
 app.use(express.urlencoded({ extended: false }));
-
-
-interface VoiceRequest {
-  CallSid: string;
-  AccountSid: string;
-  From: string;
-  To: string;
-  CallStatus: 'queued' | 'ringing' | 'in-progress' | 'completed' | 'busy' | 'failed' | 'no-answer';
-  ApiVersion: string;
-  Direction: 'inbound' | 'outbound-api' | 'outbound-dial';
-  ForwardedFrom?: string;
-  CallerName?: string;
-  ParentCallSid?: string;
-  CallToken: string;
-
-  FromCity?: string;
-  FromState?: string;
-  FromZip?: string;
-  FromCountry?: string;
-
-  ToCity?: string;
-  ToState?: string;
-  ToZip?: string;
-  ToCountry?: string;
-}
-
-interface VoiceStatusCallbackRequest extends VoiceRequest {
-  CallDuration: string;
-  RecordingUrl?: string;
-  RecordingSid?: string;
-  RecordingDuration?: string;
-}
 
 function initialAnswerResponse() {
   const voiceResponse = new twilio.twiml.VoiceResponse();
@@ -143,7 +113,10 @@ app.post('/voice', async (req, res) => {
 
   const status = getCallState(voiceRequest.CallSid);
 
-  logger.info(`${status ? 'Continued' : 'New'} call from ${voiceRequest.From}`, { voiceRequest, status: loggableStatus(status) });
+  (async () => {
+    const geocodedFrom = await geocodeVoiceRequestFrom(voiceRequest);
+    logger.info(`${status ? 'Continued' : 'New'} call from ${voiceRequest.From}`, { voiceRequest, status: loggableStatus(status), geocodedFrom });
+  })();
 
   let voiceResponse: twilio.twiml.VoiceResponse;
   if (!status) {
