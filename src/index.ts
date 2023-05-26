@@ -15,6 +15,7 @@ import {
   endCallState,
   incrementCallWaitingMessageCount,
   loggableStatus,
+  advanceToNextPart,
 } from './call-states.js';
 import type { VoiceRequest, VoiceStatusCallbackRequest } from './twilio-utilities.js';
 import { geocodeVoiceRequestFrom } from './twilio-utilities.js';
@@ -65,7 +66,7 @@ function waitingResponse(waitingCount: number) {
   return voiceResponse;
 }
 
-function playEpisodeResponse(episode: DownloadedEpisode, parts: Part[], waitingCount: number) {
+function introduceEpisodeResponse(episode: DownloadedEpisode, waitingCount: number) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   const today = utcToZonedTime(new Date(), 'America/New_York');
   const latest = utcToZonedTime(episode.date, 'America/New_York');
@@ -79,9 +80,19 @@ function playEpisodeResponse(episode: DownloadedEpisode, parts: Part[], waitingC
     voiceResponse.pause({ length: 1 });
     voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `The latest episode from ${formattedAgo}, ${formattedLatest}.`);
   }
-  parts.forEach((part) => {
-    voiceResponse.play(`/media/${episode.guid}/${part.filename}`);
-  });
+  voiceResponse.redirect('/voice');
+  return voiceResponse;
+}
+
+function playPartResponse(episode: DownloadedEpisode, part: Part) {
+  const voiceResponse = new twilio.twiml.VoiceResponse();
+  voiceResponse.play(`/media/${episode.guid}/${part.filename}`);
+  voiceResponse.redirect('/voice');
+  return voiceResponse;
+}
+
+function endEpisodeResponse() {
+  const voiceResponse = new twilio.twiml.VoiceResponse();
   voiceResponse.pause({ length: 2 });
   voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `I hope you enjoyed the episode. Have a great day.`);
   voiceResponse.pause({ length: 1 });
@@ -122,8 +133,15 @@ app.post('/voice', async (req, res) => {
   if (!status) {
     enqueueNewCall(voiceRequest.CallSid);
     voiceResponse = initialAnswerResponse();
+  } else if (status.state.status === 'introducing-episode') {
+    advanceToNextPart(voiceRequest.CallSid);
+    voiceResponse = introduceEpisodeResponse(status.state.episode, status.waitingMessageCount);
   } else if (status.state.status === 'playing-episode') {
-    voiceResponse = playEpisodeResponse(status.state.episode, status.state.parts, status.waitingMessageCount);
+    advanceToNextPart(voiceRequest.CallSid);
+    const part = status.state.parts[status.state.nextPartIndex];
+    voiceResponse = playPartResponse(status.state.episode, part);
+  } else if (status.state.status === 'ending-episode') {
+    voiceResponse = endEpisodeResponse();
   } else if (status.state.status === 'no-episode') {
     voiceResponse = noEpisodeResponse();
   } else if (status.state.status === 'episode-error') {

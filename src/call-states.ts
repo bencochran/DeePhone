@@ -28,13 +28,24 @@ interface SlicingEpisode {
   episode: DownloadedEpisode;
 }
 
-interface PlayingEpisode {
-  status: 'playing-episode';
+interface IntroducingEpisode {
+  status: 'introducing-episode';
   episode: DownloadedEpisode;
   parts: Part[];
 }
 
-type CallState = FetchingFeed | DownloadingEpisode | SlicingEpisode | PlayingEpisode | NoEpisode | EpisodeError;
+interface PlayingEpisode {
+  status: 'playing-episode';
+  episode: DownloadedEpisode;
+  parts: Part[];
+  nextPartIndex: number;
+}
+
+interface EndingEpisode {
+  status: 'ending-episode';
+}
+
+type CallState = FetchingFeed | DownloadingEpisode | SlicingEpisode | PlayingEpisode | IntroducingEpisode | EndingEpisode | NoEpisode | EpisodeError;
 
 interface InProgressCall {
   state: CallState;
@@ -64,7 +75,7 @@ export function enqueueNewCall(id: string) {
         return;
       }
 
-      updateCallState(id, { status: 'playing-episode', episode: downloadedEpisode, parts });
+      updateCallState(id, { status: 'introducing-episode', episode: downloadedEpisode, parts });
     } catch (error) {
       logger.error('Unable to download or process latest episode', { error });
       updateCallState(id, { status: 'episode-error' });
@@ -85,6 +96,26 @@ export function incrementCallWaitingMessageCount(id: string) {
   }
   const { state, waitingMessageCount } = status;
   callStates[id] = { state, waitingMessageCount: waitingMessageCount + 1 };
+}
+
+export function advanceToNextPart(id: string) {
+  const status = callStates[id];
+  if (!status) {
+    return;
+  }
+  const { state } = status;
+  if (state.status === 'introducing-episode') {
+    const { episode, parts } = state;
+    updateCallState(id, { status: 'playing-episode', episode, parts, nextPartIndex: 0 });
+  } else if (state.status === 'playing-episode') {
+    const { episode, parts, nextPartIndex: partIndex } = state;
+    const nextPartIndex = partIndex + 1;
+    if (nextPartIndex >= parts.length) {
+      updateCallState(id, { status: 'ending-episode' });
+    } else {
+      updateCallState(id, { status: 'playing-episode', episode, parts, nextPartIndex });
+    }
+  }
 }
 
 export function getCallState(id: string) {
