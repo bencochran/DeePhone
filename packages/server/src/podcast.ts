@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import Parser from 'rss-parser';
 import { spawn } from 'child_process';
+import { S3Client, PutObjectCommand, ListObjectsCommand } from '@aws-sdk/client-s3';
 
 import logger from './logger.js';
 import download from './download.js';
@@ -29,6 +30,12 @@ export interface DownloadedEpisode extends Episode {
 
 export interface Part {
   filename: string;
+  filePath: string;
+}
+
+export interface UploadedPart extends Part {
+  url: string;
+  key: string;
 }
 
 export async function downloadEpisode(episode: Episode): Promise<DownloadedEpisode> {
@@ -86,7 +93,10 @@ export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
   if (fs.existsSync(desinationDir)) {
     const files = await fs.promises.readdir(desinationDir);
     if (files.length > 0) {
-      return files.map(f => ({ filename: f }));
+      return files.map(f => ({
+        filename: f,
+        filePath: path.resolve(desinationDir, f),
+      }));
     }
   } else {
     await fs.promises.mkdir(desinationDir, { recursive: true });
@@ -151,5 +161,70 @@ export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
   });
 
   const files = await fs.promises.readdir(desinationDir);
-  return files.map(f => ({ filename: f }));
+  return files.map(f => ({
+    filename: f,
+    filePath: path.resolve(desinationDir, f),
+  }));
+}
+
+function keyPrefixForEpisode(episode: Episode) {
+  const yearString = episode.date.getUTCFullYear().toString().padStart(4, '0');
+  const monthString = episode.date.getUTCMonth().toString().padStart(2, '0');
+  const dayString = episode.date.getUTCDate().toString().padStart(2, '0');
+  const dateString = `${yearString}-${monthString}-${dayString}`;
+  return `media/${dateString}/${episode.guid}/`;
+}
+
+async function upload(episode: Episode, part: Part, s3: S3Client, bucketName: string, bucketBaseURL: string): Promise<UploadedPart> {
+  const filePath = path.resolve('downloads/media', episode.guid, part.filename);
+
+  const fileStream = fs.createReadStream(filePath);
+  fileStream.on('error', (error) => {
+    logger.error(`Error reading ${filePath}`, { error });
+  });
+  const keyPrefix = keyPrefixForEpisode(episode);
+  const key = `${keyPrefix}${part.filename}`;
+
+  const command = new PutObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+    Body: fileStream,
+    ContentType: 'audio/mpeg',
+  });
+  try {
+    const result = await s3.send(command);
+    logger.info(`Uploaded ${episode.guid} ${part.filename}`, { result });
+    return {
+      ...part,
+      url: (new URL(key, bucketBaseURL)).toString(),
+      key,
+    };
+  } catch (error) {
+    logger.error(`Unable to upload "${filePath}" with key "${key}"`, { error, key });
+    throw error;
+  }
+}
+
+export async function uploadEpisodeParts(episode: Episode, parts: Part[], s3: S3Client, bucketName: string, bucketBaseURL: string): Promise<UploadedPart[]> {
+  const keyPrefix = keyPrefixForEpisode(episode);
+
+  const listCommand = new ListObjectsCommand({
+    Bucket: bucketName,
+    Prefix: keyPrefix,
+  });
+
+  const existingUploads = await s3.send(listCommand);
+  if (existingUploads.Contents && existingUploads.Contents.length) {
+    logger.info(`Parts already uploaded for episode "${episode.title}" with prefix "${keyPrefix}"`, { episode, count: existingUploads.Contents.length, keyPrefix });
+    return existingUploads.Contents.map(p => ({
+      filename: path.basename(p.Key!),
+      key: p.Key!,
+      url: (new URL(p.Key!, bucketBaseURL)).toString(),
+      filePath: path.resolve('downloads', p.Key!),
+    }));
+  }
+
+  const uploadedParts = await Promise.all(parts.map(p => upload(episode, p, s3, bucketName, bucketBaseURL)));
+  logger.info(`Uploaded ${uploadedParts.length} for episode "${episode.title}" with prefix "${keyPrefix}"`, { episode, count: uploadedParts.length, keyPrefix });
+  return uploadedParts;
 }

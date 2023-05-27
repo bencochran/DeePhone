@@ -8,7 +8,7 @@ import { utcToZonedTime } from 'date-fns-tz';
 import path from 'path';
 
 import logger from './logger.js';
-import type { DownloadedEpisode, Part } from './podcast.js';
+import type { DownloadedEpisode, UploadedPart } from './podcast.js';
 import {
   enqueueNewCall,
   getCallState,
@@ -84,9 +84,9 @@ function introduceEpisodeResponse(episode: DownloadedEpisode, waitingCount: numb
   return voiceResponse;
 }
 
-function playPartResponse(episode: DownloadedEpisode, part: Part) {
+function playPartResponse(episode: DownloadedEpisode, part: UploadedPart) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
-  voiceResponse.play(`/media/${episode.guid}/${part.filename}`);
+  voiceResponse.play(part.url);
   voiceResponse.redirect('/voice');
   return voiceResponse;
 }
@@ -165,9 +165,6 @@ app.post('/voice/status-callback', async (req, res) => {
   res.type('text/xml');
   res.send(voiceResponse.toString());
 });
-
-// Then downloaded files
-app.use(express.static(path.resolve('downloads')));
 
 const port = process.env.PORT || 5000;
 

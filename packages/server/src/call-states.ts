@@ -1,8 +1,9 @@
 import PQueue from 'p-queue';
 
 import logger from './logger.js';
-import { fetchLatestEpisode, downloadEpisode, chopEpisode } from './podcast.js';
-import type { Episode, DownloadedEpisode, Part } from './podcast.js';
+import { fetchLatestEpisode, downloadEpisode, chopEpisode, uploadEpisodeParts } from './podcast.js';
+import type { Episode, DownloadedEpisode, UploadedPart } from './podcast.js';
+import { s3, bucketName, bucketBaseURL } from './s3.js';
 
 const requestQueue = new PQueue({ concurrency: 1 });
 
@@ -31,13 +32,13 @@ interface SlicingEpisode {
 interface IntroducingEpisode {
   status: 'introducing-episode';
   episode: DownloadedEpisode;
-  parts: Part[];
+  parts: UploadedPart[];
 }
 
 interface PlayingEpisode {
   status: 'playing-episode';
   episode: DownloadedEpisode;
-  parts: Part[];
+  parts: UploadedPart[];
   nextPartIndex: number;
 }
 
@@ -75,7 +76,9 @@ export function enqueueNewCall(id: string) {
         return;
       }
 
-      updateCallState(id, { status: 'introducing-episode', episode: downloadedEpisode, parts });
+      const uploadedParts = await uploadEpisodeParts(episode, parts, s3, bucketName, bucketBaseURL);
+
+      updateCallState(id, { status: 'introducing-episode', episode: downloadedEpisode, parts: uploadedParts });
     } catch (error) {
       logger.error('Unable to download or process latest episode', { error });
       updateCallState(id, { status: 'episode-error' });
@@ -137,8 +140,11 @@ export function loggableStatus(status: InProgressCall | null): Record<string, an
   const { state, waitingMessageCount } = status;
   let loggableState: Record<string, any>;
   if ('parts' in state) {
-    const { parts , ...rest} = state;
-    loggableState = { ...rest, partsLeft: parts.length };
+    const { parts , ...rest } = state;
+    const part = ('nextPartIndex' in state)
+      ? parts[state.nextPartIndex]
+      : undefined;
+    loggableState = { ...rest, partsCount: parts.length, part };
   } else {
     loggableState = state;
   }
