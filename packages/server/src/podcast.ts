@@ -62,7 +62,7 @@ export async function downloadEpisode(episode: Episode): Promise<DownloadedEpiso
   return { ...episode, filename };
 }
 
-export async function fetchLatestEpisode(): Promise<Episode | null> {
+export async function fetchEpisodes(): Promise<Episode[]> {
   const parser: Parser<Feed, Item> = new Parser();
   const feed = await parser.parseURL('https://feeds.npr.org/510298/podcast.xml');
 
@@ -79,6 +79,11 @@ export async function fetchLatestEpisode(): Promise<Episode | null> {
   });
   episodes.sort((lhs, rhs) => rhs.date.getTime() - lhs.date.getTime());
 
+  return episodes;
+}
+
+export async function fetchLatestEpisode(): Promise<Episode | null> {
+  const [...episodes] = await fetchEpisodes();
   if (episodes.length === 0) {
     return null;
   }
