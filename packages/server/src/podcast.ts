@@ -106,13 +106,6 @@ export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Pod
     logger.debug(`Not re-fetching podcast "${podcast.title}", last fetched ${podcast.lastFetchDate}`, { podcast });
   }
 
-  await prisma.podcast.update({
-    where: { id: podcast.id },
-    data: {
-      lastFetchDate: now,
-    }
-  });
-
   return await prisma.episode.findMany({
     where: { podcast },
     orderBy: { publishDate: 'desc' },
