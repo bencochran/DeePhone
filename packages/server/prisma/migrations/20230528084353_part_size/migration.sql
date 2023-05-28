@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "EpisodePart" ADD COLUMN     "size" INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE "EpisodePart" ALTER COLUMN   "size" DROP DEFAULT;

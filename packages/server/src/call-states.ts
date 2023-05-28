@@ -9,7 +9,7 @@ import {
 } from '@prisma/client';
 
 import logger, { loggableError, omit } from './logger.js';
-import { fetchLatestEpisode, downloadEpisode, chopEpisode, uploadEpisodeParts } from './podcast.js';
+import { fetchLatestEpisode, downloadEpisode, chopEpisode, uploadEpisodeParts, measureFiles } from './podcast.js';
 import { s3, bucketName, bucketBaseURL } from './s3.js';
 import type { VoiceRequest } from './twilio-utilities.js';
 
@@ -139,7 +139,8 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
           return;
         }
 
-        const uploadedFiles = await uploadEpisodeParts(inProgressDownload, tempFiles, s3, bucketName, bucketBaseURL);
+        const sizedTempFiles = await measureFiles(tempFiles);
+        const uploadedFiles = await uploadEpisodeParts(inProgressDownload, sizedTempFiles, s3, bucketName, bucketBaseURL);
 
         downloadToPlay = await prisma.episodeDownload.update({
           where: { id: inProgressDownload.id },
@@ -151,6 +152,7 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
                   sortOrder: index,
                   key: part.key,
                   url: part.url,
+                  size: part.size,
                 })),
               },
             },

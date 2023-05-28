@@ -27,7 +27,7 @@ interface TempFile {
   filePath: string;
 }
 
-interface UploadedTempFile extends TempFile {
+interface UploadedFile {
   url: string;
   key: string;
 }
@@ -204,6 +204,20 @@ export async function chopEpisode(episodeDownload: EpisodeDownload, filename: st
   }));
 }
 
+export async function measureFiles(files: TempFile[]): Promise<(TempFile & { size: number })[]> {
+  return await Promise.all(files.map(f =>
+    new Promise<TempFile & { size: number }>((resolve, reject) => {
+      fs.stat(f.filePath, (error, stats) => {
+        if (error) {
+          reject(error);
+        } else if (stats) {
+          resolve({ ...f, size: stats.size });
+        }
+      });
+    })
+  ));
+}
+
 function keyPrefixForDownload({ episode, ...episodeDownload }: EpisodeDownload & { episode: Episode & { podcast: Podcast } }) {
   const yearString = episode.publishDate.getUTCFullYear().toString().padStart(4, '0');
   const monthString = (episode.publishDate.getUTCMonth() + 1).toString().padStart(2, '0');
@@ -212,7 +226,7 @@ function keyPrefixForDownload({ episode, ...episodeDownload }: EpisodeDownload &
   return `media/${episode.podcast.id}/${dateString}-episode-${episode.id}/${episodeDownload.id}/`;
 }
 
-async function upload(keyPrefix: string, tempFile: TempFile, s3: S3Client, bucketName: string, bucketBaseURL: string): Promise<UploadedTempFile> {
+async function upload<File extends TempFile>(keyPrefix: string, tempFile: File, s3: S3Client, bucketName: string, bucketBaseURL: string): Promise<File & UploadedFile> {
   const fileStream = fs.createReadStream(tempFile.filePath);
   fileStream.on('error', (error) => {
     logger.error(`Error reading ${tempFile.filePath}`, { error: loggableError(error) });
@@ -240,7 +254,7 @@ async function upload(keyPrefix: string, tempFile: TempFile, s3: S3Client, bucke
   }
 }
 
-export async function uploadEpisodeParts(episodeDownload: EpisodeDownload & { episode: Episode & { podcast: Podcast } }, tempFiles: TempFile[], s3: S3Client, bucketName: string, bucketBaseURL: string): Promise<UploadedTempFile[]> {
+export async function uploadEpisodeParts<File extends TempFile>(episodeDownload: EpisodeDownload & { episode: Episode & { podcast: Podcast } }, tempFiles: File[], s3: S3Client, bucketName: string, bucketBaseURL: string): Promise<(File & UploadedFile)[]> {
   const keyPrefix = keyPrefixForDownload(episodeDownload);
   const uploadedParts = await Promise.all(tempFiles.map(p => upload(keyPrefix, p, s3, bucketName, bucketBaseURL)));
   logger.info(`Uploaded ${uploadedParts.length} parts for episode "${episodeDownload.episode.title}" with prefix "${keyPrefix}"`, { episodeDownload, count: uploadedParts.length, keyPrefix });

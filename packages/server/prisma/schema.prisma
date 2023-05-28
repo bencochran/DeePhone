@@ -50,6 +50,7 @@ model EpisodePart {
   sortOrder   Int
   key         String
   url         String
+  size        Int
 
   calls       Call[]
 }
