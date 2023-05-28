@@ -5,7 +5,6 @@ import http from 'http';
 import twilio from 'twilio';
 import { format as dateFormat, formatDistance } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
-import path from 'path';
 
 import logger from './logger.js';
 import type { DownloadedEpisode, UploadedPart } from './podcast.js';
@@ -84,7 +83,7 @@ function introduceEpisodeResponse(episode: DownloadedEpisode, waitingCount: numb
   return voiceResponse;
 }
 
-function playPartResponse(episode: DownloadedEpisode, part: UploadedPart) {
+function playPartResponse(part: UploadedPart) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   voiceResponse.play(part.url);
   voiceResponse.redirect('/voice');
@@ -139,7 +138,7 @@ app.post('/voice', async (req, res) => {
   } else if (status.state.status === 'playing-episode') {
     advanceToNextPart(voiceRequest.CallSid);
     const part = status.state.parts[status.state.nextPartIndex];
-    voiceResponse = playPartResponse(status.state.episode, part);
+    voiceResponse = playPartResponse(part);
   } else if (status.state.status === 'ending-episode') {
     voiceResponse = endEpisodeResponse();
   } else if (status.state.status === 'no-episode') {
