@@ -3,6 +3,7 @@ import path from 'path';
 import Parser from 'rss-parser';
 import { spawn } from 'child_process';
 import { S3Client, PutObjectCommand, ListObjectsCommand } from '@aws-sdk/client-s3';
+import { PrismaClient, Podcast, Episode } from '@prisma/client';
 
 import logger from './logger.js';
 import download from './download.js';
@@ -15,13 +16,6 @@ export interface Feed {}
 export interface Item {
   bar: number;
   enclosure: { url: string };
-}
-
-export interface Episode {
-  guid: string;
-  title: string;
-  date: Date;
-  url: string;
 }
 
 export interface DownloadedEpisode extends Episode {
@@ -50,7 +44,7 @@ export async function downloadEpisode(episode: Episode): Promise<DownloadedEpiso
   }
 
   logger.info(`Downloading episode "${episode.title}" as "${filename}"`, { episode, filename });
-  await download(episode.url, destination);
+  await download(episode.contentURL, destination);
   logger.info(`Finished downloading episode "${episode.title}" as "${filename}"`, { episode, filename });
   const { size } = await fs.promises.stat(destination);
   const sizeMegabytes = size / 1024 / 1024;
@@ -62,28 +56,47 @@ export async function downloadEpisode(episode: Episode): Promise<DownloadedEpiso
   return { ...episode, filename };
 }
 
-export async function fetchEpisodes(): Promise<Episode[]> {
+export async function fetchEpisodes(prisma: PrismaClient, podcast: Podcast): Promise<Episode[]> {
   const parser: Parser<Feed, Item> = new Parser();
-  const feed = await parser.parseURL('https://feeds.npr.org/510298/podcast.xml');
+  const feed = await parser.parseURL(podcast.feedURL);
 
-  const episodes: Episode[] = feed.items.flatMap(({ title, guid, pubDate, enclosure }) => {
+  await Promise.all(feed.items.map(async ({ title, guid, pubDate, enclosure }) => {
     if (!pubDate || !title || !enclosure || !enclosure.url || !guid) {
-      return [];
+      return null;
     }
-
-    const date = new Date(pubDate);
-    if (Number.isNaN(date.getTime())) {
-      return [];
+    const publishDate = new Date(pubDate);
+    if (Number.isNaN(publishDate.getTime())) {
+      logger.warning(`Got invalid publish date "${pubDate}"`, {
+        podcast,
+        episode: { title, guid, pubDate },
+      });
+      return null;
     }
-    return [{ guid, title, date, url: enclosure.url }];
-  });
-  episodes.sort((lhs, rhs) => rhs.date.getTime() - lhs.date.getTime());
+    return await prisma.episode.upsert({
+      where: { podcastId_guid: { podcastId: podcast.id, guid }},
+      create: {
+        title,
+        guid,
+        publishDate,
+        contentURL: enclosure.url,
+        podcastId: podcast.id,
+      },
+      update: {
+        title,
+        publishDate,
+        contentURL: enclosure.url,
+      },
+    });
+  }));
 
-  return episodes;
+  return await prisma.episode.findMany({
+    where: { podcast },
+    orderBy: { publishDate: 'desc' },
+  })
 }
 
-export async function fetchLatestEpisode(): Promise<Episode | null> {
-  const [...episodes] = await fetchEpisodes();
+export async function fetchLatestEpisode(prisma: PrismaClient, podcast: Podcast): Promise<Episode | null> {
+  const [...episodes] = await fetchEpisodes(prisma, podcast);
   if (episodes.length === 0) {
     return null;
   }
@@ -173,9 +186,9 @@ export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
 }
 
 function keyPrefixForEpisode(episode: Episode) {
-  const yearString = episode.date.getUTCFullYear().toString().padStart(4, '0');
-  const monthString = (episode.date.getUTCMonth() + 1).toString().padStart(2, '0');
-  const dayString = episode.date.getUTCDate().toString().padStart(2, '0');
+  const yearString = episode.publishDate.getUTCFullYear().toString().padStart(4, '0');
+  const monthString = (episode.publishDate.getUTCMonth() + 1).toString().padStart(2, '0');
+  const dayString = episode.publishDate.getUTCDate().toString().padStart(2, '0');
   const dateString = `${yearString}-${monthString}-${dayString}`;
   return `media/${dateString}/${episode.guid}/`;
 }

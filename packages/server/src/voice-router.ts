@@ -1,10 +1,8 @@
 import { Router, urlencoded } from 'express';
 import twilio from 'twilio';
-import { format as dateFormat, formatDistance } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
+import { PrismaClient, Podcast } from '@prisma/client';
 
 import logger from './logger.js';
-import type { DownloadedEpisode, UploadedPart } from './podcast.js';
 import {
   enqueueNewCall,
   getCallState,
@@ -25,7 +23,7 @@ import {
   errorResponse,
 } from './responses.js';
 
-export function buildRouter() {
+export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
   const router = Router();
   router.use(urlencoded({ extended: false }));
 
@@ -41,7 +39,7 @@ export function buildRouter() {
 
     let voiceResponse: twilio.twiml.VoiceResponse;
     if (!status) {
-      enqueueNewCall(voiceRequest.CallSid);
+      enqueueNewCall(prisma, podcast, voiceRequest.CallSid);
       voiceResponse = initialAnswerResponse();
     } else if (status.state.status === 'introducing-episode') {
       advanceToNextPart(voiceRequest.CallSid);

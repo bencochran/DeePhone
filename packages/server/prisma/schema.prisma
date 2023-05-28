@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Podcast {
+  id              Int       @id @default(autoincrement())
+  title           String
+  feedURL         String
+  lastFetchDate   DateTime?
+  episodes        Episode[]
+}
+
+model Episode {
+  id            Int       @id @default(autoincrement())
+  podcastId     Int
+  podcast       Podcast   @relation(fields: [podcastId], references: [id])
+  guid          String
+  title         String
+  contentURL    String
+  publishDate   DateTime
+
+  @@unique([podcastId, guid])
+}

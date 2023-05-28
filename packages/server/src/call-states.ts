@@ -1,8 +1,9 @@
 import PQueue from 'p-queue';
+import { PrismaClient, Podcast, Episode } from '@prisma/client';
 
 import logger from './logger.js';
 import { fetchLatestEpisode, downloadEpisode, chopEpisode, uploadEpisodeParts } from './podcast.js';
-import type { Episode, DownloadedEpisode, UploadedPart } from './podcast.js';
+import type { DownloadedEpisode, UploadedPart } from './podcast.js';
 import { s3, bucketName, bucketBaseURL } from './s3.js';
 
 const requestQueue = new PQueue({ concurrency: 1 });
@@ -55,11 +56,11 @@ interface InProgressCall {
 
 const callStates: Record<string, InProgressCall> = {};
 
-export function enqueueNewCall(id: string) {
+export function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, id: string) {
   updateCallState(id, { status: 'fetching-feed' });
   requestQueue.add(async () => {
     try {
-      const episode = await fetchLatestEpisode();
+      const episode = await fetchLatestEpisode(prisma, podcast);
       if (!episode) {
         logger.warning('Unable to find latest episode');
         updateCallState(id, { status: 'no-episode' });
