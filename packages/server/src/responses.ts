@@ -5,6 +5,18 @@ import { EpisodePart } from '@prisma/client';
 
 import type { PlayableDownload } from './call-states.js';
 
+export function initialAnswerUnauthorizedResponse() {
+  const voiceResponse = new twilio.twiml.VoiceResponse();
+
+  // A bit of pause at the start so we don’t answer halfway though the first ring
+  voiceResponse.pause({ length: 3 });
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Sorry, something went wrong, we’re unable to play you an episode right now. Please try again later.`);
+  voiceResponse.pause({ length: 1 });
+  voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Goodbye.`);
+  voiceResponse.pause({ length: 2 });
+  return voiceResponse;
+}
+
 export function initialAnswerResponse() {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   const today = utcToZonedTime(new Date(), 'America/New_York');

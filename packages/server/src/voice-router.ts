@@ -14,6 +14,7 @@ import {
 import type { VoiceRequest, VoiceStatusCallbackRequest } from './twilio-utilities.js';
 import { geocodeVoiceRequestFrom } from './twilio-utilities.js';
 import {
+  initialAnswerUnauthorizedResponse,
   initialAnswerResponse,
   waitingResponse,
   introduceEpisodeResponse,
@@ -22,12 +23,31 @@ import {
   noEpisodeResponse,
   errorResponse,
 } from './responses.js';
+import { TWILIO_AUTH_TOKEN } from './env.js';
 
 export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
   const router = Router();
   router.use(urlencoded({ extended: false }));
 
   router.post('/voice', async (req, res) => {
+    const twilioSignature = req.header('X-Twilio-Signature');
+    if (!twilioSignature) {
+      logger.warning('Missing X-Twilio-Signature header', { headers: req.headers });
+      const voiceResponse = initialAnswerUnauthorizedResponse();
+      res.type('text/xml');
+      res.send(voiceResponse.toString());
+      return;
+    }
+    const url = new URL(req.url, `https://${req.hostname}`).toString()
+    const valid = twilio.validateRequest(TWILIO_AUTH_TOKEN, twilioSignature, url, req.body);
+    if (!valid) {
+      logger.warning('Invalid /voice request', { headers: req.headers, body: req.body, url });
+      const voiceResponse = initialAnswerUnauthorizedResponse();
+      res.type('text/xml');
+      res.send(voiceResponse.toString());
+      return;
+    }
+
     const voiceRequest: VoiceRequest = req.body;
 
     const status = getCallState(voiceRequest.CallSid);
