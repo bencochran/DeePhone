@@ -56,39 +56,55 @@ export async function downloadEpisode(episode: Episode): Promise<DownloadedEpiso
   return { ...episode, filename };
 }
 
-export async function fetchEpisodes(prisma: PrismaClient, podcast: Podcast): Promise<Episode[]> {
+export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Podcast): Promise<Episode[]> {
+  const podcast = await prisma.podcast.findUniqueOrThrow({ where: { id: podcastId } });
   const now = new Date();
-  const parser: Parser<Feed, Item> = new Parser();
-  const feed = await parser.parseURL(podcast.feedURL);
 
-  await Promise.all(feed.items.map(async ({ title, guid, pubDate, enclosure }) => {
-    if (!pubDate || !title || !enclosure || !enclosure.url || !guid) {
-      return null;
-    }
-    const publishDate = new Date(pubDate);
-    if (Number.isNaN(publishDate.getTime())) {
-      logger.warning(`Got invalid publish date "${pubDate}"`, {
-        podcast,
-        episode: { title, guid, pubDate },
+  if (!podcast.lastFetchDate
+    || now.getTime() - podcast.lastFetchDate.getTime() > 1000 * 60 * 60
+    || await prisma.episode.count({ where: { podcastId } }) === 0
+  ) {
+    const parser: Parser<Feed, Item> = new Parser();
+    const feed = await parser.parseURL(podcast.feedURL);
+
+    await Promise.all(feed.items.map(async ({ title, guid, pubDate, enclosure }) => {
+      if (!pubDate || !title || !enclosure || !enclosure.url || !guid) {
+        return null;
+      }
+      const publishDate = new Date(pubDate);
+      if (Number.isNaN(publishDate.getTime())) {
+        logger.warning(`Got invalid publish date "${pubDate}"`, {
+          podcast,
+          episode: { title, guid, pubDate },
+        });
+        return null;
+      }
+      return await prisma.episode.upsert({
+        where: { podcastId_guid: { podcastId: podcast.id, guid }},
+        create: {
+          title,
+          guid,
+          publishDate,
+          contentURL: enclosure.url,
+          podcastId: podcast.id,
+        },
+        update: {
+          title,
+          publishDate,
+          contentURL: enclosure.url,
+        },
       });
-      return null;
-    }
-    return await prisma.episode.upsert({
-      where: { podcastId_guid: { podcastId: podcast.id, guid }},
-      create: {
-        title,
-        guid,
-        publishDate,
-        contentURL: enclosure.url,
-        podcastId: podcast.id,
-      },
-      update: {
-        title,
-        publishDate,
-        contentURL: enclosure.url,
-      },
+    }));
+
+    await prisma.podcast.update({
+      where: { id: podcast.id },
+      data: {
+        lastFetchDate: now,
+      }
     });
-  }));
+  } else {
+    logger.debug(`Not re-fetching podcast "${podcast.title}", last fetched ${podcast.lastFetchDate}`, { podcast });
+  }
 
   await prisma.podcast.update({
     where: { id: podcast.id },
