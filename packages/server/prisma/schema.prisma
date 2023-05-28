@@ -41,7 +41,7 @@ model EpisodeDownload {
   deleted       Boolean   @default(false)
   parts         EpisodePart[]
 
-  calls         Call[]
+  callEvents    CallEvent[]
 }
 
 model EpisodePart {
@@ -54,26 +54,34 @@ model EpisodePart {
   size        Int
   duration    Float
 
-  calls       Call[]
+  callEvents  CallEvent[]
 }
 
 model Call {
+  id              Int     @id @default(autoincrement())
+  twilioCallSid   String  @unique
+
+  phoneNumber     String
+  callerName      String?
+  callerCity      String?
+  callerState     String?
+  callerZip       String?
+  callerCountry   String?
+  callDuration    Int?
+
+  events          CallEvent[]
+}
+
+model CallEvent {
   id                    Int               @id @default(autoincrement())
-  twilioCallSid         String            @unique
+  callId                Int
+  call                  Call              @relation(fields: [callId], references: [id])
+  date                  DateTime
   state                 CallState
-  waitingMessageCount   Int               @default(0)
   downloadId            Int?
   download              EpisodeDownload?  @relation(fields: [downloadId], references: [id])
   currentPartId         Int?
   currentPart           EpisodePart?      @relation(fields: [currentPartId], references: [id])
-
-  phoneNumber           String
-  callerName            String?
-  callerCity            String?
-  callerState           String?
-  callerZip             String?
-  callerCountry         String?
-  callDuration          Int?
 }
 
 enum CallState {
