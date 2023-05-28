@@ -169,11 +169,22 @@ export async function chopEpisode(episodeDownload: EpisodeDownload, filename: st
 
   const { stdout, stderr } = await ffmpeg(silencedetectArgs);
 
-  const startTimes: string[] = [];
+  const rawStartTimes: number[] = [];
   const startMatches = (stdout + stderr).matchAll(/silence_start: ([\d\.]+)/g);
   for (const match of startMatches) {
-    startTimes.push(match[1]);
+    rawStartTimes.push(Number(match[1]));
   }
+
+  // Collapse short segments together
+  const MIN_SEGMENT_LENGTH = 20;
+  const startTimes = rawStartTimes.reduceRight((acc, startTime) => {
+    const next = acc.at(0);
+    if (next !== undefined && next - startTime < MIN_SEGMENT_LENGTH) {
+      return [startTime, ...acc.slice(1)];
+    } else {
+      return [startTime, ...acc];
+    }
+  }, [] as number[]);
 
   // Split on those periods of silence
 
