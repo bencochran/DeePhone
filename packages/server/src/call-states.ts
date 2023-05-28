@@ -91,7 +91,7 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
 
       // TODO: Consider race condition where we have an otherwise-valid in-progress download already going
       const existingDownload = await prisma.episodeDownload.findFirst({
-        where: { episodeId: episode.id, finished: true },
+        where: { episodeId: episode.id, finished: true, deleted: false },
         orderBy: { downloadDate: 'desc' },
         include: {
           episode: true,

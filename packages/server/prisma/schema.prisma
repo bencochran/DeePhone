@@ -38,6 +38,7 @@ model EpisodeDownload {
   contentURL    String
   downloadDate  DateTime
   finished      Boolean   @default(false)
+  deleted       Boolean   @default(false)
   parts         EpisodePart[]
 
   calls         Call[]
