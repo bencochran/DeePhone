@@ -57,6 +57,7 @@ export async function downloadEpisode(episode: Episode): Promise<DownloadedEpiso
 }
 
 export async function fetchEpisodes(prisma: PrismaClient, podcast: Podcast): Promise<Episode[]> {
+  const now = new Date();
   const parser: Parser<Feed, Item> = new Parser();
   const feed = await parser.parseURL(podcast.feedURL);
 
@@ -88,6 +89,13 @@ export async function fetchEpisodes(prisma: PrismaClient, podcast: Podcast): Pro
       },
     });
   }));
+
+  await prisma.podcast.update({
+    where: { id: podcast.id },
+    data: {
+      lastFetchDate: now,
+    }
+  });
 
   return await prisma.episode.findMany({
     where: { podcast },
