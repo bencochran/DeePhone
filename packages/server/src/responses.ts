@@ -49,7 +49,7 @@ export function waitingResponse(waitingCount: number) {
 export function introduceEpisodeResponse(episode: DownloadedEpisode, waitingCount: number) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   const today = utcToZonedTime(new Date(), 'America/New_York');
-  const latest = utcToZonedTime(episode.date, 'America/New_York');
+  const latest = utcToZonedTime(episode.publishDate, 'America/New_York');
   const formattedLatest = dateFormat(latest, 'eeee, MMMM do');
   const formattedAgo = formatDistance(latest, today, { addSuffix: true });
 

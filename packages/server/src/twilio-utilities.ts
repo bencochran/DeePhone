@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import logger from './logger.js';
+import logger, { loggableError } from './logger.js';
 
 export interface VoiceRequest {
   CallSid: string;
@@ -74,7 +74,7 @@ export async function geocodeVoiceRequestFrom(voiceRequest: VoiceRequest): Promi
     }
     return null;
   } catch (error) {
-    logger.warning('Failed to geocode', { error, voiceRequest })
+    logger.warning('Failed to geocode', { error: loggableError(error), voiceRequest })
     return null;
   }
 }
