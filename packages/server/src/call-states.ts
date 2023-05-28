@@ -58,7 +58,7 @@ interface InProgressCall {
   waitingMessageCount: number;
 }
 
-export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, request: VoiceRequest) {
+export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, request: Readonly<VoiceRequest>) {
   const call = await prisma.call.create({
     data: {
       twilioCallSid: request.CallSid,
@@ -66,6 +66,7 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
         create: {
           date: new Date(),
           state: StoredCallState.FETCHING_EPISODE,
+          rawRequest: request,
         },
       },
       phoneNumber: request.From,
@@ -88,6 +89,7 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
             call: { connect: { id: call.id } },
             date: new Date(),
             state: StoredCallState.NO_EPISODE,
+            rawRequest: request,
           },
         });
         return;
@@ -144,6 +146,7 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
               call: { connect: { id: call.id } },
               date: new Date(),
               state: StoredCallState.NO_EPISODE,
+              rawRequest: request,
             },
           });
           return;
@@ -181,6 +184,7 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
           date: new Date(),
           state: StoredCallState.INTRODUCING_EPISODE,
           download: { connect: { id: downloadToPlay.id } },
+          rawRequest: request,
         },
       });
 
@@ -191,6 +195,7 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
           call: { connect: { id: call.id } },
           date: new Date(),
           state: StoredCallState.EPISODE_ERROR,
+          rawRequest: request,
         },
       });
       return;
@@ -198,17 +203,18 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
   });
 }
 
-export async function incrementCallWaitingMessageCount(prisma: PrismaClient, request: VoiceRequest) {
+export async function incrementCallWaitingMessageCount(prisma: PrismaClient, request: Readonly<VoiceRequest>) {
   await prisma.callEvent.create({
     data: {
       call: { connect: { twilioCallSid: request.CallSid } },
       date: new Date(),
       state: StoredCallState.FETCHING_EPISODE,
+      rawRequest: request,
     },
   });
 }
 
-export async function advanceToNextPart(prisma: PrismaClient, request: VoiceRequest) {
+export async function advanceToNextPart(prisma: PrismaClient, request: Readonly<VoiceRequest>) {
   const call = await prisma.call.findUniqueOrThrow({
     where: { twilioCallSid: request.CallSid },
     include: {
@@ -244,6 +250,7 @@ export async function advanceToNextPart(prisma: PrismaClient, request: VoiceRequ
         state: StoredCallState.PLAYING_EPISODE,
         download: { connect: { id: event.download.id } },
         currentPart: { connect: { id: event.download.parts[0].id } },
+        rawRequest: request,
       },
     });
   } else if (event.state === StoredCallState.PLAYING_EPISODE) {
@@ -269,6 +276,7 @@ export async function advanceToNextPart(prisma: PrismaClient, request: VoiceRequ
           state: StoredCallState.PLAYING_EPISODE,
           download: { connect: { id: event.download.id } },
           currentPart: { connect: { id: nextPart.id } },
+          rawRequest: request,
         },
       });
     } else {
@@ -277,13 +285,14 @@ export async function advanceToNextPart(prisma: PrismaClient, request: VoiceRequ
           call: { connect: { twilioCallSid: request.CallSid } },
           date: new Date(),
           state: StoredCallState.ENDING_EPISODE,
+          rawRequest: request,
         },
       });
     }
   }
 }
 
-export async function getCallState(prisma: PrismaClient, request: VoiceRequest): Promise<InProgressCall | null> {
+export async function getCallState(prisma: PrismaClient, request: Readonly<VoiceRequest>): Promise<InProgressCall | null> {
   const call = await prisma.call.findUnique({
     where: { twilioCallSid: request.CallSid },
     include: {
@@ -346,12 +355,18 @@ export async function getCallState(prisma: PrismaClient, request: VoiceRequest):
   }
 }
 
-export async function endCallState(prisma: PrismaClient, request: VoiceRequest, duration: number | undefined) {
-  await prisma.callEvent.create({
+export async function endCallState(prisma: PrismaClient, request: Readonly<VoiceRequest>, duration: number | undefined) {
+  await prisma.call.update({
+    where: { twilioCallSid: request.CallSid },
     data: {
-      call: { connect: { twilioCallSid: request.CallSid } },
-      date: new Date(),
-      state: StoredCallState.ENDED,
+      callDuration: duration,
+      events: {
+        create: {
+          date: new Date(),
+          state: StoredCallState.ENDED,
+          rawRequest: request,
+        }
+      }
     },
   });
 }

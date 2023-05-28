@@ -82,6 +82,7 @@ model CallEvent {
   download              EpisodeDownload?  @relation(fields: [downloadId], references: [id])
   currentPartId         Int?
   currentPart           EpisodePart?      @relation(fields: [currentPartId], references: [id])
+  rawRequest            Json?
 }
 
 enum CallState {
