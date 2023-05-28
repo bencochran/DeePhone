@@ -121,6 +121,26 @@ export async function fetchLatestEpisode(prisma: PrismaClient, podcast: Podcast)
   return episodes[0];
 }
 
+async function ffmpeg(args: string[], process: 'ffmpeg' | 'ffprobe' = 'ffmpeg'): Promise<{ stderr: string, stdout: string }> {
+  return await new Promise<{ stderr: string, stdout: string }>((resolve, reject) => {
+    const proc = spawn(process, args);
+    let stdout = '';
+    let stderr = ''
+    proc.stdout?.on('data', (data) => {
+      stdout += data.toString();
+    });
+    proc.stderr?.on('data', (data) => {
+      stderr += data.toString();
+    });
+    proc.once('error', (error) => {
+      reject(error);
+    });
+    proc.once('close', () => {
+      resolve({ stdout, stderr });
+    });
+  });
+}
+
 export async function chopEpisode(episodeDownload: EpisodeDownload, filename: string): Promise<TempFile[]> {
   const inputFile = path.resolve('downloads/media', filename);
   const desinationDir = path.resolve('downloads/media', `${episodeDownload.id}`);
@@ -147,25 +167,10 @@ export async function chopEpisode(episodeDownload: EpisodeDownload, filename: st
     '-y', '/dev/null',
   ];
 
-  const output = await new Promise<string>((resolve, reject) => {
-    const proc = spawn('ffmpeg', silencedetectArgs);
-    let result = '';
-    proc.stdout?.on('data', (data) => {
-      result += data.toString();
-    });
-    proc.stderr?.on('data', (data) => {
-      result += data.toString();
-    });
-    proc.once('error', (error) => {
-      reject(error);
-    });
-    proc.once('close', () => {
-      resolve(result);
-    });
-  });
+  const { stdout, stderr } = await ffmpeg(silencedetectArgs);
 
   const startTimes: string[] = [];
-  const startMatches = output.matchAll(/silence_start: ([\d\.]+)/g);
+  const startMatches = (stdout + stderr).matchAll(/silence_start: ([\d\.]+)/g);
   for (const match of startMatches) {
     startTimes.push(match[1]);
   }
@@ -204,9 +209,9 @@ export async function chopEpisode(episodeDownload: EpisodeDownload, filename: st
   }));
 }
 
-export async function measureFiles(files: TempFile[]): Promise<(TempFile & { size: number })[]> {
+export async function measureFiles<File extends TempFile>(files: File[]): Promise<(File & { size: number })[]> {
   return await Promise.all(files.map(f =>
-    new Promise<TempFile & { size: number }>((resolve, reject) => {
+    new Promise<File & { size: number }>((resolve, reject) => {
       fs.stat(f.filePath, (error, stats) => {
         if (error) {
           reject(error);
@@ -214,6 +219,25 @@ export async function measureFiles(files: TempFile[]): Promise<(TempFile & { siz
           resolve({ ...f, size: stats.size });
         }
       });
+    })
+  ));
+}
+
+export async function fileDurations<File extends TempFile>(files: File[]): Promise<(File & { duration: number})[]> {
+  return await Promise.all(files.map(f =>
+    new Promise<File & { duration: number }>(async (resolve) => {
+      const args = [
+        f.filePath,
+        '-show_entries', 'format=duration',
+        '-v', 'error',
+        '-of', 'csv=p=0',
+      ];
+      const { stdout, stderr } = await ffmpeg(args, 'ffprobe');
+      if (stderr.trim()) {
+        logger.warning('ffprobe error', { file: f, error: stderr });
+      }
+      const duration = Number(stdout);
+      resolve({ ...f, duration });
     })
   ));
 }

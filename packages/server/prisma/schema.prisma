@@ -51,6 +51,7 @@ model EpisodePart {
   key         String
   url         String
   size        Int
+  duration    Float
 
   calls       Call[]
 }
