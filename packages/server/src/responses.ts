@@ -1,8 +1,9 @@
 import twilio from 'twilio';
 import { format as dateFormat, formatDistance } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
+import { EpisodePart } from '@prisma/client';
 
-import type { DownloadedEpisode, UploadedPart } from './podcast.js';
+import type { PlayableDownload } from './call-states.js';
 
 export function initialAnswerResponse() {
   const voiceResponse = new twilio.twiml.VoiceResponse();
@@ -46,10 +47,10 @@ export function waitingResponse(waitingCount: number) {
   return voiceResponse;
 }
 
-export function introduceEpisodeResponse(episode: DownloadedEpisode, waitingCount: number) {
+export function introduceEpisodeResponse(playable: PlayableDownload, waitingCount: number) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   const today = utcToZonedTime(new Date(), 'America/New_York');
-  const latest = utcToZonedTime(episode.publishDate, 'America/New_York');
+  const latest = utcToZonedTime(playable.episode.publishDate, 'America/New_York');
   const formattedLatest = dateFormat(latest, 'eeee, MMMM do');
   const formattedAgo = formatDistance(latest, today, { addSuffix: true });
 
@@ -64,7 +65,7 @@ export function introduceEpisodeResponse(episode: DownloadedEpisode, waitingCoun
   return voiceResponse;
 }
 
-export function playPartResponse(part: UploadedPart) {
+export function playPartResponse(part: EpisodePart) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   voiceResponse.play(part.url);
   voiceResponse.redirect('/voice');

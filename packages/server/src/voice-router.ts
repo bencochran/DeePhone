@@ -43,10 +43,10 @@ export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
       voiceResponse = initialAnswerResponse();
     } else if (status.state.status === 'introducing-episode') {
       advanceToNextPart(voiceRequest.CallSid);
-      voiceResponse = introduceEpisodeResponse(status.state.episode, status.waitingMessageCount);
+      voiceResponse = introduceEpisodeResponse(status.state.playable, status.waitingMessageCount);
     } else if (status.state.status === 'playing-episode') {
       advanceToNextPart(voiceRequest.CallSid);
-      const part = status.state.parts[status.state.nextPartIndex];
+      const part = status.state.playable.parts[status.state.nextPartIndex];
       voiceResponse = playPartResponse(part);
     } else if (status.state.status === 'ending-episode') {
       voiceResponse = endEpisodeResponse();

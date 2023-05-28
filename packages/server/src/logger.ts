@@ -22,4 +22,16 @@ export function loggableError(error: any) {
   };
 }
 
+
+export function omit<T extends {}>(object: T, omittedKeys: (keyof T)[] | keyof T) {
+  const omittedKeysArray = Array.isArray(omittedKeys) ? omittedKeys : [omittedKeys];
+  return Object.fromEntries(
+    Object
+      .keys(object)
+      .map(k => k as keyof T)
+      .filter(k => !omittedKeysArray.includes(k))
+      .map(k => [k, object[k]])
+  );
+}
+
 export default logger;

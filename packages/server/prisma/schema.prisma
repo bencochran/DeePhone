@@ -26,6 +26,26 @@ model Episode {
   title         String
   contentURL    String
   publishDate   DateTime
+  downloads     EpisodeDownload[]
 
   @@unique([podcastId, guid])
+}
+
+model EpisodeDownload {
+  id            Int       @id @default(autoincrement())
+  episodeId     Int
+  episode       Episode   @relation(fields: [episodeId], references: [id])
+  contentURL    String
+  downloadDate  DateTime
+  finished      Boolean   @default(false)
+  parts         EpisodePart[]
+}
+
+model EpisodePart {
+  id          Int               @id @default(autoincrement())
+  downloadId  Int
+  download    EpisodeDownload   @relation(fields: [downloadId], references: [id])
+  sortOrder   Int
+  key         String
+  url         String
 }

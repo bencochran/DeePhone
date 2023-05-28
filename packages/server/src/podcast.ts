@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import Parser from 'rss-parser';
 import { spawn } from 'child_process';
-import { S3Client, PutObjectCommand, ListObjectsCommand } from '@aws-sdk/client-s3';
-import { PrismaClient, Podcast, Episode } from '@prisma/client';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { PrismaClient, Podcast, Episode, EpisodeDownload } from '@prisma/client';
 
 import logger, { loggableError } from './logger.js';
 import download from './download.js';
@@ -22,38 +22,38 @@ export interface DownloadedEpisode extends Episode {
   filename: string;
 }
 
-export interface Part {
+interface TempFile {
   filename: string;
   filePath: string;
 }
 
-export interface UploadedPart extends Part {
+interface UploadedTempFile extends TempFile {
   url: string;
   key: string;
 }
 
-export async function downloadEpisode(episode: Episode): Promise<DownloadedEpisode> {
-  const filename = `${episode.guid}.mp3`;
+export async function downloadEpisode({ episode, ...episodeDownload }: EpisodeDownload & { episode: Episode }): Promise<{ filename: string }> {
+  const filename = `${episodeDownload.id}.mp3`;
   if (!fs.existsSync('downloads/media')) {
     await fs.promises.mkdir('downloads/media', { recursive: true });
   }
   const destination = path.resolve('downloads/media', filename);
   if (fs.existsSync(destination)) {
     logger.info(`Episode "${episode.title}" already exists as "${filename}"`, { episode, filename });
-    return { ...episode, filename }
+    return { filename }
   }
 
   logger.info(`Downloading episode "${episode.title}" as "${filename}"`, { episode, filename });
-  await download(episode.contentURL, destination);
+  await download(episodeDownload.contentURL, destination);
   logger.info(`Finished downloading episode "${episode.title}" as "${filename}"`, { episode, filename });
   const { size } = await fs.promises.stat(destination);
   const sizeMegabytes = size / 1024 / 1024;
   if (sizeMegabytes < MIN_EPISODE_FILE_SIZE_MB) {
     fs.unlink(destination, () => {});
-    logger.warning(`File "${destination}" is smaller than ${MIN_EPISODE_FILE_SIZE_MB}MB (${sizeMegabytes.toFixed(2)}MB). Considering this a download failure.`, { episode, filename, size });
-    throw new Error(`File "${destination}" is smaller than ${MIN_EPISODE_FILE_SIZE_MB}MB (${sizeMegabytes.toFixed(2)}MB). Considering this a download failure.`);
+    logger.warning(`File "${destination}" is smaller than ${MIN_EPISODE_FILE_SIZE_MB} MB (${sizeMegabytes.toFixed(2)} MB). Considering this a download failure.`, { episodeDownload, filename, size });
+    throw new Error(`File "${destination}" is smaller than ${MIN_EPISODE_FILE_SIZE_MB} MB (${sizeMegabytes.toFixed(2)} MB). Considering this a download failure.`);
   }
-  return { ...episode, filename };
+  return { filename };
 }
 
 export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Podcast): Promise<Episode[]> {
@@ -121,10 +121,9 @@ export async function fetchLatestEpisode(prisma: PrismaClient, podcast: Podcast)
   return episodes[0];
 }
 
-export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
-  const inputFile = path.resolve('downloads/media', episode.filename);
-  const desinationDir = path.resolve('downloads/media', episode.guid);
-  const desinationFile = path.resolve(desinationDir, '%03d.mp3');
+export async function chopEpisode(episodeDownload: EpisodeDownload, filename: string): Promise<TempFile[]> {
+  const inputFile = path.resolve('downloads/media', filename);
+  const desinationDir = path.resolve('downloads/media', `${episodeDownload.id}`);
 
   if (fs.existsSync(desinationDir)) {
     const files = await fs.promises.readdir(desinationDir);
@@ -173,6 +172,8 @@ export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
 
   // Split on those periods of silence
 
+  const desinationFilePattern = path.resolve(desinationDir, `%5d.mp3`);
+
   const segmentArgs = [
     '-i', inputFile,
     '-f', 'segment',
@@ -180,7 +181,7 @@ export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
     '-reset_timestamps', '1',
     '-map', '0:a',
     '-c:a', 'copy',
-    desinationFile,
+    desinationFilePattern,
   ];
 
   await new Promise<void>((resolve, reject) => {
@@ -203,23 +204,20 @@ export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
   }));
 }
 
-function keyPrefixForEpisode(episode: Episode) {
+function keyPrefixForDownload({ episode, ...episodeDownload }: EpisodeDownload & { episode: Episode & { podcast: Podcast } }) {
   const yearString = episode.publishDate.getUTCFullYear().toString().padStart(4, '0');
   const monthString = (episode.publishDate.getUTCMonth() + 1).toString().padStart(2, '0');
   const dayString = episode.publishDate.getUTCDate().toString().padStart(2, '0');
   const dateString = `${yearString}-${monthString}-${dayString}`;
-  return `media/${dateString}/${episode.guid}/`;
+  return `media/${episode.podcast.id}/${dateString}-episode-${episode.id}/${episodeDownload.id}/`;
 }
 
-async function upload(episode: Episode, part: Part, s3: S3Client, bucketName: string, bucketBaseURL: string): Promise<UploadedPart> {
-  const filePath = path.resolve('downloads/media', episode.guid, part.filename);
-
-  const fileStream = fs.createReadStream(filePath);
+async function upload(keyPrefix: string, tempFile: TempFile, s3: S3Client, bucketName: string, bucketBaseURL: string): Promise<UploadedTempFile> {
+  const fileStream = fs.createReadStream(tempFile.filePath);
   fileStream.on('error', (error) => {
-    logger.error(`Error reading ${filePath}`, { error: loggableError(error) });
+    logger.error(`Error reading ${tempFile.filePath}`, { error: loggableError(error) });
   });
-  const keyPrefix = keyPrefixForEpisode(episode);
-  const key = `${keyPrefix}${part.filename}`;
+  const key = `${keyPrefix}${tempFile.filename}`;
 
   const command = new PutObjectCommand({
     Bucket: bucketName,
@@ -230,38 +228,21 @@ async function upload(episode: Episode, part: Part, s3: S3Client, bucketName: st
   });
   try {
     const result = await s3.send(command);
-    logger.info(`Uploaded ${episode.guid} ${part.filename}`, { result });
+    logger.info(`Uploaded ${keyPrefix} ${tempFile.filename}`, { result });
     return {
-      ...part,
+      ...tempFile,
       url: (new URL(key, bucketBaseURL)).toString(),
       key,
     };
   } catch (error) {
-    logger.error(`Unable to upload "${filePath}" with key "${key}"`, { error: loggableError(error), key });
+    logger.error(`Unable to upload "${tempFile.filePath}" with key "${key}"`, { error: loggableError(error), key, keyPrefix });
     throw error;
   }
 }
 
-export async function uploadEpisodeParts(episode: Episode, parts: Part[], s3: S3Client, bucketName: string, bucketBaseURL: string): Promise<UploadedPart[]> {
-  const keyPrefix = keyPrefixForEpisode(episode);
-
-  const listCommand = new ListObjectsCommand({
-    Bucket: bucketName,
-    Prefix: keyPrefix,
-  });
-
-  const existingUploads = await s3.send(listCommand);
-  if (existingUploads.Contents && existingUploads.Contents.length) {
-    logger.info(`Parts already uploaded for episode "${episode.title}" with prefix "${keyPrefix}"`, { episode, count: existingUploads.Contents.length, keyPrefix });
-    return existingUploads.Contents.map(p => ({
-      filename: path.basename(p.Key!),
-      key: p.Key!,
-      url: (new URL(p.Key!, bucketBaseURL)).toString(),
-      filePath: path.resolve('downloads', p.Key!),
-    }));
-  }
-
-  const uploadedParts = await Promise.all(parts.map(p => upload(episode, p, s3, bucketName, bucketBaseURL)));
-  logger.info(`Uploaded ${uploadedParts.length} for episode "${episode.title}" with prefix "${keyPrefix}"`, { episode, count: uploadedParts.length, keyPrefix });
+export async function uploadEpisodeParts(episodeDownload: EpisodeDownload & { episode: Episode & { podcast: Podcast } }, tempFiles: TempFile[], s3: S3Client, bucketName: string, bucketBaseURL: string): Promise<UploadedTempFile[]> {
+  const keyPrefix = keyPrefixForDownload(episodeDownload);
+  const uploadedParts = await Promise.all(tempFiles.map(p => upload(keyPrefix, p, s3, bucketName, bucketBaseURL)));
+  logger.info(`Uploaded ${uploadedParts.length} parts for episode "${episodeDownload.episode.title}" with prefix "${keyPrefix}"`, { episodeDownload, count: uploadedParts.length, keyPrefix });
   return uploadedParts;
 }
