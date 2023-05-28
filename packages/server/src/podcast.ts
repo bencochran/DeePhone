@@ -174,7 +174,7 @@ export async function chopEpisode(episode: DownloadedEpisode): Promise<Part[]> {
 
 function keyPrefixForEpisode(episode: Episode) {
   const yearString = episode.date.getUTCFullYear().toString().padStart(4, '0');
-  const monthString = episode.date.getUTCMonth().toString().padStart(2, '0');
+  const monthString = (episode.date.getUTCMonth() + 1).toString().padStart(2, '0');
   const dayString = episode.date.getUTCDate().toString().padStart(2, '0');
   const dateString = `${yearString}-${monthString}-${dayString}`;
   return `media/${dateString}/${episode.guid}/`;
