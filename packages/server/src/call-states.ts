@@ -1,7 +1,7 @@
 import PQueue from 'p-queue';
 import { PrismaClient, Podcast, Episode } from '@prisma/client';
 
-import logger from './logger.js';
+import logger, { loggableError } from './logger.js';
 import { fetchLatestEpisode, downloadEpisode, chopEpisode, uploadEpisodeParts } from './podcast.js';
 import type { DownloadedEpisode, UploadedPart } from './podcast.js';
 import { s3, bucketName, bucketBaseURL } from './s3.js';
@@ -81,7 +81,7 @@ export function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, id: strin
 
       updateCallState(id, { status: 'introducing-episode', episode: downloadedEpisode, parts: uploadedParts });
     } catch (error) {
-      logger.error('Unable to download or process latest episode', { error });
+      logger.error('Unable to download or process latest episode', { error: loggableError(error) });
       updateCallState(id, { status: 'episode-error' });
       return;
     }

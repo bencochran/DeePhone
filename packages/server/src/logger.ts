@@ -15,4 +15,11 @@ const logger = createLogger({
     : format.json(),
 });
 
+export function loggableError(error: any) {
+  return {
+    string: error.toString(),
+    raw: error,
+  };
+}
+
 export default logger;

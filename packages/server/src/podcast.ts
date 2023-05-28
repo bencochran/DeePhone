@@ -5,7 +5,7 @@ import { spawn } from 'child_process';
 import { S3Client, PutObjectCommand, ListObjectsCommand } from '@aws-sdk/client-s3';
 import { PrismaClient, Podcast, Episode } from '@prisma/client';
 
-import logger from './logger.js';
+import logger, { loggableError } from './logger.js';
 import download from './download.js';
 
 const MIN_EPISODE_FILE_SIZE_MB = 2;
@@ -198,7 +198,7 @@ async function upload(episode: Episode, part: Part, s3: S3Client, bucketName: st
 
   const fileStream = fs.createReadStream(filePath);
   fileStream.on('error', (error) => {
-    logger.error(`Error reading ${filePath}`, { error });
+    logger.error(`Error reading ${filePath}`, { error: loggableError(error) });
   });
   const keyPrefix = keyPrefixForEpisode(episode);
   const key = `${keyPrefix}${part.filename}`;
@@ -219,7 +219,7 @@ async function upload(episode: Episode, part: Part, s3: S3Client, bucketName: st
       key,
     };
   } catch (error) {
-    logger.error(`Unable to upload "${filePath}" with key "${key}"`, { error, key });
+    logger.error(`Unable to upload "${filePath}" with key "${key}"`, { error: loggableError(error), key });
     throw error;
   }
 }
