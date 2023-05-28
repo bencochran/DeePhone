@@ -195,6 +195,7 @@ async function upload(episode: Episode, part: Part, s3: S3Client, bucketName: st
     Key: key,
     Body: fileStream,
     ContentType: 'audio/mpeg',
+    CacheControl: 'max-age=604800' // 7 days
   });
   try {
     const result = await s3.send(command);
