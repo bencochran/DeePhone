@@ -9,7 +9,8 @@
     "server": "yarn workspace @deephone/server",
     "build": "yarn server build",
     "start": "yarn server start",
-    "dev:server": "yarn sterver dev"
+    "dev:server": "yarn sterver dev",
+    "release": "yarn server release"
   },
   "devDependencies": {
     "typescript": "^5.0.4"
