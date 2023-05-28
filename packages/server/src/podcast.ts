@@ -64,6 +64,7 @@ export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Pod
     || now.getTime() - podcast.lastFetchDate.getTime() > 1000 * 60 * 60
     || await prisma.episode.count({ where: { podcastId } }) === 0
   ) {
+    logger.info(`Fetching feed for "${podcast.title}"`, { podcast });
     const parser: Parser<Feed, Item> = new Parser();
     const feed = await parser.parseURL(podcast.feedURL);
 
@@ -107,7 +108,7 @@ export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Pod
   }
 
   return await prisma.episode.findMany({
-    where: { podcast },
+    where: { podcastId: podcast.id },
     orderBy: { publishDate: 'desc' },
   })
 }
