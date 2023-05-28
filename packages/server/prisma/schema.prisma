@@ -39,6 +39,8 @@ model EpisodeDownload {
   downloadDate  DateTime
   finished      Boolean   @default(false)
   parts         EpisodePart[]
+
+  calls         Call[]
 }
 
 model EpisodePart {
@@ -48,4 +50,35 @@ model EpisodePart {
   sortOrder   Int
   key         String
   url         String
+
+  calls       Call[]
+}
+
+model Call {
+  id                    Int               @id @default(autoincrement())
+  twilioCallSid         String            @unique
+  state                 CallState
+  waitingMessageCount   Int               @default(0)
+  downloadId            Int?
+  download              EpisodeDownload?  @relation(fields: [downloadId], references: [id])
+  currentPartId         Int?
+  currentPart           EpisodePart?      @relation(fields: [currentPartId], references: [id])
+
+  phoneNumber           String
+  callerName            String?
+  callerCity            String?
+  callerState           String?
+  callerZip             String?
+  callerCountry         String?
+  callDuration          Int?
+}
+
+enum CallState {
+  FETCHING_EPISODE
+  NO_EPISODE
+  EPISODE_ERROR
+  INTRODUCING_EPISODE
+  PLAYING_EPISODE
+  ENDING_EPISODE
+  ENDED
 }

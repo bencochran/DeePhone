@@ -1,9 +1,17 @@
 import PQueue from 'p-queue';
-import { PrismaClient, Podcast, Episode, EpisodeDownload, EpisodePart } from '@prisma/client';
+import {
+  PrismaClient,
+  Podcast,
+  Episode,
+  EpisodeDownload,
+  EpisodePart,
+  CallState as StoredCallState
+} from '@prisma/client';
 
 import logger, { loggableError, omit } from './logger.js';
 import { fetchLatestEpisode, downloadEpisode, chopEpisode, uploadEpisodeParts } from './podcast.js';
 import { s3, bucketName, bucketBaseURL } from './s3.js';
+import type { VoiceRequest } from './twilio-utilities.js';
 
 const requestQueue = new PQueue({ concurrency: 1 });
 
@@ -29,7 +37,7 @@ interface IntroducingEpisode {
 interface PlayingEpisode {
   status: 'playing-episode';
   playable: PlayableDownload;
-  nextPartIndex: number;
+  part: EpisodePart;
 }
 
 interface EndingEpisode {
@@ -43,16 +51,34 @@ interface InProgressCall {
   waitingMessageCount: number;
 }
 
-const callStates: Record<string, InProgressCall> = {};
+export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, request: VoiceRequest) {
+  const call = await prisma.call.create({
+    data: {
+      twilioCallSid: request.CallSid,
+      state: StoredCallState.FETCHING_EPISODE,
+      phoneNumber: request.From,
+      callerName: request.CallerName,
+      callerCity: request.FromCity,
+      callerState: request.FromState,
+      callerZip: request.FromZip,
+      callerCountry: request.FromCountry,
+    },
+  });
 
-export function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, id: string) {
-  updateCallState(id, { status: 'finding-episode' });
   requestQueue.add(async () => {
     try {
       const episode = await fetchLatestEpisode(prisma, podcast);
       if (!episode) {
         logger.error('Unable to find latest episode');
-        updateCallState(id, { status: 'no-episode' });
+
+        await prisma.call.update({
+          where: { id: call.id },
+          data: {
+            state: StoredCallState.NO_EPISODE,
+            download: { disconnect: true },
+            currentPart: { disconnect: true },
+          }
+        });
         return;
       }
 
@@ -102,7 +128,14 @@ export function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, id: strin
         const tempFiles = await chopEpisode(inProgressDownload, filename);
         if (tempFiles.length === 0) {
           logger.warning(`No parts produced chopping ${filename}`, { download: inProgressDownload, filename })
-          updateCallState(id, { status: 'no-episode' });
+          await prisma.call.update({
+            where: { id: call.id },
+            data: {
+              state: StoredCallState.NO_EPISODE,
+              download: { disconnect: true },
+              currentPart: { disconnect: true },
+            }
+          });
           return;
         }
 
@@ -128,59 +161,152 @@ export function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, id: strin
           },
         });
       }
-      updateCallState(id, { status: 'introducing-episode', playable: downloadToPlay });
+      await prisma.call.update({
+        where: { id: call.id },
+        data: {
+          state: StoredCallState.INTRODUCING_EPISODE,
+          download: { connect: { id: downloadToPlay.id } },
+          currentPart: { disconnect: true },
+        }
+      });
+
     } catch (error) {
       logger.error('Unable to download or process latest episode', { error: loggableError(error) });
-      updateCallState(id, { status: 'episode-error' });
+      await prisma.call.update({
+        where: { id: call.id },
+        data: {
+          state: StoredCallState.EPISODE_ERROR,
+          download: { disconnect: true },
+          currentPart: { disconnect: true },
+        }
+      });
       return;
     }
   });
 }
 
-function updateCallState(id: string, state: CallState) {
-  const waitingMessageCount = callStates[id]?.waitingMessageCount ?? 0;
-  callStates[id] = { state, waitingMessageCount };
+export async function incrementCallWaitingMessageCount(prisma: PrismaClient, request: VoiceRequest) {
+  await prisma.call.update({
+    where: { twilioCallSid: request.CallSid },
+    data: {
+      waitingMessageCount: { increment: 1 },
+    }
+  });
 }
 
-export function incrementCallWaitingMessageCount(id: string) {
-  const status = callStates[id];
-  if (!status) {
-    return;
-  }
-  const { state, waitingMessageCount } = status;
-  callStates[id] = { state, waitingMessageCount: waitingMessageCount + 1 };
-}
+export async function advanceToNextPart(prisma: PrismaClient, request: VoiceRequest) {
+  const call = await prisma.call.findUniqueOrThrow({
+    where: { twilioCallSid: request.CallSid },
+    include: {
+      download: {
+        include: {
+          parts: { orderBy: { sortOrder: 'asc' }, take: 1 },
+        },
+      },
+      currentPart: true,
+    },
+  });
 
-export function advanceToNextPart(id: string) {
-  const status = callStates[id];
-  if (!status) {
-    return;
-  }
-  const { state } = status;
-  if (state.status === 'introducing-episode') {
-    const { playable } = state;
-    updateCallState(id, { status: 'playing-episode', playable, nextPartIndex: 0 });
-  } else if (state.status === 'playing-episode') {
-    const { playable, nextPartIndex: partIndex } = state;
-    const nextPartIndex = partIndex + 1;
-    if (nextPartIndex >= playable.parts.length) {
-      updateCallState(id, { status: 'ending-episode' });
+  if (call.state === StoredCallState.INTRODUCING_EPISODE) {
+    if (!call.download) {
+      logger.error('Missing download for INTRODUCING_EPISODE call', { call });
+      throw new Error('Missing download for INTRODUCING_EPISODE call');
+    }
+    await prisma.call.update({
+      where: { twilioCallSid: request.CallSid },
+      data: {
+        state: StoredCallState.PLAYING_EPISODE,
+        currentPart: { connect: { id: call.download?.parts[0].id } }
+      },
+    });
+  } else if (call.state === StoredCallState.PLAYING_EPISODE) {
+    if (!call.download) {
+      logger.error('Missing download for PLAYING_EPISODE call', { call });
+      throw new Error('Missing download for PLAYING_EPISODE call');
+    }
+    if (!call.currentPart) {
+      logger.error('Missing currentPart for PLAYING_EPISODE call', { call });
+      throw new Error('Missing currentPart for PLAYING_EPISODE call');
+    }
+
+    const nextPart = await prisma.episodePart.findFirst({
+      where: { download: { id: call.download.id }, sortOrder: { gt: call.currentPart.sortOrder } },
+      orderBy: { sortOrder: 'asc' },
+    });
+
+    if (nextPart) {
+      await prisma.call.update({
+        where: { twilioCallSid: request.CallSid },
+        data: {
+          currentPart: { connect: { id: nextPart.id } },
+        },
+      });
     } else {
-      updateCallState(id, { status: 'playing-episode', playable, nextPartIndex });
+      await prisma.call.update({
+        where: { twilioCallSid: request.CallSid },
+        data: {
+          state: StoredCallState.ENDING_EPISODE,
+        },
+      });
     }
   }
 }
 
-export function getCallState(id: string) {
-  if (id in callStates) {
-    return callStates[id];
-  } else {
+export async function getCallState(prisma: PrismaClient, request: VoiceRequest): Promise<InProgressCall | null> {
+  const call = await prisma.call.findUnique({
+    where: { twilioCallSid: request.CallSid },
+    include: {
+      download: {
+        include: {
+          episode: true,
+          parts: true,
+        }
+      },
+      currentPart: true,
+    }
+  });
+  if (!call) {
     return null;
+  }
+  const { waitingMessageCount } = call;
+
+  switch (call.state) {
+    case StoredCallState.FETCHING_EPISODE:
+      return { state: { status: 'finding-episode' }, waitingMessageCount };
+    case StoredCallState.NO_EPISODE:
+      return { state: { status: 'no-episode' }, waitingMessageCount };
+    case StoredCallState.EPISODE_ERROR:
+      return { state: { status: 'episode-error' }, waitingMessageCount };
+    case StoredCallState.INTRODUCING_EPISODE:
+      if (!call.download) {
+        logger.error('Missing download for INTRODUCING_EPISODE call', { call });
+        throw new Error('Missing download for INTRODUCING_EPISODE call');
+      }
+      return { state: { status: 'introducing-episode', playable: call.download }, waitingMessageCount };
+    case StoredCallState.PLAYING_EPISODE:
+      if (!call.download) {
+        logger.error('Missing download for PLAYING_EPISODE call', { call });
+        throw new Error('Missing download for PLAYING_EPISODE call');
+      }
+      if (!call.currentPart) {
+        logger.error('Missing currentPart for PLAYING_EPISODE call', { call });
+        throw new Error('Missing currentPart for PLAYING_EPISODE call');
+      }
+      return { state: { status: 'playing-episode', playable: call.download, part: call.currentPart }, waitingMessageCount };
+    case StoredCallState.ENDING_EPISODE:
+    case StoredCallState.ENDED:
+      return { state: { status: 'ending-episode' }, waitingMessageCount };
   }
 }
 
-export function endCallState(id: string) {
-  delete callStates[id];
+export async function endCallState(prisma: PrismaClient, request: VoiceRequest, duration: number | undefined) {
+  await prisma.call.update({
+    where: { twilioCallSid: request.CallSid },
+    data: {
+      state: StoredCallState.ENDED,
+      callDuration: duration,
+    },
+  });
 }
 
 export function loggableStatus(status: InProgressCall | null): Record<string, any> | null {
@@ -192,10 +318,7 @@ export function loggableStatus(status: InProgressCall | null): Record<string, an
   if ('playable' in state) {
     const { playable, ...rest } = state;
     const { parts, ...playableRest } = playable;
-    const part = ('nextPartIndex' in state)
-      ? parts[state.nextPartIndex]
-      : undefined;
-    loggableState = { ...rest, playable: { ... playableRest, partsCount: parts.length }, part };
+    loggableState = { ...rest, playable: { ... playableRest, partsCount: parts.length } };
   } else {
     loggableState = state;
   }
