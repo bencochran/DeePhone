@@ -3,6 +3,11 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["filteredRelationCount"]
+}
+
+generator pothos {
+  provider = "prisma-pothos-types"
 }
 
 datasource db {
