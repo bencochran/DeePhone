@@ -1,5 +1,5 @@
 {
-  "name": "@deephone/server",
+  "name": "@deephone/api",
   "version": "1.0.0",
   "author": "Ben Cochran <bcochran@gmail.com>",
   "license": "MIT",

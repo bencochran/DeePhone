@@ -9,7 +9,7 @@
 
     "baseUrl": "./",
     "paths": {
-      "@deephone/*": ["packages/*"]
+      "@deephone/*": ["apps/*"]
     },
     "forceConsistentCasingInFileNames": true,
     "strict": true,

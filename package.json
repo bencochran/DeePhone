@@ -4,13 +4,13 @@
   "author": "Ben Cochran <bcochran@gmail.com>",
   "license": "MIT",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": ["apps/*"],
   "scripts": {
-    "server": "yarn workspace @deephone/server",
-    "build": "yarn server build",
-    "start": "yarn server start",
-    "dev:server": "yarn sterver dev",
-    "release": "yarn server release"
+    "api": "yarn workspace @deephone/api",
+    "build": "yarn api build",
+    "start": "yarn api start",
+    "dev:api": "yarn api dev",
+    "release": "yarn api release"
   },
   "devDependencies": {
     "typescript": "^5.0.4"
