@@ -8,7 +8,7 @@ import {
   CallState as StoredCallState
 } from '@prisma/client';
 
-import logger, { loggableError, omit } from './logger.js';
+import logger, { loggableError, omit } from './logger';
 import {
   fetchLatestEpisode,
   downloadEpisode,
@@ -16,9 +16,9 @@ import {
   uploadEpisodeParts,
   measureFiles,
   fileDurations
-} from './podcast.js';
-import { s3, bucketName, bucketBaseURL } from './s3.js';
-import type { VoiceRequest } from './twilio-utilities.js';
+} from './podcast';
+import { s3, bucketName, bucketBaseURL } from './s3';
+import type { VoiceRequest } from './twilio-utilities';
 
 const requestQueue = new PQueue({ concurrency: 1 });
 

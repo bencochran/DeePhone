@@ -3,7 +3,7 @@ import { format as dateFormat, formatDistance } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import { EpisodePart } from '@prisma/client';
 
-import type { PlayableDownload } from './call-states.js';
+import type { PlayableDownload } from './call-states';
 
 export function initialAnswerUnauthorizedResponse() {
   const voiceResponse = new twilio.twiml.VoiceResponse();

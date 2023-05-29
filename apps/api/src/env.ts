@@ -1,4 +1,4 @@
-import logger from './logger.js'
+import logger from './logger'
 
 if (!process.env.AWS_REGION) {
   logger.error('Missing AWS_REGION');

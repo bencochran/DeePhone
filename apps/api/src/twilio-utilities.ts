@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import logger, { loggableError } from './logger.js';
+import logger, { loggableError } from './logger';
 
 export interface VoiceRequest {
   CallSid: string;

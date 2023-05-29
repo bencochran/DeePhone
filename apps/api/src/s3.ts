@@ -6,7 +6,7 @@ import {
   AWS_SECRET_ACCESS_KEY,
   S3_BUCKET_NAME,
   S3_BUCKET_BASE_URL
-} from './env.js';
+} from './env';
 
 export const s3 = new S3Client({
   region: AWS_REGION,

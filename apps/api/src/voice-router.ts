@@ -2,7 +2,7 @@ import { Router, urlencoded } from 'express';
 import twilio from 'twilio';
 import { PrismaClient, Podcast } from '@prisma/client';
 
-import logger, { loggableError } from './logger.js';
+import logger, { loggableError } from './logger';
 import {
   enqueueNewCall,
   getCallState,
@@ -10,9 +10,9 @@ import {
   incrementCallWaitingMessageCount,
   loggableStatus,
   advanceToNextPart,
-} from './call-states.js';
-import type { VoiceRequest, VoiceStatusCallbackRequest } from './twilio-utilities.js';
-import { geocodeVoiceRequestFrom } from './twilio-utilities.js';
+} from './call-states';
+import type { VoiceRequest, VoiceStatusCallbackRequest } from './twilio-utilities';
+import { geocodeVoiceRequestFrom } from './twilio-utilities';
 import {
   initialAnswerUnauthorizedResponse,
   initialAnswerResponse,
@@ -22,8 +22,8 @@ import {
   endEpisodeResponse,
   noEpisodeResponse,
   errorResponse,
-} from './responses.js';
-import { TWILIO_AUTH_TOKEN } from './env.js';
+} from './responses';
+import { TWILIO_AUTH_TOKEN } from './env';
 
 export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
   const router = Router();

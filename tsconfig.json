@@ -1,10 +1,10 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "es2016",
     "module": "ESNext",
     "lib": ["es2021"],
 
-    "moduleResolution": "nodenext",
     "esModuleInterop": true,
 
     "baseUrl": "./",
@@ -14,7 +14,17 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitAny": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+
+    "composite": false,
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": false,
+    "isolatedModules": true,
+    "moduleResolution": "node",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "preserveWatchOutput": true
   },
   "exclude": ["node_modules", "**/node_modules/*", "dist"]
 }

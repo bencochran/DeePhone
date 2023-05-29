@@ -2,10 +2,11 @@ import 'dotenv/config'
 
 import express from 'express';
 import http from 'http';
+import path from 'path';
 import { PrismaClient, Podcast } from '@prisma/client';
 
-import logger from './logger.js';
-import { buildRouter } from './voice-router.js';
+import logger from './logger';
+import { buildRouter } from './voice-router';
 
 interface Boostrap {
   prisma: PrismaClient;
@@ -40,6 +41,14 @@ bootstrap()
     app.enable('trust proxy');
 
     app.use('/', buildRouter(prisma, podcast));
+
+    // Serve static files as-is
+    app.use(express.static(path.resolve('../web/dist')));
+
+    // All other routes send the SPA root to let it do routing
+    app.get('*', (_req, res) => {
+      res.sendFile(path.resolve('../web/dist/index.html'));
+    });
 
     const port = process.env.PORT || 5000;
 

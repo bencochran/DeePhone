@@ -5,8 +5,8 @@ import { spawn } from 'child_process';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { PrismaClient, Podcast, Episode, EpisodeDownload } from '@prisma/client';
 
-import logger, { loggableError } from './logger.js';
-import download from './download.js';
+import logger, { loggableError } from './logger';
+import download from './download';
 
 const MIN_EPISODE_FILE_SIZE_MB = 2;
 const MIN_SILENCE_SPLIT_DURATION = 0.75

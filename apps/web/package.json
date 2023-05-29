@@ -1,0 +1,24 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "private": true,
+  "source": "src/index.html",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "parcel build",
+    "dev": "parcel"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.11.2"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.7",
+    "@types/react-dom": "^18.2.4",
+    "parcel": "^2.9.1",
+    "rimraf": "^5.0.1",
+    "tsconfig": "*"
+  }
+}

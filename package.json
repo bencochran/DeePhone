@@ -4,15 +4,22 @@
   "author": "Ben Cochran <bcochran@gmail.com>",
   "license": "MIT",
   "private": true,
-  "workspaces": ["apps/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "api": "yarn workspace @deephone/api",
-    "build": "yarn api build",
-    "start": "yarn api start",
-    "dev:api": "yarn api dev",
-    "release": "yarn api release"
+    "clean": "turbo run clean",
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "dev:api": "turbo run dev --filter=api",
+    "dev:web": "turbo run dev --filter=web",
+    "start": "yarn workspace api start",
+    "release": "yarn workspace api release"
   },
   "devDependencies": {
+    "process": "^0.11.10",
+    "turbo": "^1.9.9",
     "typescript": "^5.0.4"
   }
 }
