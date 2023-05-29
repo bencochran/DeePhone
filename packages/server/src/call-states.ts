@@ -59,16 +59,18 @@ interface InProgressCall {
 }
 
 export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, request: Readonly<VoiceRequest>) {
+  const now = new Date();
   const call = await prisma.call.create({
     data: {
       twilioCallSid: request.CallSid,
       events: {
         create: {
-          date: new Date(),
+          date: now,
           state: StoredCallState.FETCHING_EPISODE,
           rawRequest: request,
         },
       },
+      startDate: now,
       phoneNumber: request.From,
       callerName: request.CallerName,
       callerCity: request.FromCity,
@@ -356,13 +358,15 @@ export async function getCallState(prisma: PrismaClient, request: Readonly<Voice
 }
 
 export async function endCallState(prisma: PrismaClient, request: Readonly<VoiceRequest>, duration: number | undefined) {
+  const now = new Date();
   await prisma.call.update({
     where: { twilioCallSid: request.CallSid },
     data: {
       callDuration: duration,
+      endDate: now,
       events: {
         create: {
-          date: new Date(),
+          date: now,
           state: StoredCallState.ENDED,
           rawRequest: request,
         }

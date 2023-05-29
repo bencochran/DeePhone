@@ -65,8 +65,11 @@ model EpisodePart {
 }
 
 model Call {
-  id              Int     @id @default(autoincrement())
-  twilioCallSid   String  @unique
+  id              Int       @id @default(autoincrement())
+  twilioCallSid   String    @unique
+
+  startDate       DateTime
+  endDate         DateTime?
 
   phoneNumber     String
   callerName      String?
@@ -77,6 +80,8 @@ model Call {
   callDuration    Int?
 
   events          CallEvent[]
+
+  @@unique([startDate, id])
 }
 
 model CallEvent {
