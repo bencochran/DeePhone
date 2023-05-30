@@ -1,16 +1,16 @@
 import React from 'react';
 
 import { graphql, useFragment } from 'react-relay';
-import { Episode_episode$key } from './__generated__/Episode_episode.graphql';
+import { EpisodeRow_episode$key } from './__generated__/EpisodeRow_episode.graphql';
 
 interface Props {
-  data: Episode_episode$key;
+  data: EpisodeRow_episode$key;
 }
 
-export const Episode: React.FC<Props> = ({ data }) => {
+export const EpisodeRow: React.FC<Props> = ({ data }) => {
   const episode = useFragment(
     graphql`
-      fragment Episode_episode on Episode {
+      fragment EpisodeRow_episode on Episode {
         title
         publishDate
         imageURL

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b6d185760f80431b2a08b3417a3381c6>>
+ * @generated SignedSource<<000cd52a23ea0140ecad8060219a32ca>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,7 +15,7 @@ export type PodcastCard_podcast$data = {
     readonly edges: ReadonlyArray<{
       readonly node: {
         readonly id: string;
-        readonly " $fragmentSpreads": FragmentRefs<"Episode_episode">;
+        readonly " $fragmentSpreads": FragmentRefs<"EpisodeRow_episode">;
       };
     } | null>;
   };
@@ -88,7 +88,7 @@ const node: ReaderFragment = {
                 {
                   "args": null,
                   "kind": "FragmentSpread",
-                  "name": "Episode_episode"
+                  "name": "EpisodeRow_episode"
                 }
               ],
               "storageKey": null
@@ -104,6 +104,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "85f3def819f9b9102039abed02d416a9";
+(node as any).hash = "0191ec0612fec3fc94cb8e4cda2ac287";
 
 export default node;

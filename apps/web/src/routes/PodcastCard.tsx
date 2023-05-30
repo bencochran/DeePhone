@@ -3,7 +3,7 @@ import React from 'react';
 import { graphql, useFragment } from 'react-relay';
 import { PodcastCard_podcast$key } from './__generated__/PodcastCard_podcast.graphql';
 
-import { Episode } from './Episode';
+import { EpisodeRow } from './EpisodeRow';
 
 interface Props {
   data: PodcastCard_podcast$key;
@@ -19,7 +19,7 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
           edges {
             node {
               id
-              ...Episode_episode
+              ...EpisodeRow_episode
             }
           }
         }
@@ -56,7 +56,7 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
           </p>
           <div className='flex flex-col gap-2'>
             {podcast.episodes.edges.map(edge =>
-              edge && <Episode key={edge.node.id} data={edge.node} />
+              edge && <EpisodeRow key={edge.node.id} data={edge.node} />
             )}
           </div>
         </div>
