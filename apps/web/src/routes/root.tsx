@@ -3,7 +3,7 @@ import React from 'react';
 import { graphql, QueryRenderer, useRelayEnvironment } from 'react-relay';
 import { root_Query } from './__generated__/root_Query.graphql'
 
-import PodcastGrid from '../components/PodcastGrid';
+import PodcastGrid from '@/components/PodcastGrid';
 
 export const Root: React.FC = () => {
   const environment = useRelayEnvironment();

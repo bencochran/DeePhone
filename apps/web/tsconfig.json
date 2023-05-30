@@ -4,6 +4,9 @@
   "exclude": ["node_modules"],
   "compilerOptions": {
     "baseUrl": ".",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "paths": {
+      "@/components/*": ["src/components/*"]
+    }
   }
 }
