@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6336a2fd08625523108c31ef1bd3e588>>
+ * @generated SignedSource<<8889999bf86c485df5edb772bc2c992d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,45 +10,31 @@
 
 import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type root_PodcastsQuery$variables = {};
-export type root_PodcastsQuery$data = {
-  readonly podcasts: {
-    readonly edges: ReadonlyArray<{
-      readonly node: {
-        readonly id: string;
-        readonly " $fragmentSpreads": FragmentRefs<"Podcast_podcast">;
-      };
-    } | null>;
-  };
+export type root_Query$variables = {};
+export type root_Query$data = {
+  readonly " $fragmentSpreads": FragmentRefs<"PodcastGrid_podcastsQuery">;
 };
-export type root_PodcastsQuery = {
-  response: root_PodcastsQuery$data;
-  variables: root_PodcastsQuery$variables;
+export type root_Query = {
+  response: root_Query$data;
+  variables: root_Query$variables;
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "kind": "Literal",
-    "name": "first",
-    "value": 10
-  }
-],
-v1 = {
+var v0 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v2 = {
+v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "title",
   "storageKey": null
 },
-v3 = {
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
@@ -60,46 +46,12 @@ return {
     "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
-    "name": "root_PodcastsQuery",
+    "name": "root_Query",
     "selections": [
       {
-        "alias": null,
-        "args": (v0/*: any*/),
-        "concreteType": "QueryPodcastsConnection",
-        "kind": "LinkedField",
-        "name": "podcasts",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "QueryPodcastsConnectionEdge",
-            "kind": "LinkedField",
-            "name": "edges",
-            "plural": true,
-            "selections": [
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "Podcast",
-                "kind": "LinkedField",
-                "name": "node",
-                "plural": false,
-                "selections": [
-                  (v1/*: any*/),
-                  {
-                    "args": null,
-                    "kind": "FragmentSpread",
-                    "name": "Podcast_podcast"
-                  }
-                ],
-                "storageKey": null
-              }
-            ],
-            "storageKey": null
-          }
-        ],
-        "storageKey": "podcasts(first:10)"
+        "args": null,
+        "kind": "FragmentSpread",
+        "name": "PodcastGrid_podcastsQuery"
       }
     ],
     "type": "Query",
@@ -109,11 +61,17 @@ return {
   "operation": {
     "argumentDefinitions": [],
     "kind": "Operation",
-    "name": "root_PodcastsQuery",
+    "name": "root_Query",
     "selections": [
       {
         "alias": null,
-        "args": (v0/*: any*/),
+        "args": [
+          {
+            "kind": "Literal",
+            "name": "first",
+            "value": 10
+          }
+        ],
         "concreteType": "QueryPodcastsConnection",
         "kind": "LinkedField",
         "name": "podcasts",
@@ -135,12 +93,18 @@ return {
                 "name": "node",
                 "plural": false,
                 "selections": [
+                  (v0/*: any*/),
                   (v1/*: any*/),
                   (v2/*: any*/),
-                  (v3/*: any*/),
                   {
                     "alias": null,
-                    "args": (v0/*: any*/),
+                    "args": [
+                      {
+                        "kind": "Literal",
+                        "name": "first",
+                        "value": 4
+                      }
+                    ],
                     "concreteType": "PodcastEpisodesConnection",
                     "kind": "LinkedField",
                     "name": "episodes",
@@ -162,9 +126,16 @@ return {
                             "name": "node",
                             "plural": false,
                             "selections": [
+                              (v0/*: any*/),
                               (v1/*: any*/),
+                              {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "publishDate",
+                                "storageKey": null
+                              },
                               (v2/*: any*/),
-                              (v3/*: any*/),
                               {
                                 "alias": null,
                                 "args": null,
@@ -179,7 +150,7 @@ return {
                         "storageKey": null
                       }
                     ],
-                    "storageKey": "episodes(first:10)"
+                    "storageKey": "episodes(first:4)"
                   }
                 ],
                 "storageKey": null
@@ -193,16 +164,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "480de8457efb131b923f1ec97bc5de03",
+    "cacheID": "5776080eccff196f8bc3dcc89d0e9122",
     "id": null,
     "metadata": {},
-    "name": "root_PodcastsQuery",
+    "name": "root_Query",
     "operationKind": "query",
-    "text": "query root_PodcastsQuery {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...Podcast_podcast\n      }\n    }\n  }\n}\n\nfragment Episode_episode on Episode {\n  title\n  imageURL\n  callCount\n}\n\nfragment Podcast_podcast on Podcast {\n  title\n  imageURL\n  episodes(first: 10) {\n    edges {\n      node {\n        id\n        ...Episode_episode\n      }\n    }\n  }\n}\n"
+    "text": "query root_Query {\n  ...PodcastGrid_podcastsQuery\n}\n\nfragment Episode_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        ...Episode_episode\n      }\n    }\n  }\n}\n\nfragment PodcastGrid_podcastsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "2237348fc14ab187fc26371e6b24462a";
+(node as any).hash = "96e2dd341eb24a58e37e3a45b3dacd58";
 
 export default node;

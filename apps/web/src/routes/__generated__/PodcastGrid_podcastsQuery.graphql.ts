@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e22fe14ed1cf3e8b8f6a96b4c8b2a87e>>
+ * @generated SignedSource<<c0973c63ce9f406055f52f1231cecae2>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,44 +10,28 @@
 
 import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type Podcast_podcast$data = {
-  readonly episodes: {
+export type PodcastGrid_podcastsQuery$data = {
+  readonly podcasts: {
     readonly edges: ReadonlyArray<{
       readonly node: {
         readonly id: string;
-        readonly " $fragmentSpreads": FragmentRefs<"Episode_episode">;
+        readonly " $fragmentSpreads": FragmentRefs<"PodcastCard_podcast">;
       };
     } | null>;
   };
-  readonly imageURL: any | null;
-  readonly title: string;
-  readonly " $fragmentType": "Podcast_podcast";
+  readonly " $fragmentType": "PodcastGrid_podcastsQuery";
 };
-export type Podcast_podcast$key = {
-  readonly " $data"?: Podcast_podcast$data;
-  readonly " $fragmentSpreads": FragmentRefs<"Podcast_podcast">;
+export type PodcastGrid_podcastsQuery$key = {
+  readonly " $data"?: PodcastGrid_podcastsQuery$data;
+  readonly " $fragmentSpreads": FragmentRefs<"PodcastGrid_podcastsQuery">;
 };
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
-  "name": "Podcast_podcast",
+  "name": "PodcastGrid_podcastsQuery",
   "selections": [
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "title",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "imageURL",
-      "storageKey": null
-    },
     {
       "alias": null,
       "args": [
@@ -57,15 +41,15 @@ const node: ReaderFragment = {
           "value": 10
         }
       ],
-      "concreteType": "PodcastEpisodesConnection",
+      "concreteType": "QueryPodcastsConnection",
       "kind": "LinkedField",
-      "name": "episodes",
+      "name": "podcasts",
       "plural": false,
       "selections": [
         {
           "alias": null,
           "args": null,
-          "concreteType": "PodcastEpisodesConnectionEdge",
+          "concreteType": "QueryPodcastsConnectionEdge",
           "kind": "LinkedField",
           "name": "edges",
           "plural": true,
@@ -73,7 +57,7 @@ const node: ReaderFragment = {
             {
               "alias": null,
               "args": null,
-              "concreteType": "Episode",
+              "concreteType": "Podcast",
               "kind": "LinkedField",
               "name": "node",
               "plural": false,
@@ -88,7 +72,7 @@ const node: ReaderFragment = {
                 {
                   "args": null,
                   "kind": "FragmentSpread",
-                  "name": "Episode_episode"
+                  "name": "PodcastCard_podcast"
                 }
               ],
               "storageKey": null
@@ -97,13 +81,13 @@ const node: ReaderFragment = {
           "storageKey": null
         }
       ],
-      "storageKey": "episodes(first:10)"
+      "storageKey": "podcasts(first:10)"
     }
   ],
-  "type": "Podcast",
+  "type": "Query",
   "abstractKey": null
 };
 
-(node as any).hash = "dcba470e3d407f0a271f9ec35f414f4e";
+(node as any).hash = "c25f2dc59356dcde89c60f916a92b978";
 
 export default node;
