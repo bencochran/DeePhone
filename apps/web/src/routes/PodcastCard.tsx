@@ -63,7 +63,7 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
               >
                 <EpisodeRow
                   key={edge.node.id}
-                  className='-m-1 p-1 hover:bg-slate-200 hover:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer'
+                  className='-m-1 p-1 [@media(hover:hover){&:hover}]:bg-slate-200 [@media(hover:hover){&:hover}]:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer'
                   data={edge.node}
                 />
               </button>
