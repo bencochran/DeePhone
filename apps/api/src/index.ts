@@ -6,7 +6,8 @@ import path from 'path';
 import { PrismaClient, Podcast } from '@prisma/client';
 
 import logger from './logger';
-import { buildRouter } from './voice-router';
+import { buildRouter as buildVoiceRouter } from './voice-router';
+import { buildRouter as buildGraphQLRouter } from './graphql/router';
 
 interface Boostrap {
   prisma: PrismaClient;
@@ -40,7 +41,8 @@ bootstrap()
     const app = express();
     app.enable('trust proxy');
 
-    app.use('/', buildRouter(prisma, podcast));
+    app.use('/', buildVoiceRouter(prisma, podcast));
+    app.use('/api/graphql', buildGraphQLRouter(prisma, '/api/graphql'));
 
     // Serve static files as-is
     app.use(express.static(path.resolve('../web/dist')));

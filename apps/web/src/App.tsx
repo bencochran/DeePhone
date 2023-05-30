@@ -3,9 +3,11 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from 'react-router-dom';
+import { RelayEnvironmentProvider } from 'react-relay';
+
+import RelayEnvironment from './RelayEnvironment';
 
 import { Root } from './routes/root';
-import { Other } from './routes/other';
 import { ErrorPage } from './error-page';
 
 const router = createBrowserRouter([
@@ -14,14 +16,12 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
   },
-  {
-    path: "/other",
-    element: <Other />,
-  }
 ]);
 
 
 export const App: React.FC = () =>
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <RelayEnvironmentProvider environment={RelayEnvironment}>
+      <RouterProvider router={router} />
+    </RelayEnvironmentProvider>
   </React.StrictMode>;
