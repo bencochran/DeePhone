@@ -7,13 +7,13 @@ import { RelayEnvironmentProvider } from 'react-relay';
 
 import RelayEnvironment from './RelayEnvironment';
 
-import { Root } from './routes/root';
+import { Home } from './pages/Home';
 import { ErrorPage } from './error-page';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root />,
+    element: <Home />,
     errorElement: <ErrorPage />,
   },
 ]);

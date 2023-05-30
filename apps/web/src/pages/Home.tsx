@@ -1,17 +1,17 @@
 import React from 'react';
 
 import { graphql, QueryRenderer, useRelayEnvironment } from 'react-relay';
-import { root_Query } from './__generated__/root_Query.graphql'
+import { HomeQuery } from './__generated__/HomeQuery.graphql';
 
 import PodcastGrid from '@/components/PodcastGrid';
 
-export const Root: React.FC = () => {
+export const Home: React.FC = () => {
   const environment = useRelayEnvironment();
   return (
-    <QueryRenderer<root_Query>
+    <QueryRenderer<HomeQuery>
       environment={environment}
       query={graphql`
-        query root_Query {
+        query HomeQuery {
           ...PodcastGrid_podcastsQuery
         }
       `}
