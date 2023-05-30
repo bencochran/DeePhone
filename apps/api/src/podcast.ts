@@ -14,8 +14,7 @@ const MIN_SILENCE_SPLIT_DURATION = 0.75
 export interface Feed {}
 
 export interface Item {
-  bar: number;
-  enclosure: { url: string };
+  itunes?: { image?: string };
 }
 
 export interface DownloadedEpisode extends Episode {
@@ -68,15 +67,37 @@ export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Pod
     const parser: Parser<Feed, Item> = new Parser();
     const feed = await parser.parseURL(podcast.feedURL);
 
-    await Promise.all(feed.items.map(async ({ title, guid, pubDate, enclosure }) => {
+    if (feed.title && feed.title !== podcast.title || feed.itunes?.image !== podcast.imageURL) {
+      logger.debug(`Updating title and image for "${podcast.title}"`, {
+        old: {
+          title: podcast.title,
+          imageURL: podcast.imageURL ?? null,
+        },
+        new: {
+          title: feed.title ?? null,
+          imageURL: feed.itunes?.image ?? null,
+        }
+      });
+      await prisma.podcast.update({
+        where: { id: podcast.id },
+        data: {
+          title: feed.title,
+          imageURL: feed.itunes?.image ?? null,
+        }
+      });
+    }
+
+    await Promise.all(feed.items.map(async (item) => {
+      const { title, guid, pubDate, enclosure, itunes } = item;
       if (!pubDate || !title || !enclosure || !enclosure.url || !guid) {
+        logger.warning('Missing required attributes from feed item', { podcast, item });
         return null;
       }
       const publishDate = new Date(pubDate);
       if (Number.isNaN(publishDate.getTime())) {
         logger.warning(`Got invalid publish date "${pubDate}"`, {
           podcast,
-          episode: { title, guid, pubDate },
+          episode: item,
         });
         return null;
       }
@@ -85,12 +106,14 @@ export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Pod
         create: {
           title,
           guid,
+          imageURL: itunes?.image ?? null,
           publishDate,
           contentURL: enclosure.url,
           podcastId: podcast.id,
         },
         update: {
           title,
+          imageURL: itunes?.image ?? null,
           publishDate,
           contentURL: enclosure.url,
         },
