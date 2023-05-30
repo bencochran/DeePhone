@@ -58,11 +58,11 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
           <div className='flex flex-col gap-2'>
             {podcast.episodes.edges.map(edge => edge &&
               <button
+                key={edge.node.id}
                 className='text-left'
                 onClick={() => alert(`Selected ${edge.node.title}`)}
               >
                 <EpisodeRow
-                  key={edge.node.id}
                   className='-m-1 p-1 [@media(hover:hover){&:hover}]:bg-slate-200 [@media(hover:hover){&:hover}]:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer'
                   data={edge.node}
                 />
