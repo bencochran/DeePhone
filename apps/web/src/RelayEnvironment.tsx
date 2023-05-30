@@ -13,7 +13,8 @@ async function fetchRelay(
   variables: Variables,
   _cacheConfig: CacheConfig
 ) {
-  const response = await fetch(`${import.meta.env.VITE_GRAPHQL_BASE}/api/graphql`, {
+  const base = import.meta.env.VITE_GRAPHQL_BASE ?? '';
+  const response = await fetch(`${base}/api/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
