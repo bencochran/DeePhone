@@ -1,0 +1,168 @@
+type Call {
+  callerCity: String
+  callerCountry: String
+  callerName: String
+  callerState: String
+  callerZip: String
+  duration: Int
+  endDate: DateTime
+  events(after: ID, before: ID, first: Int, last: Int): CallEventsConnection!
+  id: ID!
+  phoneNumber: String!
+  startDate: DateTime!
+}
+
+type CallEvent {
+  date: DateTime!
+  download: EpisodeDownload
+  id: ID!
+  part: EpisodePart
+  state: CallState!
+}
+
+type CallEventsConnection {
+  edges: [CallEventsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CallEventsConnectionEdge {
+  cursor: String!
+  node: CallEvent!
+}
+
+enum CallState {
+  ENDED
+  ENDING_EPISODE
+  EPISODE_ERROR
+  FETCHING_EPISODE
+  INTRODUCING_EPISODE
+  NO_EPISODE
+  PLAYING_EPISODE
+}
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+type Episode {
+  callCount: Int!
+  contentURL: URL!
+  downloads(after: ID, before: ID, excludeDeleted: Boolean, first: Int, last: Int, oldestFirst: Boolean, onlyFinished: Boolean): EpisodeDownloadsConnection!
+  guid: String!
+  id: ID!
+  podcast: Podcast!
+  publishDate: DateTime!
+  title: String!
+}
+
+type EpisodeDownload {
+  callCount: Int!
+  contentURL: URL!
+  deleted: Boolean!
+  downloadDate: DateTime!
+  episode: Episode!
+  finished: Boolean!
+  id: ID!
+  partCount: Int!
+  parts(after: ID, before: ID, first: Int, last: Int): EpisodeDownloadPartsConnection!
+}
+
+type EpisodeDownloadPartsConnection {
+  edges: [EpisodeDownloadPartsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type EpisodeDownloadPartsConnectionEdge {
+  cursor: String!
+  node: EpisodePart!
+}
+
+type EpisodeDownloadsConnection {
+  edges: [EpisodeDownloadsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type EpisodeDownloadsConnectionEdge {
+  cursor: String!
+  node: EpisodeDownload!
+}
+
+type EpisodePart {
+  download: EpisodeDownload!
+  duration: Float!
+  id: ID!
+  number: Int!
+  size: Int!
+  url: URL!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type Podcast {
+  episodes(after: ID, before: ID, first: Int, last: Int, oldestFirst: Boolean): PodcastEpisodesConnection!
+  feedURL: URL!
+  id: ID!
+  lastFetchDate: DateTime
+  title: String!
+}
+
+type PodcastEpisodesConnection {
+  edges: [PodcastEpisodesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type PodcastEpisodesConnectionEdge {
+  cursor: String!
+  node: Episode!
+}
+
+type Query {
+  call(id: ID!): Call
+  calls(after: ID, before: ID, first: Int, last: Int, onlyComplete: Boolean, onlyInProgress: Boolean): QueryCallsConnection!
+  episode(id: ID!): Episode
+  episodes(after: ID, before: ID, first: Int, last: Int): QueryEpisodesConnection!
+  ok: Boolean!
+  podcast(id: ID!): Podcast
+  podcasts(after: ID, before: ID, first: Int, last: Int): QueryPodcastsConnection!
+}
+
+type QueryCallsConnection {
+  edges: [QueryCallsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type QueryCallsConnectionEdge {
+  cursor: String!
+  node: Call!
+}
+
+type QueryEpisodesConnection {
+  edges: [QueryEpisodesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type QueryEpisodesConnectionEdge {
+  cursor: String!
+  node: Episode!
+}
+
+type QueryPodcastsConnection {
+  edges: [QueryPodcastsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type QueryPodcastsConnectionEdge {
+  cursor: String!
+  node: Podcast!
+}
+
+"""
+A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt.
+"""
+scalar URL
