@@ -9,7 +9,10 @@
     "clean": "rimraf dist",
     "build": "yarn prisma generate && tsc",
     "start": "node ./dist/index.js",
-    "dev": "nodemon --exec \"node -r esbuild-register ./src/index.ts\" -e .ts",
+    "dev": "concurrently -n server,prisma,grapql \"yarn dev:server\" \"yarn dev:prisma\" \"yarn dev:graphql\"",
+    "dev:server": "nodemon --exec \"node -r esbuild-register ./src/index.ts\" -e ts src",
+    "dev:prisma": "yarn prisma generate --watch",
+    "dev:graphql": "nodemon --exec \"yarn graphql:generate\" -e ts -w src/graphql -w scripts/generate-graphql-schema.ts",
     "db:generate": "yarn prisma generate",
     "graphql:generate": "tsx ./scripts/generate-graphql-schema.ts",
     "release": "yarn prisma migrate deploy"
