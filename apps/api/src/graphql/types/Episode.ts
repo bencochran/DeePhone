@@ -14,6 +14,10 @@ export function addEpisodeToBuilder(builder: ReturnType<typeof buildBuilder>, pr
       publishDate: t.expose('publishDate', {
         type: 'DateTime',
       }),
+      imageURL: t.expose('imageURL', {
+        type: 'URL',
+        nullable: true,
+      }),
       podcast: t.relation('podcast'),
       downloads: t.relatedConnection('downloads', {
         cursor: 'downloadDate_id',

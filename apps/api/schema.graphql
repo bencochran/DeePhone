@@ -51,6 +51,7 @@ type Episode {
   downloads(after: ID, before: ID, excludeDeleted: Boolean, first: Int, last: Int, oldestFirst: Boolean, onlyFinished: Boolean): EpisodeDownloadsConnection!
   guid: String!
   id: ID!
+  imageURL: URL
   podcast: Podcast!
   publishDate: DateTime!
   title: String!
@@ -108,6 +109,7 @@ type Podcast {
   episodes(after: ID, before: ID, first: Int, last: Int, oldestFirst: Boolean): PodcastEpisodesConnection!
   feedURL: URL!
   id: ID!
+  imageURL: URL
   lastFetchDate: DateTime
   title: String!
 }

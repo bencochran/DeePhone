@@ -9,6 +9,10 @@ export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>, pr
       feedURL: t.expose('feedURL', {
         type: 'URL',
       }),
+      imageURL: t.expose('imageURL', {
+        type: 'URL',
+        nullable: true,
+      }),
       lastFetchDate: t.expose('lastFetchDate', {
         type: 'DateTime',
         nullable: true,
