@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<656f1a49159a94d43b7e3651e369d073>>
+ * @generated SignedSource<<6ea9c007377d2d2adf007502ae0bcc16>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -164,12 +164,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "1359b0c1ec828f4a8a7a8aaa26f57e39",
+    "cacheID": "fa1a630dd1e66a77155aa10cf8641f8a",
     "id": null,
     "metadata": {},
     "name": "root_Query",
     "operationKind": "query",
-    "text": "query root_Query {\n  ...PodcastGrid_podcastsQuery\n}\n\nfragment EpisodeRow_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        ...EpisodeRow_episode\n      }\n    }\n  }\n}\n\nfragment PodcastGrid_podcastsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
+    "text": "query root_Query {\n  ...PodcastGrid_podcastsQuery\n}\n\nfragment EpisodeRow_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        title\n        ...EpisodeRow_episode\n      }\n    }\n  }\n}\n\nfragment PodcastGrid_podcastsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
   }
 };
 })();

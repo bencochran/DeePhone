@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<000cd52a23ea0140ecad8060219a32ca>>
+ * @generated SignedSource<<d98fdb93e13087859f45215bd1814004>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type PodcastCard_podcast$data = {
     readonly edges: ReadonlyArray<{
       readonly node: {
         readonly id: string;
+        readonly title: string;
         readonly " $fragmentSpreads": FragmentRefs<"EpisodeRow_episode">;
       };
     } | null>;
@@ -28,19 +29,21 @@ export type PodcastCard_podcast$key = {
   readonly " $fragmentSpreads": FragmentRefs<"PodcastCard_podcast">;
 };
 
-const node: ReaderFragment = {
+const node: ReaderFragment = (function(){
+var v0 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "title",
+  "storageKey": null
+};
+return {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
   "name": "PodcastCard_podcast",
   "selections": [
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "title",
-      "storageKey": null
-    },
+    (v0/*: any*/),
     {
       "alias": null,
       "args": null,
@@ -85,6 +88,7 @@ const node: ReaderFragment = {
                   "name": "id",
                   "storageKey": null
                 },
+                (v0/*: any*/),
                 {
                   "args": null,
                   "kind": "FragmentSpread",
@@ -103,7 +107,8 @@ const node: ReaderFragment = {
   "type": "Podcast",
   "abstractKey": null
 };
+})();
 
-(node as any).hash = "0191ec0612fec3fc94cb8e4cda2ac287";
+(node as any).hash = "dfee2b9a1cb4a6bcca8ee453515058b2";
 
 export default node;
