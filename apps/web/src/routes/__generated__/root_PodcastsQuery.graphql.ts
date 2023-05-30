@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<838e1360054855c4b92c31bf2d63dae2>>
+ * @generated SignedSource<<6336a2fd08625523108c31ef1bd3e588>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -46,6 +46,13 @@ v2 = {
   "args": null,
   "kind": "ScalarField",
   "name": "title",
+  "storageKey": null
+},
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "imageURL",
   "storageKey": null
 };
 return {
@@ -130,6 +137,7 @@ return {
                 "selections": [
                   (v1/*: any*/),
                   (v2/*: any*/),
+                  (v3/*: any*/),
                   {
                     "alias": null,
                     "args": (v0/*: any*/),
@@ -156,6 +164,7 @@ return {
                             "selections": [
                               (v1/*: any*/),
                               (v2/*: any*/),
+                              (v3/*: any*/),
                               {
                                 "alias": null,
                                 "args": null,
@@ -184,12 +193,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "c620b6128738b7ee7056abaf1dfda579",
+    "cacheID": "480de8457efb131b923f1ec97bc5de03",
     "id": null,
     "metadata": {},
     "name": "root_PodcastsQuery",
     "operationKind": "query",
-    "text": "query root_PodcastsQuery {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...Podcast_podcast\n      }\n    }\n  }\n}\n\nfragment Episode_episode on Episode {\n  title\n  callCount\n}\n\nfragment Podcast_podcast on Podcast {\n  title\n  episodes(first: 10) {\n    edges {\n      node {\n        id\n        ...Episode_episode\n      }\n    }\n  }\n}\n"
+    "text": "query root_PodcastsQuery {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...Podcast_podcast\n      }\n    }\n  }\n}\n\nfragment Episode_episode on Episode {\n  title\n  imageURL\n  callCount\n}\n\nfragment Podcast_podcast on Podcast {\n  title\n  imageURL\n  episodes(first: 10) {\n    edges {\n      node {\n        id\n        ...Episode_episode\n      }\n    }\n  }\n}\n"
   }
 };
 })();

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<231837b40b8fc7cf49e27e8eb335b549>>
+ * @generated SignedSource<<e22fe14ed1cf3e8b8f6a96b4c8b2a87e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -19,6 +19,7 @@ export type Podcast_podcast$data = {
       };
     } | null>;
   };
+  readonly imageURL: any | null;
   readonly title: string;
   readonly " $fragmentType": "Podcast_podcast";
 };
@@ -38,6 +39,13 @@ const node: ReaderFragment = {
       "args": null,
       "kind": "ScalarField",
       "name": "title",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "imageURL",
       "storageKey": null
     },
     {
@@ -96,6 +104,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "806d32cee056db0e64bee17a9f6115fa";
+(node as any).hash = "dcba470e3d407f0a271f9ec35f414f4e";
 
 export default node;

@@ -14,6 +14,7 @@ export const Podcast: React.FC<Props> = ({ data }) => {
     graphql`
       fragment Podcast_podcast on Podcast {
         title
+        imageURL
         episodes(first: 10) {
           edges {
             node {
@@ -30,6 +31,7 @@ export const Podcast: React.FC<Props> = ({ data }) => {
   return (
     <div>
       <p>{podcast.title}</p>
+      {podcast.imageURL && <img src={podcast.imageURL} height='100px'/>}
       <ul>
         {podcast.episodes.edges.map(edge =>
           edge && <Episode key={edge.node.id} data={edge.node} />
