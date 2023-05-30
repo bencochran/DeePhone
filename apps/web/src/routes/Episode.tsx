@@ -18,5 +18,5 @@ export const Episode: React.FC<Props> = ({ data }) => {
     data
   );
 
-  return <p>{episode.title} {episode.callCount > 0 && <em>{episode.callCount} {episode.callCount === 1 ? 'call' : 'call'}</em>}</p>;
+  return <p>{episode.title} {episode.callCount > 0 && <em>{episode.callCount} {episode.callCount === 1 ? 'call' : 'calls'}</em>}</p>;
 }
