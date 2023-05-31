@@ -17,8 +17,8 @@ function maskPhoneNumber(phoneNumber: string) {
     // Couldn’t find last 4, just obscure the whole thing
     return phoneNumber.replaceAll(/\d/g, 'X');
   }
-  const [_, toMask, toShow] = match;
-  return toMask.replaceAll(/\d/g, 'X') + toShow;
+  const [_, first, second] = match;
+  return first + second.replaceAll(/\d/g, 'X');
 }
 
 export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient) {
