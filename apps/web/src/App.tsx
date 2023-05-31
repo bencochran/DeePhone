@@ -7,7 +7,7 @@ import { RelayEnvironmentProvider } from 'react-relay';
 
 import RelayEnvironment from './RelayEnvironment';
 
-import { Home } from './pages/Home';
+import { Home, loadHome } from './pages/Home';
 import { ErrorPage } from './error-page';
 
 const router = createBrowserRouter([
@@ -15,6 +15,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <Home />,
     errorElement: <ErrorPage />,
+    loader: () => loadHome(RelayEnvironment),
   },
 ]);
 
