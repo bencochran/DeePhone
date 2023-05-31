@@ -59,18 +59,18 @@ interface InProgressCall {
 }
 
 export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, request: Readonly<VoiceRequest>) {
-  const now = new Date();
+  const enqueueDate = new Date();
   const call = await prisma.call.create({
     data: {
       twilioCallSid: request.CallSid,
       events: {
         create: {
-          date: now,
+          date: enqueueDate,
           state: StoredCallState.FETCHING_EPISODE,
           rawRequest: request,
         },
       },
-      startDate: now,
+      startDate: enqueueDate,
       phoneNumber: request.From,
       callerName: request.CallerName,
       callerCity: request.FromCity,
@@ -127,12 +127,12 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
           });
         }
 
-        const now = new Date();
+        const downloadStartDate = new Date();
         const inProgressDownload = await prisma.episodeDownload.create({
           data: {
             episodeId: episode.id,
             contentURL: episode.contentURL,
-            downloadDate: now,
+            downloadDate: downloadStartDate,
             finished: false,
           },
           include: { episode: { include: { podcast: true } } },
@@ -158,10 +158,13 @@ export async function enqueueNewCall(prisma: PrismaClient, podcast: Podcast, req
         const durationedTempFiles = await fileDurations(sizedTempFiles);
         const uploadedFiles = await uploadEpisodeParts(inProgressDownload, durationedTempFiles, s3, bucketName, bucketBaseURL);
 
+        const downloadFinishDate = new Date();
+
         downloadToPlay = await prisma.episodeDownload.update({
           where: { id: inProgressDownload.id },
           data: {
             finished: true,
+            downloadFinishDate,
             parts: {
               createMany: {
                 data: uploadedFiles.map((part, index) => ({

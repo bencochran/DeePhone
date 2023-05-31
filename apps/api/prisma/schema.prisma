@@ -42,14 +42,15 @@ model Episode {
 }
 
 model EpisodeDownload {
-  id            Int       @id @default(autoincrement())
-  episodeId     Int
-  episode       Episode   @relation(fields: [episodeId], references: [id])
-  contentURL    String
-  downloadDate  DateTime
-  finished      Boolean   @default(false)
-  deleted       Boolean   @default(false)
-  parts         EpisodePart[]
+  id                  Int       @id @default(autoincrement())
+  episodeId           Int
+  episode             Episode   @relation(fields: [episodeId], references: [id])
+  contentURL          String
+  downloadDate        DateTime
+  downloadFinishDate  DateTime?
+  finished            Boolean   @default(false)
+  deleted             Boolean   @default(false)
+  parts               EpisodePart[]
 
   callEvents    CallEvent[]
 

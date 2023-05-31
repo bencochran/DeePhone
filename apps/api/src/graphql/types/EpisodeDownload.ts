@@ -12,6 +12,10 @@ export function addEpisodeDownloadToBuilder(builder: ReturnType<typeof buildBuil
       downloadDate: t.expose('downloadDate', {
         type: 'DateTime',
       }),
+      downloadFinishDate: t.expose('downloadFinishDate', {
+        type: 'DateTime',
+        nullable: true,
+      }),
       finished: t.exposeBoolean('finished'),
       deleted: t.exposeBoolean('deleted'),
       episode: t.relation('episode'),

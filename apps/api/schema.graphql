@@ -63,6 +63,7 @@ type EpisodeDownload {
   contentURL: URL!
   deleted: Boolean!
   downloadDate: DateTime!
+  downloadFinishDate: DateTime
   episode: Episode!
   finished: Boolean!
   id: ID!
