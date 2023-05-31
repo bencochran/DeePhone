@@ -2,9 +2,10 @@ import { PrismaClient } from '@prisma/client';
 import { buildBuilder } from '../builder';
 
 export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient) {
-  builder.prismaObject('Podcast', {
+  builder.prismaNode('Podcast', {
+    id: { field: 'id' },
     fields: (t) => ({
-      id: t.exposeID('id'),
+      identifier: t.exposeInt('id'),
       title: t.exposeString('title'),
       feedURL: t.expose('feedURL', {
         type: 'URL',
@@ -34,12 +35,12 @@ export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>, pr
       type: 'Podcast',
       nullable: true,
       args: {
-        id: t.arg.id({ required: true }),
+        identifier: t.arg.int({ required: true }),
       },
       resolve: (query, _parent, args, _ctx, _info) =>
         prisma.podcast.findUnique({
           ...query,
-          where: { id: Number.parseInt(String(args.id), 10) },
+          where: { id: args.identifier },
         }),
     }),
     podcasts: t.prismaConnection({

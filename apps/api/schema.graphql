@@ -1,4 +1,4 @@
-type Call {
+type Call implements Node {
   callerCity: String
   callerCountry: String
   callerName: String
@@ -8,11 +8,12 @@ type Call {
   endDate: DateTime
   events(after: ID, before: ID, first: Int, last: Int): CallEventsConnection!
   id: ID!
+  identifier: Int!
   phoneNumber: String!
   startDate: DateTime!
 }
 
-type CallEvent {
+type CallEvent implements Node {
   date: DateTime!
   download: EpisodeDownload
   id: ID!
@@ -45,19 +46,20 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
-type Episode {
+type Episode implements Node {
   callCount: Int!
   contentURL: URL!
   downloads(after: ID, before: ID, excludeDeleted: Boolean, first: Int, last: Int, oldestFirst: Boolean, onlyFinished: Boolean): EpisodeDownloadsConnection!
   guid: String!
   id: ID!
+  identifier: Int!
   imageURL: URL
   podcast: Podcast!
   publishDate: DateTime!
   title: String!
 }
 
-type EpisodeDownload {
+type EpisodeDownload implements Node {
   callCount: Int!
   calls(after: ID, before: ID, first: Int, last: Int): EpisodeDownloadCallsConnection!
   contentURL: URL!
@@ -101,13 +103,17 @@ type EpisodeDownloadsConnectionEdge {
   node: EpisodeDownload!
 }
 
-type EpisodePart {
+type EpisodePart implements Node {
   download: EpisodeDownload!
   duration: Float!
   id: ID!
   number: Int!
   size: Int!
   url: URL!
+}
+
+interface Node {
+  id: ID!
 }
 
 type PageInfo {
@@ -117,10 +123,11 @@ type PageInfo {
   startCursor: String
 }
 
-type Podcast {
+type Podcast implements Node {
   episodes(after: ID, before: ID, first: Int, last: Int, oldestFirst: Boolean): PodcastEpisodesConnection!
   feedURL: URL!
   id: ID!
+  identifier: Int!
   imageURL: URL
   lastFetchDate: DateTime
   title: String!
@@ -137,12 +144,14 @@ type PodcastEpisodesConnectionEdge {
 }
 
 type Query {
-  call(id: ID!): Call
+  call(identifier: Int!): Call
   calls(after: ID, before: ID, first: Int, last: Int, onlyComplete: Boolean, onlyInProgress: Boolean): QueryCallsConnection!
-  episode(id: ID!): Episode
+  episode(identifier: Int!): Episode
   episodes(after: ID, before: ID, first: Int, last: Int): QueryEpisodesConnection!
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node]!
   ok: Boolean!
-  podcast(id: ID!): Podcast
+  podcast(identifier: Int!): Podcast
   podcasts(after: ID, before: ID, first: Int, last: Int): QueryPodcastsConnection!
 }
 

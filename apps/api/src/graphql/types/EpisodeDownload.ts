@@ -3,9 +3,9 @@ import { PrismaClient } from '@prisma/client';
 import { buildBuilder } from '../builder';
 
 export function addEpisodeDownloadToBuilder(builder: ReturnType<typeof buildBuilder>, _prisma: PrismaClient) {
-  builder.prismaObject('EpisodeDownload', {
+  builder.prismaNode('EpisodeDownload', {
+    id: { field: 'id' },
     fields: (t) => ({
-      id: t.exposeID('id'),
       contentURL: t.expose('contentURL', {
         type: 'URL',
       }),

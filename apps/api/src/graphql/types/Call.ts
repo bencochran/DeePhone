@@ -22,9 +22,10 @@ function maskPhoneNumber(phoneNumber: string) {
 }
 
 export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient) {
-  const Call = builder.prismaObject('Call', {
+  const Call = builder.prismaNode('Call', {
+    id: { field: 'id' },
     fields: (t) => ({
-      id: t.exposeID('id'),
+      identifier: t.exposeInt('id'),
       phoneNumber: t.string({
         resolve: (call) => maskPhoneNumber(formatPhoneNumber(call.phoneNumber, call.callerCountry ?? undefined)),
       }),
@@ -98,12 +99,12 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
       type: 'Call',
       nullable: true,
       args: {
-        id: t.arg.id({ required: true }),
+        identifier: t.arg.int({ required: true }),
       },
       resolve: (query, _parent, args, _ctx, _info) =>
         prisma.call.findUnique({
           ...query,
-          where: { id: Number.parseInt(String(args.id), 10) },
+          where: { id: args.identifier },
         })
     }),
     calls: t.prismaConnection({

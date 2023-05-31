@@ -3,9 +3,9 @@ import { PrismaClient, CallState } from '@prisma/client';
 import { buildBuilder } from '../builder';
 
 export function addCallEventToBuilder(builder: ReturnType<typeof buildBuilder>, _prisma: PrismaClient) {
-  builder.prismaObject('CallEvent', {
+  builder.prismaNode('CallEvent', {
+    id: { field: 'id' },
     fields: (t) => ({
-      id: t.exposeID('id'),
       date: t.expose('date', {
         type: 'DateTime',
       }),

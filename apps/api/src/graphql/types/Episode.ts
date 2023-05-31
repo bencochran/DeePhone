@@ -3,9 +3,10 @@ import { PrismaClient } from '@prisma/client';
 import { buildBuilder } from '../builder';
 
 export function addEpisodeToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient) {
-  builder.prismaObject('Episode', {
+  builder.prismaNode('Episode', {
+    id: { field: 'id' },
     fields: (t) => ({
-      id: t.exposeID('id'),
+      identifier: t.exposeInt('id'),
       guid: t.exposeString('guid'),
       title: t.exposeString('title'),
       contentURL: t.expose('contentURL', {
@@ -58,12 +59,12 @@ export function addEpisodeToBuilder(builder: ReturnType<typeof buildBuilder>, pr
       type: 'Episode',
       nullable: true,
       args: {
-        id: t.arg.id({ required: true }),
+        identifier: t.arg.int({ required: true }),
       },
       resolve: (query, _parent, args, _ctx, _info) =>
         prisma.episode.findUnique({
           ...query,
-          where: { id: Number.parseInt(String(args.id), 10) },
+          where: { id: args.identifier },
         })
     }),
     episodes: t.prismaConnection({
