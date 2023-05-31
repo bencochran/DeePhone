@@ -34,7 +34,7 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
       <div className='aspect-square rounded overflow-hidden'>
         {podcast.imageURL ? (
           <img
-            className=''
+            className='object-cover'
             title={podcast.title}
             src={podcast.imageURL}
           />
