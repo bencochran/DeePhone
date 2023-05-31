@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { prismaConnectionHelpers } from '@pothos/plugin-prisma';
 
 import { buildBuilder } from '../builder';
 
@@ -13,7 +14,7 @@ function maskPhoneNumber(phoneNumber: string) {
 }
 
 export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient) {
-  builder.prismaObject('Call', {
+  const Call = builder.prismaObject('Call', {
     fields: (t) => ({
       id: t.exposeID('id'),
       phoneNumber: t.string({
@@ -52,6 +53,37 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
       }),
     })
   });
+
+  const downloadCallConnectionHelpers = prismaConnectionHelpers(
+    builder,
+    'CallEvent',
+    {
+      cursor: 'date_id',
+      select: (nodeSelection) => ({
+        call: nodeSelection({
+        }),
+      }),
+      resolveNode: (callEvent) => callEvent.call,
+    },
+  );
+
+  builder.prismaObjectField('EpisodeDownload', 'calls', (t) =>
+    t.connection({
+      type: Call,
+      select: (args, ctx, nestedSelection) => ({
+        callEvents: {
+          ...downloadCallConnectionHelpers.getQuery(args, ctx, nestedSelection),
+          where: { state: 'INTRODUCING_EPISODE' },
+          orderBy: { date: 'desc' },
+        }
+      }),
+      resolve: (download, args, ctx) => downloadCallConnectionHelpers.resolve(
+        download.callEvents,
+        args,
+        ctx
+      ),
+    })
+  )
 
   builder.queryFields((t) => ({
     call: t.prismaField({

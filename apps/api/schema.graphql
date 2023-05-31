@@ -59,6 +59,7 @@ type Episode {
 
 type EpisodeDownload {
   callCount: Int!
+  calls(after: ID, before: ID, first: Int, last: Int): EpisodeDownloadCallsConnection!
   contentURL: URL!
   deleted: Boolean!
   downloadDate: DateTime!
@@ -67,6 +68,16 @@ type EpisodeDownload {
   id: ID!
   partCount: Int!
   parts(after: ID, before: ID, first: Int, last: Int): EpisodeDownloadPartsConnection!
+}
+
+type EpisodeDownloadCallsConnection {
+  edges: [EpisodeDownloadCallsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type EpisodeDownloadCallsConnectionEdge {
+  cursor: String!
+  node: Call!
 }
 
 type EpisodeDownloadPartsConnection {
