@@ -2,11 +2,23 @@ import { PrismaClient } from '@prisma/client';
 
 import { buildBuilder } from '../builder';
 
+function maskPhoneNumber(phoneNumber: string) {
+  const match = phoneNumber.match(/^(.*)(\d{4})$/);
+  if (!match) {
+    // Couldn’t find last 4, just obscure the whole thing
+    return phoneNumber.replaceAll(/\d/g, 'X');
+  }
+  const [_, toMask, toShow] = match;
+  return toMask.replaceAll(/\d/g, 'X') + toShow;
+}
+
 export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient) {
   builder.prismaObject('Call', {
     fields: (t) => ({
       id: t.exposeID('id'),
-      phoneNumber: t.exposeString('phoneNumber'),
+      phoneNumber: t.string({
+        resolve: (call) => maskPhoneNumber(call.phoneNumber),
+      }),
       startDate: t.expose('startDate', {
         type: 'DateTime',
       }),
@@ -14,16 +26,30 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
         type: 'DateTime',
         nullable: true,
       }),
-      callerName: t.exposeString('callerName', { nullable: true }),
-      callerCity: t.exposeString('callerCity', { nullable: true }),
-      callerState: t.exposeString('callerState', { nullable: true }),
-      callerZip: t.exposeString('callerZip', { nullable: true }),
       callerCountry: t.exposeString('callerCountry', { nullable: true }),
       duration: t.exposeInt('callDuration', { nullable: true }),
       events: t.relatedConnection('events', {
         cursor: 'date_id',
         query: { orderBy: { date: 'desc' } },
-      })
+      }),
+
+      // TODO: Re-expose these once we have authz
+      callerName: t.string({
+        nullable: true,
+        resolve: () => null,
+      }),
+      callerCity: t.string({
+        nullable: true,
+        resolve: () => null,
+      }),
+      callerState: t.string({
+        nullable: true,
+        resolve: () => null,
+      }),
+      callerZip: t.string({
+        nullable: true,
+        resolve: () => null,
+      }),
     })
   });
 
