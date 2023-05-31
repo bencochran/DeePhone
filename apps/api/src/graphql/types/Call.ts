@@ -1,7 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import { prismaConnectionHelpers } from '@pothos/plugin-prisma';
+import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
 
 import { buildBuilder } from '../builder';
+
+const phoneUtil = PhoneNumberUtil.getInstance()
+
+function formatPhoneNumber(phoneNumber: string, countryCode?: string) {
+  const number = phoneUtil.parseAndKeepRawInput(phoneNumber, countryCode);
+  return phoneUtil.format(number, PhoneNumberFormat.NATIONAL);
+}
 
 function maskPhoneNumber(phoneNumber: string) {
   const match = phoneNumber.match(/^(.*)(\d{4})$/);
@@ -18,7 +26,7 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
     fields: (t) => ({
       id: t.exposeID('id'),
       phoneNumber: t.string({
-        resolve: (call) => maskPhoneNumber(call.phoneNumber),
+        resolve: (call) => maskPhoneNumber(formatPhoneNumber(call.phoneNumber, call.callerCountry ?? undefined)),
       }),
       startDate: t.expose('startDate', {
         type: 'DateTime',
