@@ -70,7 +70,7 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({ data }) => {
           )}
           {hasNext &&
             <button
-              className='text-white active:text-blue-100 font-medium bg-blue-500 hover:bg-blue-600 active:bg-blue-700 py-2 px-4 rounded flex flex-row items-center justify-center gap-2'
+              className='text-white active:text-blue-100 dark:active:text-white font-medium bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 dark:active:bg-blue-500 py-2 px-4 rounded flex flex-row items-center justify-center gap-2'
               onClick={() => loadNext(4)}
             >
               {isLoadingNext ? (
@@ -86,7 +86,7 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({ data }) => {
         </div>
       </div>
     ) : (
-      <p className='italic text-slate-500 text-center'>
+      <p className='italic text-slate-500 dark:text-slate-400 text-center'>
         No recent episodes
       </p>
     )}

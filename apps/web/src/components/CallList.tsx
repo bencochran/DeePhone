@@ -59,7 +59,7 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
 
   if (calls.edges.length === 0) {
     return (
-      <p className='italic text-slate-500 text-center'>
+      <p className='italic text-slate-500 dark:text-slate-400 text-center'>
         No calls
       </p>
     );
@@ -99,7 +99,7 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
       )}
       {hasNext &&
           <button
-            className='text-white active:text-blue-100 font-medium bg-blue-500 hover:bg-blue-600 active:bg-blue-700 py-2 px-4 rounded flex flex-row items-center justify-center gap-2'
+            className='text-white active:text-blue-100 dark:active:text-white font-medium bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 dark:active:bg-blue-500 py-2 px-4 rounded flex flex-row items-center justify-center gap-2'
             onClick={() => loadNext(10)}
           >
             {isLoadingNext ? (

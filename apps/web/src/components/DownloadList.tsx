@@ -28,7 +28,7 @@ export const DownloadList: React.FC<DownloadListProps> = ({ data }) => {
 
   if (download.downloads.edges.length === 0) {
     return (
-      <p className='italic text-slate-500 text-center'>
+      <p className='italic text-slate-500 dark:text-slate-400 text-center'>
         No fetches
       </p>
     );

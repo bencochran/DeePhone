@@ -59,7 +59,7 @@ export const CallEventsList: React.FC<CallEventsListProps> = ({ queryReference, 
     return (
       <div className='flex flex-row justify-center items-center h-6 mt-2'>
         <p
-          className='italic text-slate-500 text-center'
+          className='italic text-slate-500 dark:text-slate-400 text-center'
         >
           No call events
         </p>
@@ -83,7 +83,7 @@ export const CallEventsList: React.FC<CallEventsListProps> = ({ queryReference, 
       </table>
       {hasNext &&
         <button
-          className='text-blue-600 hover:text-blue-700 active:text-blue-800 font-medium hover:bg-blue-100 active:bg-blue-200 h-7 rounded mt-2 flex flex-row items-center justify-center gap-2'
+          className='text-blue-600 hover:text-blue-700 active:text-blue-800 dark:text-blue-500 dark:hover:text-blue-100 dark:active:text-blue-50 font-medium hover:bg-blue-100 active:bg-blue-200 dark:hover:bg-blue-900 dark:active:bg-blue-800 h-7 rounded mt-2 flex flex-row items-center justify-center gap-2'
           onClick={() => loadNext(50)}
         >
           {isLoadingNext ? (
