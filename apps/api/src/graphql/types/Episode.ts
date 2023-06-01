@@ -19,6 +19,7 @@ export function addEpisodeToBuilder(builder: ReturnType<typeof buildBuilder>, pr
         type: 'URL',
         nullable: true,
       }),
+      description: t.exposeString('description', { nullable: true }),
       podcast: t.relation('podcast'),
       downloads: t.relatedConnection('downloads', {
         cursor: 'downloadDate_id',

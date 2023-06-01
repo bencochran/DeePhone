@@ -49,6 +49,7 @@ scalar DateTime
 type Episode implements Node {
   callCount: Int!
   contentURL: URL!
+  description: String
   downloads(after: ID, before: ID, excludeDeleted: Boolean, first: Int, last: Int, oldestFirst: Boolean, onlyFinished: Boolean): EpisodeDownloadsConnection!
   guid: String!
   id: ID!
@@ -124,6 +125,7 @@ type PageInfo {
 }
 
 type Podcast implements Node {
+  description: String
   episodes(after: ID, before: ID, first: Int, last: Int, oldestFirst: Boolean): PodcastEpisodesConnection!
   feedURL: URL!
   id: ID!

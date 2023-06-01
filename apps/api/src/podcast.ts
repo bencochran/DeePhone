@@ -15,6 +15,7 @@ export interface Feed {}
 
 export interface Item {
   itunes?: { image?: string };
+  'content:encoded'?: string;
 }
 
 export interface DownloadedEpisode extends Episode {
@@ -67,22 +68,27 @@ export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Pod
     const parser: Parser<Feed, Item> = new Parser();
     const feed = await parser.parseURL(podcast.feedURL);
 
-    if (feed.title && feed.title !== podcast.title || feed.itunes?.image !== podcast.imageURL) {
-      logger.debug(`Updating title and image for "${podcast.title}"`, {
+    const imageURL = feed.itunes?.image ?? feed.image?.url;
+
+    if (feed.title && feed.title !== podcast.title || imageURL !== podcast.imageURL || feed.description !== podcast.description) {
+      logger.debug(`Updating title, image, and description for "${podcast.title}"`, {
         old: {
           title: podcast.title,
-          imageURL: podcast.imageURL ?? null,
+          imageURL: imageURL ?? null,
+          description: podcast.description ?? null,
         },
         new: {
           title: feed.title ?? null,
-          imageURL: feed.itunes?.image ?? null,
+          imageURL: imageURL ?? null,
+          description: feed.description ?? null,
         }
       });
       await prisma.podcast.update({
         where: { id: podcast.id },
         data: {
           title: feed.title,
-          imageURL: feed.itunes?.image ?? null,
+          imageURL: imageURL ?? null,
+          description: feed.description ?? null,
         }
       });
     }
@@ -101,12 +107,14 @@ export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Pod
         });
         return null;
       }
+      const description = item['content:encoded'] ?? item.content;
       return await prisma.episode.upsert({
         where: { podcastId_guid: { podcastId: podcast.id, guid }},
         create: {
           title,
           guid,
           imageURL: itunes?.image ?? null,
+          description: description ?? null,
           publishDate,
           contentURL: enclosure.url,
           podcastId: podcast.id,
@@ -114,6 +122,7 @@ export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Pod
         update: {
           title,
           imageURL: itunes?.image ?? null,
+          description: description ?? null,
           publishDate,
           contentURL: enclosure.url,
         },

@@ -20,6 +20,7 @@ model Podcast {
   title           String
   feedURL         String
   imageURL        String?
+  description     String?
   lastFetchDate   DateTime?
   episodes        Episode[]
 
@@ -35,6 +36,7 @@ model Episode {
   contentURL    String
   publishDate   DateTime
   imageURL      String?
+  description   String?
   downloads     EpisodeDownload[]
 
   @@unique([podcastId, guid])

@@ -14,6 +14,7 @@ export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>, pr
         type: 'URL',
         nullable: true,
       }),
+      description: t.exposeString('description', { nullable: true }),
       lastFetchDate: t.expose('lastFetchDate', {
         type: 'DateTime',
         nullable: true,
