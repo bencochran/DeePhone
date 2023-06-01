@@ -1,5 +1,5 @@
 import React from 'react';
-import { graphql, useFragment, useQueryLoader } from 'react-relay';
+import { graphql, usePaginationFragment, useQueryLoader } from 'react-relay';
 import { twMerge as cn } from 'tailwind-merge';
 
 import { CallRow } from '@/components/CallRow';
@@ -15,10 +15,23 @@ export interface CallListProps {
 }
 
 export const CallList: React.FC<CallListProps> = ({ data, className }) => {
-  const { calls } = useFragment(
+  const {
+    data: { calls },
+    hasNext,
+    loadNext,
+    isLoadingNext,
+  } = usePaginationFragment(
     graphql`
-      fragment CallListQuery on Query {
-        calls(first: 10) {
+      fragment CallListQuery on Query
+      @refetchable(queryName: "CallListPaginationQuery")
+      @argumentDefinitions(
+        first: { type: "Int!" },
+        cursor: { type: "ID" }
+      ) {
+        calls(
+          first: $first,
+          after: $cursor
+        ) @connection(key: "Query_calls") {
           edges {
             node {
               id
@@ -74,6 +87,21 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
           }
         </div>
       )}
+      {hasNext &&
+          <button
+            className='text-white active:text-blue-100 font-medium bg-blue-500 hover:bg-blue-600 active:bg-blue-700 py-2 px-4 rounded flex flex-row items-center justify-center gap-2'
+            onClick={() => loadNext(10)}
+          >
+            {isLoadingNext ? (
+              <>
+                <Spinner className='text-inherit' size='sm' />
+                <span className='block'>Loading…</span>
+              </>
+            ) : (
+              <span className='block'>Load more</span>
+            )}
+          </button>
+      }
     </div>
   );
 };

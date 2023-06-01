@@ -19,7 +19,7 @@ const CallsContent: React.FC<CallsContentProps> = ({ initialQueryRef }) => {
   const data = usePreloadedQuery(
     graphql`
       query CallsQuery {
-        ...CallListQuery
+        ...CallListQuery @arguments(first: 10)
       }
     `,
     initialQueryRef,

@@ -20,7 +20,7 @@ const HomeContent: React.FC<HomeContentProps> = ({ initialQueryRef }) => {
     graphql`
       query HomeQuery {
         ...PodcastCardsQuery
-        ...CallListQuery
+        ...CallListQuery @arguments(first: 10)
       }
     `,
     initialQueryRef

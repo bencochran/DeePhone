@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1e8b421661f7eaea74081e4e1fe1cdef>>
+ * @generated SignedSource<<69df0718449c87f17ec77bf97d2ab381>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -8,7 +8,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { Fragment, ReaderFragment } from 'relay-runtime';
+import { ReaderFragment, RefetchableFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type CallListQuery$data = {
   readonly calls: {
@@ -31,24 +31,56 @@ export type CallListQuery$key = {
   readonly " $fragmentSpreads": FragmentRefs<"CallListQuery">;
 };
 
-const node: ReaderFragment = {
-  "argumentDefinitions": [],
+import CallListPaginationQuery_graphql from './CallListPaginationQuery.graphql';
+
+const node: ReaderFragment = (function(){
+var v0 = [
+  "calls"
+];
+return {
+  "argumentDefinitions": [
+    {
+      "defaultValue": null,
+      "kind": "LocalArgument",
+      "name": "cursor"
+    },
+    {
+      "defaultValue": null,
+      "kind": "LocalArgument",
+      "name": "first"
+    }
+  ],
   "kind": "Fragment",
-  "metadata": null,
+  "metadata": {
+    "connection": [
+      {
+        "count": "first",
+        "cursor": "cursor",
+        "direction": "forward",
+        "path": (v0/*: any*/)
+      }
+    ],
+    "refetch": {
+      "connection": {
+        "forward": {
+          "count": "first",
+          "cursor": "cursor"
+        },
+        "backward": null,
+        "path": (v0/*: any*/)
+      },
+      "fragmentPathInResult": [],
+      "operation": CallListPaginationQuery_graphql
+    }
+  },
   "name": "CallListQuery",
   "selections": [
     {
-      "alias": null,
-      "args": [
-        {
-          "kind": "Literal",
-          "name": "first",
-          "value": 10
-        }
-      ],
+      "alias": "calls",
+      "args": null,
       "concreteType": "QueryCallsConnection",
       "kind": "LinkedField",
-      "name": "calls",
+      "name": "__Query_calls_connection",
       "plural": false,
       "selections": [
         {
@@ -85,8 +117,22 @@ const node: ReaderFragment = {
                   "args": null,
                   "kind": "FragmentSpread",
                   "name": "CallRow_call"
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "__typename",
+                  "storageKey": null
                 }
               ],
+              "storageKey": null
+            },
+            {
+              "alias": null,
+              "args": null,
+              "kind": "ScalarField",
+              "name": "cursor",
               "storageKey": null
             }
           ],
@@ -118,13 +164,14 @@ const node: ReaderFragment = {
           "storageKey": null
         }
       ],
-      "storageKey": "calls(first:10)"
+      "storageKey": null
     }
   ],
   "type": "Query",
   "abstractKey": null
 };
+})();
 
-(node as any).hash = "fc0c06ac6a6c5dd8f86a02af4a7a2a4e";
+(node as any).hash = "6248c9190ad11b36e10d673a509e60df";
 
 export default node;

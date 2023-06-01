@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e5100ac1e2da9a3e619c672e46f87d50>>
+ * @generated SignedSource<<e4f001613f93dd1e370ddf1702a76310>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,21 +20,28 @@ export type CallsQuery = {
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = {
+var v0 = [
+  {
+    "kind": "Literal",
+    "name": "first",
+    "value": 10
+  }
+],
+v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v1 = {
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "title",
   "storageKey": null
 },
-v2 = {
+v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
@@ -49,7 +56,7 @@ return {
     "name": "CallsQuery",
     "selections": [
       {
-        "args": null,
+        "args": (v0/*: any*/),
         "kind": "FragmentSpread",
         "name": "CallListQuery"
       }
@@ -65,13 +72,7 @@ return {
     "selections": [
       {
         "alias": null,
-        "args": [
-          {
-            "kind": "Literal",
-            "name": "first",
-            "value": 10
-          }
-        ],
+        "args": (v0/*: any*/),
         "concreteType": "QueryCallsConnection",
         "kind": "LinkedField",
         "name": "calls",
@@ -93,7 +94,7 @@ return {
                 "name": "node",
                 "plural": false,
                 "selections": [
-                  (v0/*: any*/),
+                  (v1/*: any*/),
                   {
                     "alias": null,
                     "args": null,
@@ -137,8 +138,8 @@ return {
                     "name": "episode",
                     "plural": false,
                     "selections": [
-                      (v1/*: any*/),
                       (v2/*: any*/),
+                      (v3/*: any*/),
                       {
                         "alias": null,
                         "args": null,
@@ -147,17 +148,31 @@ return {
                         "name": "podcast",
                         "plural": false,
                         "selections": [
-                          (v1/*: any*/),
                           (v2/*: any*/),
-                          (v0/*: any*/)
+                          (v3/*: any*/),
+                          (v1/*: any*/)
                         ],
                         "storageKey": null
                       },
-                      (v0/*: any*/)
+                      (v1/*: any*/)
                     ],
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "__typename",
                     "storageKey": null
                   }
                 ],
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "cursor",
                 "storageKey": null
               }
             ],
@@ -190,20 +205,29 @@ return {
           }
         ],
         "storageKey": "calls(first:10)"
+      },
+      {
+        "alias": null,
+        "args": (v0/*: any*/),
+        "filters": null,
+        "handle": "connection",
+        "key": "Query_calls",
+        "kind": "LinkedHandle",
+        "name": "calls"
       }
     ]
   },
   "params": {
-    "cacheID": "dd9695e790a9fde9e10c1d6296283e24",
+    "cacheID": "ade4f33207e9dfd5fe28c91ef8468b34",
     "id": null,
     "metadata": {},
     "name": "CallsQuery",
     "operationKind": "query",
-    "text": "query CallsQuery {\n  ...CallListQuery\n}\n\nfragment CallListQuery on Query {\n  calls(first: 10) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n"
+    "text": "query CallsQuery {\n  ...CallListQuery_4i7Unr\n}\n\nfragment CallListQuery_4i7Unr on Query {\n  calls(first: 10) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "70e49e88652ee00efd84d8ded9fdae66";
+(node as any).hash = "cfac7852fa174513937a93a7c1abaa51";
 
 export default node;
