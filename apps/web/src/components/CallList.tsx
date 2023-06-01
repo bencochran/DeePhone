@@ -55,7 +55,7 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
               setNextExpandedCallIdentifier(i => i === edge.node.identifier ? null : edge.node.identifier)
               startTransition(() => {
                 setExpandedCallIdentifier(i => i === edge.node.identifier ? null : edge.node.identifier)
-                loadQuery({ callId: edge.node.identifier });
+                loadQuery({ callId: edge.node.identifier, first: 50 });
               })
             }}
           >
@@ -68,7 +68,7 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
             />
           }
           {(nextExpandedCallIdentifier === edge.node.identifier && loadingEvents) &&
-            <div className='flex flex-row justify-center items-center h-6'>
+            <div className='flex flex-row justify-center items-center h-6 mt-2'>
               <Spinner size='sm' />
             </div>
           }

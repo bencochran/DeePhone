@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f23bc6a8b591b10c21bbbc8db304c348>>
+ * @generated SignedSource<<d2b5931d1a65a030dcec122e620b79f8>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,18 +12,13 @@ import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type CallEventsListQuery$variables = {
   callId: number;
+  cursor?: string | null;
+  first: number;
 };
 export type CallEventsListQuery$data = {
   readonly call: {
-    readonly events: {
-      readonly edges: ReadonlyArray<{
-        readonly node: {
-          readonly id: string;
-          readonly " $fragmentSpreads": FragmentRefs<"CallEventRow_callEvent">;
-        };
-      } | null>;
-    };
     readonly startDate: any;
+    readonly " $fragmentSpreads": FragmentRefs<"CallEventsListQuery_call">;
   } | null;
 };
 export type CallEventsListQuery = {
@@ -37,6 +32,16 @@ var v0 = [
     "defaultValue": null,
     "kind": "LocalArgument",
     "name": "callId"
+  },
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "cursor"
+  },
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "first"
   }
 ],
 v1 = [
@@ -55,9 +60,14 @@ v2 = {
 },
 v3 = [
   {
-    "kind": "Literal",
+    "kind": "Variable",
+    "name": "after",
+    "variableName": "cursor"
+  },
+  {
+    "kind": "Variable",
     "name": "first",
-    "value": 100
+    "variableName": "first"
   },
   {
     "kind": "Literal",
@@ -89,43 +99,9 @@ return {
         "selections": [
           (v2/*: any*/),
           {
-            "alias": null,
-            "args": (v3/*: any*/),
-            "concreteType": "CallEventsConnection",
-            "kind": "LinkedField",
-            "name": "events",
-            "plural": false,
-            "selections": [
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "CallEventsConnectionEdge",
-                "kind": "LinkedField",
-                "name": "edges",
-                "plural": true,
-                "selections": [
-                  {
-                    "alias": null,
-                    "args": null,
-                    "concreteType": "CallEvent",
-                    "kind": "LinkedField",
-                    "name": "node",
-                    "plural": false,
-                    "selections": [
-                      (v4/*: any*/),
-                      {
-                        "args": null,
-                        "kind": "FragmentSpread",
-                        "name": "CallEventRow_callEvent"
-                      }
-                    ],
-                    "storageKey": null
-                  }
-                ],
-                "storageKey": null
-              }
-            ],
-            "storageKey": "events(first:100,oldestFirst:true)"
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "CallEventsListQuery_call"
           }
         ],
         "storageKey": null
@@ -272,15 +248,65 @@ return {
                           (v4/*: any*/)
                         ],
                         "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "__typename",
+                        "storageKey": null
                       }
                     ],
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "cursor",
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "PageInfo",
+                "kind": "LinkedField",
+                "name": "pageInfo",
+                "plural": false,
+                "selections": [
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "endCursor",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "hasNextPage",
                     "storageKey": null
                   }
                 ],
                 "storageKey": null
               }
             ],
-            "storageKey": "events(first:100,oldestFirst:true)"
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": (v3/*: any*/),
+            "filters": [
+              "oldestFirst"
+            ],
+            "handle": "connection",
+            "key": "Call_events",
+            "kind": "LinkedHandle",
+            "name": "events"
           },
           (v4/*: any*/)
         ],
@@ -289,16 +315,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "c29eaab25ee3e2ee2160177380412199",
+    "cacheID": "069270f7f72369687d8e6fc8e977f19c",
     "id": null,
     "metadata": {},
     "name": "CallEventsListQuery",
     "operationKind": "query",
-    "text": "query CallEventsListQuery(\n  $callId: Int!\n) {\n  call(identifier: $callId) {\n    startDate\n    events(oldestFirst: true, first: 100) {\n      edges {\n        node {\n          id\n          ...CallEventRow_callEvent\n        }\n      }\n    }\n    id\n  }\n}\n\nfragment CallEventRow_callEvent on CallEvent {\n  date\n  state\n  download {\n    partCount\n    episode {\n      title\n      publishDate\n      imageURL\n      id\n    }\n    id\n  }\n  part {\n    number\n    size\n    duration\n    id\n  }\n}\n"
+    "text": "query CallEventsListQuery(\n  $callId: Int!\n  $cursor: ID\n  $first: Int!\n) {\n  call(identifier: $callId) {\n    startDate\n    ...CallEventsListQuery_call\n    id\n  }\n}\n\nfragment CallEventRow_callEvent on CallEvent {\n  date\n  state\n  download {\n    partCount\n    episode {\n      title\n      publishDate\n      imageURL\n      id\n    }\n    id\n  }\n  part {\n    number\n    size\n    duration\n    id\n  }\n}\n\nfragment CallEventsListQuery_call on Call {\n  events(oldestFirst: true, first: $first, after: $cursor) {\n    edges {\n      node {\n        id\n        ...CallEventRow_callEvent\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();
 
-(node as any).hash = "20b79599a8b268a92ca07ea83077551e";
+(node as any).hash = "6cb4ea9e050629c0343528e8ca8be424";
 
 export default node;

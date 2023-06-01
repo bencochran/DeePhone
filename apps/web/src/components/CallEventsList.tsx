@@ -1,9 +1,12 @@
 import React from 'react';
-import { usePreloadedQuery, graphql, PreloadedQuery } from 'react-relay';
+import { usePreloadedQuery, graphql, PreloadedQuery, usePaginationFragment } from 'react-relay';
 
 import { CallEventRow } from '@/components/CallEventRow';
+import { Spinner } from '@/components/Spinner';
 
 import * as CallEventsListQuery from './__generated__/CallEventsListQuery.graphql';
+import { CallEventsListQuery_call$key } from './__generated__/CallEventsListQuery_call.graphql';
+import { CallEventsListEventPaginationQuery } from './__generated__/CallEventsListEventPaginationQuery.graphql';
 
 interface CallEventsListProps extends React.HTMLProps<HTMLDivElement> {
   queryReference: PreloadedQuery<CallEventsListQuery.CallEventsListQuery>;
@@ -11,30 +14,63 @@ interface CallEventsListProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 export const CallEventsList: React.FC<CallEventsListProps> = ({ queryReference, className }) => {
-  const { call } = usePreloadedQuery(
+  const fetched = usePreloadedQuery(
     graphql`
-      query CallEventsListQuery($callId: Int!) {
+      query CallEventsListQuery($callId: Int!, $cursor: ID, $first: Int!) {
         call(identifier: $callId) {
           startDate
-          events(oldestFirst: true, first: 100) {
-            edges {
-              node {
-                id
-                ...CallEventRow_callEvent
-              }
+          ...CallEventsListQuery_call
+        }
+      }
+    `,
+    queryReference
+  );
+
+  const {
+    data,
+    loadNext,
+    hasNext,
+    isLoadingNext
+  } = usePaginationFragment<CallEventsListEventPaginationQuery, CallEventsListQuery_call$key>(
+    graphql`
+      fragment CallEventsListQuery_call on Call
+        @refetchable(queryName: "CallEventsListEventPaginationQuery") {
+        events(
+          oldestFirst: true,
+          first: $first,
+          after: $cursor
+        ) @connection(key: "Call_events") {
+          edges {
+            node {
+              id
+              ...CallEventRow_callEvent
             }
           }
         }
       }
     `,
-    queryReference
-  )
+    fetched.call
+  );
+
+  const { call } = fetched;
+
+  if (!call || !data || data.events.edges.length === 0) {
+    return (
+      <div className='flex flex-row justify-center items-center h-6 mt-2'>
+        <p
+          className='italic text-slate-500 text-center'
+        >
+          No call events
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <>
-    {call && call.events.edges.length > 0 ? (
-      <table className={className}>
+    <div className={className}>
+      <table>
         <tbody>
-          {call.events.edges.map((edge, i) => edge &&
+          {data.events.edges.map((edge, i) => edge &&
             <CallEventRow
               key={edge.node.id}
               data={edge.node}
@@ -44,9 +80,21 @@ export const CallEventsList: React.FC<CallEventsListProps> = ({ queryReference, 
           )}
         </tbody>
       </table>
-    ) : (
-      <p>No events</p>
-    )}
-    </>
+      {isLoadingNext &&
+        <div className='flex flex-row justify-center items-center h-6 mt-2'>
+          <Spinner size='sm' />
+        </div>
+      }
+      {!isLoadingNext && hasNext &&
+        <div className='flex flex-row justify-center items-center h-6 mt-2'>
+          <button
+            className='text-blue-600 hover:text-blue-700 active:text-blue-800 font-medium hover:bg-blue-100 active:bg-blue-200 py-1 px-3 rounded'
+            onClick={() => loadNext(50)}
+          >
+            More events…
+          </button>
+        </div>
+      }
+    </div>
   );
 };
