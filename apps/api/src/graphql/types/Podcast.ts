@@ -28,6 +28,31 @@ export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>, pr
           orderBy: { publishDate: args.oldestFirst ? 'asc' : 'desc' },
         })
       }),
+      callCount: t.int({
+        select: {
+          episodes: {
+            select:{
+              downloads: {
+                select: {
+                  _count: {
+                    select: {
+                      callEvents: {
+                        where: { state: 'INTRODUCING_EPISODE' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        resolve: (episode) => episode.episodes
+          .reduce((sum, e) =>
+            sum + e.downloads.reduce((isum, dl) =>
+              isum + dl._count.callEvents,
+            0 as number),
+          0 as number),
+      }),
     })
   });
 
