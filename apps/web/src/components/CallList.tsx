@@ -98,7 +98,7 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
                 <span className='block'>Loading…</span>
               </>
             ) : (
-              <span className='block'>Load more</span>
+              <span className='block'>Load more calls</span>
             )}
           </button>
       }

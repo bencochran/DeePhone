@@ -79,7 +79,7 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({ data }) => {
                   <span className='block'>Loading…</span>
                 </>
               ) : (
-                <span className='block'>Load more</span>
+                <span className='block'>Load more episodes</span>
               )}
             </button>
           }
