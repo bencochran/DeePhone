@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c471281a104cfba2da840a19a6921a6a>>
+ * @generated SignedSource<<78b5d8ed6e8f24ae84fa17e9a2577e43>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -171,12 +171,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "b15668d55f994c6da1c89020f03123ba",
+    "cacheID": "54f5ef33da85dc23e1158b1ac3fc00ef",
     "id": null,
     "metadata": {},
     "name": "PodcastsQuery",
     "operationKind": "query",
-    "text": "query PodcastsQuery {\n  ...PodcastCardsQuery\n}\n\nfragment EpisodeRow_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        identifier\n        title\n        ...EpisodeRow_episode\n      }\n    }\n  }\n}\n\nfragment PodcastCardsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
+    "text": "query PodcastsQuery {\n  ...PodcastCardsQuery\n}\n\nfragment EpisodeList_podcast on Podcast {\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        identifier\n        ...EpisodeRow_episode\n      }\n    }\n  }\n}\n\nfragment EpisodeRow_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  ...EpisodeList_podcast\n}\n\nfragment PodcastCardsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
   }
 };
 })();
