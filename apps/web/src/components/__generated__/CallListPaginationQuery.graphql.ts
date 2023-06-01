@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<8140ed7ee22f6ff4d9b920556d665b98>>
+ * @generated SignedSource<<b268f09a7b4f4e3e153ce00f91be69b4>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,6 +12,7 @@ import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type CallListPaginationQuery$variables = {
   cursor?: string | null;
+  episodeIdentifier?: number | null;
   first: number;
 };
 export type CallListPaginationQuery$data = {
@@ -32,37 +33,48 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
+    "name": "episodeIdentifier"
+  },
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
     "name": "first"
   }
 ],
 v1 = {
   "kind": "Variable",
+  "name": "episodeIdentifier",
+  "variableName": "episodeIdentifier"
+},
+v2 = {
+  "kind": "Variable",
   "name": "first",
   "variableName": "first"
 },
-v2 = [
+v3 = [
   {
     "kind": "Variable",
     "name": "after",
     "variableName": "cursor"
   },
-  (v1/*: any*/)
+  (v1/*: any*/),
+  (v2/*: any*/)
 ],
-v3 = {
+v4 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v4 = {
+v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "title",
   "storageKey": null
 },
-v5 = {
+v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
@@ -83,7 +95,8 @@ return {
             "name": "cursor",
             "variableName": "cursor"
           },
-          (v1/*: any*/)
+          (v1/*: any*/),
+          (v2/*: any*/)
         ],
         "kind": "FragmentSpread",
         "name": "CallListQuery"
@@ -100,7 +113,7 @@ return {
     "selections": [
       {
         "alias": null,
-        "args": (v2/*: any*/),
+        "args": (v3/*: any*/),
         "concreteType": "QueryCallsConnection",
         "kind": "LinkedField",
         "name": "calls",
@@ -122,7 +135,7 @@ return {
                 "name": "node",
                 "plural": false,
                 "selections": [
-                  (v3/*: any*/),
+                  (v4/*: any*/),
                   {
                     "alias": null,
                     "args": null,
@@ -166,8 +179,8 @@ return {
                     "name": "episode",
                     "plural": false,
                     "selections": [
-                      (v4/*: any*/),
                       (v5/*: any*/),
+                      (v6/*: any*/),
                       {
                         "alias": null,
                         "args": null,
@@ -176,13 +189,13 @@ return {
                         "name": "podcast",
                         "plural": false,
                         "selections": [
-                          (v4/*: any*/),
                           (v5/*: any*/),
-                          (v3/*: any*/)
+                          (v6/*: any*/),
+                          (v4/*: any*/)
                         ],
                         "storageKey": null
                       },
-                      (v3/*: any*/)
+                      (v4/*: any*/)
                     ],
                     "storageKey": null
                   },
@@ -236,8 +249,10 @@ return {
       },
       {
         "alias": null,
-        "args": (v2/*: any*/),
-        "filters": null,
+        "args": (v3/*: any*/),
+        "filters": [
+          "episodeIdentifier"
+        ],
         "handle": "connection",
         "key": "Query_calls",
         "kind": "LinkedHandle",
@@ -246,16 +261,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "ee17d2b807a4f8929cbd12b402b533ae",
+    "cacheID": "219e9a9fd03561284d9b76e84b2290f0",
     "id": null,
     "metadata": {},
     "name": "CallListPaginationQuery",
     "operationKind": "query",
-    "text": "query CallListPaginationQuery(\n  $cursor: ID\n  $first: Int!\n) {\n  ...CallListQuery_19XkED\n}\n\nfragment CallListQuery_19XkED on Query {\n  calls(first: $first, after: $cursor) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n"
+    "text": "query CallListPaginationQuery(\n  $cursor: ID\n  $episodeIdentifier: Int\n  $first: Int!\n) {\n  ...CallListQuery_2Q8tVP\n}\n\nfragment CallListQuery_2Q8tVP on Query {\n  calls(first: $first, after: $cursor, episodeIdentifier: $episodeIdentifier) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "6248c9190ad11b36e10d673a509e60df";
+(node as any).hash = "275dc3b08e337ee5f4d943f3d960c976";
 
 export default node;

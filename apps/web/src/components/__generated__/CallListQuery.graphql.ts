@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<69df0718449c87f17ec77bf97d2ab381>>
+ * @generated SignedSource<<4765654be12a9fa0f8cfbe577bdca722>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -47,6 +47,11 @@ return {
     {
       "defaultValue": null,
       "kind": "LocalArgument",
+      "name": "episodeIdentifier"
+    },
+    {
+      "defaultValue": null,
+      "kind": "LocalArgument",
       "name": "first"
     }
   ],
@@ -77,7 +82,13 @@ return {
   "selections": [
     {
       "alias": "calls",
-      "args": null,
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "episodeIdentifier",
+          "variableName": "episodeIdentifier"
+        }
+      ],
       "concreteType": "QueryCallsConnection",
       "kind": "LinkedField",
       "name": "__Query_calls_connection",
@@ -172,6 +183,6 @@ return {
 };
 })();
 
-(node as any).hash = "6248c9190ad11b36e10d673a509e60df";
+(node as any).hash = "275dc3b08e337ee5f4d943f3d960c976";
 
 export default node;

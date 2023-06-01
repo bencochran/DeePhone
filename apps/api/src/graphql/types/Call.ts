@@ -137,11 +137,13 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
       args: {
         onlyInProgress: t.arg.boolean(),
         onlyComplete: t.arg.boolean(),
+        episodeIdentifier: t.arg.int(),
       },
       resolve: (query, _parent, args, _ctx, _info) =>
         prisma.call.findMany({
           ...query,
           where: { AND: [
+            args.episodeIdentifier ? { events: { some: { download: { episode: { id: args.episodeIdentifier } } } } } : { },
             args.onlyInProgress ? { endDate: null } : { },
             args.onlyComplete ? { NOT: { endDate: null } } : { },
           ] },

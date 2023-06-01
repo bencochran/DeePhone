@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<599fdcd50aa0a1bddb7194ef071a65e2>>
+ * @generated SignedSource<<c11783529db168fde7fc55cae5466366>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -337,7 +337,9 @@ return {
       {
         "alias": null,
         "args": (v0/*: any*/),
-        "filters": null,
+        "filters": [
+          "episodeIdentifier"
+        ],
         "handle": "connection",
         "key": "Query_calls",
         "kind": "LinkedHandle",

@@ -26,11 +26,13 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
       @refetchable(queryName: "CallListPaginationQuery")
       @argumentDefinitions(
         first: { type: "Int!" },
-        cursor: { type: "ID" }
+        cursor: { type: "ID" },
+        episodeIdentifier: { type: "Int" },
       ) {
         calls(
           first: $first,
-          after: $cursor
+          after: $cursor,
+          episodeIdentifier: $episodeIdentifier
         ) @connection(key: "Query_calls") {
           edges {
             node {
@@ -54,6 +56,14 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
 
   const [loadingEvents, startTransition] = React.useTransition();
   const [queryReference, loadQuery] = useQueryLoader<CallEventsListQuery.CallEventsListQuery>(CallEventsListQuery.default /*, initialQuertRef */);
+
+  if (calls.edges.length === 0) {
+    return (
+      <p className='italic text-slate-500 text-center'>
+        No calls
+      </p>
+    );
+  }
 
   return (
     <div className={cn('flex flex-col gap-3', className)}>

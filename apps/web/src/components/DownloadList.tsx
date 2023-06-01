@@ -26,6 +26,14 @@ export const DownloadList: React.FC<DownloadListProps> = ({ data }) => {
     data
   );
 
+  if (download.downloads.edges.length === 0) {
+    return (
+      <p className='italic text-slate-500 text-center'>
+        No fetches
+      </p>
+    );
+  }
+
   return (
     <div className='flex flex-col gap-2'>
       {download.downloads.edges.map(edge => edge &&
