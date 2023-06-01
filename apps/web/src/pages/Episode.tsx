@@ -43,12 +43,12 @@ const EpisodeContent: React.FC<EpisodeContentProps> = ({ initialQueryRef }) => {
     >
       <Card className='flex flex-col gap-3 max-w-[320px]'>
         <EpisodeHeader className='' data={data.episode} />
-        <div className='flex-grow'>
-          <h3 className='text-lg font-medium my-2'>
-            Episode fetches
-          </h3>
-          <DownloadList data={data.episode} />
-        </div>
+      </Card>
+      <Card className='flex flex-col gap-3 max-w-[320px]'>
+        <h2 className='text-slate-900 dark:text-slate-300 font-medium text-2xl'>
+          Episode fetches
+        </h2>
+        <DownloadList data={data.episode} />
       </Card>
     </Page>
   );
