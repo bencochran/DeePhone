@@ -12,14 +12,18 @@
     "relay": "yarn run relay-compiler"
   },
   "dependencies": {
+    "@heroicons/react": "^2.0.18",
+    "dompurify": "^3.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-relay": "^15.0.0",
     "react-router-dom": "^6.11.2",
+    "react-tooltip": "^5.13.1",
     "relay-runtime": "^15.0.0",
     "tailwind-merge": "^1.12.0"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.0.2",
     "@types/react": "18.2.7",
     "@types/react-dom": "^18.2.4",
     "@types/react-relay": "^14.1.4",

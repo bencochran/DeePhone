@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<86fd56f25cbf97b565fe99fc0bd9bfb1>>
+ * @generated SignedSource<<836280e61f0748c61a18110b3d7f8ab4>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,7 +12,7 @@ import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type HomeQuery$variables = {};
 export type HomeQuery$data = {
-  readonly " $fragmentSpreads": FragmentRefs<"PodcastGrid_podcastsQuery">;
+  readonly " $fragmentSpreads": FragmentRefs<"CallListQuery" | "PodcastCardsQuery">;
 };
 export type HomeQuery = {
   response: HomeQuery$data;
@@ -20,25 +20,39 @@ export type HomeQuery = {
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = {
+var v0 = [
+  {
+    "kind": "Literal",
+    "name": "first",
+    "value": 10
+  }
+],
+v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v1 = {
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "title",
   "storageKey": null
 },
-v2 = {
+v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "imageURL",
+  "storageKey": null
+},
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "identifier",
   "storageKey": null
 };
 return {
@@ -51,7 +65,12 @@ return {
       {
         "args": null,
         "kind": "FragmentSpread",
-        "name": "PodcastGrid_podcastsQuery"
+        "name": "PodcastCardsQuery"
+      },
+      {
+        "args": null,
+        "kind": "FragmentSpread",
+        "name": "CallListQuery"
       }
     ],
     "type": "Query",
@@ -65,13 +84,7 @@ return {
     "selections": [
       {
         "alias": null,
-        "args": [
-          {
-            "kind": "Literal",
-            "name": "first",
-            "value": 10
-          }
-        ],
+        "args": (v0/*: any*/),
         "concreteType": "QueryPodcastsConnection",
         "kind": "LinkedField",
         "name": "podcasts",
@@ -93,9 +106,9 @@ return {
                 "name": "node",
                 "plural": false,
                 "selections": [
-                  (v0/*: any*/),
                   (v1/*: any*/),
                   (v2/*: any*/),
+                  (v3/*: any*/),
                   {
                     "alias": null,
                     "args": [
@@ -126,8 +139,9 @@ return {
                             "name": "node",
                             "plural": false,
                             "selections": [
-                              (v0/*: any*/),
                               (v1/*: any*/),
+                              (v4/*: any*/),
+                              (v2/*: any*/),
                               {
                                 "alias": null,
                                 "args": null,
@@ -135,7 +149,7 @@ return {
                                 "name": "publishDate",
                                 "storageKey": null
                               },
-                              (v2/*: any*/),
+                              (v3/*: any*/),
                               {
                                 "alias": null,
                                 "args": null,
@@ -160,20 +174,136 @@ return {
           }
         ],
         "storageKey": "podcasts(first:10)"
+      },
+      {
+        "alias": null,
+        "args": (v0/*: any*/),
+        "concreteType": "QueryCallsConnection",
+        "kind": "LinkedField",
+        "name": "calls",
+        "plural": false,
+        "selections": [
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "QueryCallsConnectionEdge",
+            "kind": "LinkedField",
+            "name": "edges",
+            "plural": true,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "Call",
+                "kind": "LinkedField",
+                "name": "node",
+                "plural": false,
+                "selections": [
+                  (v1/*: any*/),
+                  (v4/*: any*/),
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "callerName",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "phoneNumber",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "startDate",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "endDate",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "Episode",
+                    "kind": "LinkedField",
+                    "name": "episode",
+                    "plural": false,
+                    "selections": [
+                      (v2/*: any*/),
+                      (v3/*: any*/),
+                      {
+                        "alias": null,
+                        "args": null,
+                        "concreteType": "Podcast",
+                        "kind": "LinkedField",
+                        "name": "podcast",
+                        "plural": false,
+                        "selections": [
+                          (v2/*: any*/),
+                          (v3/*: any*/),
+                          (v1/*: any*/)
+                        ],
+                        "storageKey": null
+                      },
+                      (v1/*: any*/)
+                    ],
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "PageInfo",
+            "kind": "LinkedField",
+            "name": "pageInfo",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "hasNextPage",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "endCursor",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          }
+        ],
+        "storageKey": "calls(first:10)"
       }
     ]
   },
   "params": {
-    "cacheID": "a0924643b36724a2b28ace8b1cfce335",
+    "cacheID": "4c864ee4ec09fd8dfb12064a9b65aa4d",
     "id": null,
     "metadata": {},
     "name": "HomeQuery",
     "operationKind": "query",
-    "text": "query HomeQuery {\n  ...PodcastGrid_podcastsQuery\n}\n\nfragment EpisodeRow_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        title\n        ...EpisodeRow_episode\n      }\n    }\n  }\n}\n\nfragment PodcastGrid_podcastsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
+    "text": "query HomeQuery {\n  ...PodcastCardsQuery\n  ...CallListQuery\n}\n\nfragment CallListQuery on Query {\n  calls(first: 10) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n\nfragment EpisodeRow_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        identifier\n        title\n        ...EpisodeRow_episode\n      }\n    }\n  }\n}\n\nfragment PodcastCardsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "940803698b4ad7b54368e8378fc667bc";
+(node as any).hash = "c9715c7408a942b382d69a1a47ebd24b";
 
 export default node;

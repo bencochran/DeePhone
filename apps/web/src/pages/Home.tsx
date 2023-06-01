@@ -3,7 +3,10 @@ import { useLoaderData, defer, Await } from 'react-router-dom';
 import { graphql, PreloadedQuery, usePreloadedQuery, loadQuery, Environment } from 'react-relay';
 import * as HomeQuery from './__generated__/HomeQuery.graphql';
 
-import PodcastGrid from '@/components/PodcastGrid';
+import { Page } from '@/components/Page';
+import { Card } from '@/components/Card';
+import { CallList } from '@/components/CallList';
+import { PodcastCards } from '@/components/PodcastCards';
 
 export const loadHome = (environment: Environment) =>
   defer({ loadQuery: loadQuery(environment, HomeQuery.default, {}) });
@@ -16,25 +19,25 @@ const HomeContent: React.FC<HomeContentProps> = ({ initialQueryRef }) => {
   const data = usePreloadedQuery(
     graphql`
       query HomeQuery {
-        ...PodcastGrid_podcastsQuery
+        ...PodcastCardsQuery
+        ...CallListQuery
       }
     `,
     initialQueryRef
   );
 
   return (
-    <div className='mx-8 my-6'>
-      <h2 className='text-slate-900 dark:text-slate-300 font-medium text-3xl mb-4'>
-        Podcasts
-      </h2>
-      {data ? (
-        <PodcastGrid
-          data={data}
-        />
-      ) : (
-        <p>Loading</p>
-      )}
-    </div>
+    <Page title='Home'>
+      <Card>
+        <div className='mb-4'>
+          <h2 className='text-slate-900 dark:text-slate-300 font-medium text-2xl'>
+            Recent calls
+          </h2>
+        </div>
+        <CallList data={data} />
+      </Card>
+      <PodcastCards data={data} />
+    </Page>
   );
 }
 

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5428df7c748e572469270ad75c787388>>
+ * @generated SignedSource<<1e8b421661f7eaea74081e4e1fe1cdef>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,66 +10,51 @@
 
 import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type PodcastCard_podcast$data = {
-  readonly episodes: {
+export type CallListQuery$data = {
+  readonly calls: {
     readonly edges: ReadonlyArray<{
       readonly node: {
         readonly id: string;
         readonly identifier: number;
-        readonly title: string;
-        readonly " $fragmentSpreads": FragmentRefs<"EpisodeRow_episode">;
+        readonly " $fragmentSpreads": FragmentRefs<"CallRow_call">;
       };
     } | null>;
+    readonly pageInfo: {
+      readonly endCursor: string | null;
+      readonly hasNextPage: boolean;
+    };
   };
-  readonly imageURL: any | null;
-  readonly title: string;
-  readonly " $fragmentType": "PodcastCard_podcast";
+  readonly " $fragmentType": "CallListQuery";
 };
-export type PodcastCard_podcast$key = {
-  readonly " $data"?: PodcastCard_podcast$data;
-  readonly " $fragmentSpreads": FragmentRefs<"PodcastCard_podcast">;
+export type CallListQuery$key = {
+  readonly " $data"?: CallListQuery$data;
+  readonly " $fragmentSpreads": FragmentRefs<"CallListQuery">;
 };
 
-const node: ReaderFragment = (function(){
-var v0 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "title",
-  "storageKey": null
-};
-return {
+const node: ReaderFragment = {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
-  "name": "PodcastCard_podcast",
+  "name": "CallListQuery",
   "selections": [
-    (v0/*: any*/),
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "imageURL",
-      "storageKey": null
-    },
     {
       "alias": null,
       "args": [
         {
           "kind": "Literal",
           "name": "first",
-          "value": 4
+          "value": 10
         }
       ],
-      "concreteType": "PodcastEpisodesConnection",
+      "concreteType": "QueryCallsConnection",
       "kind": "LinkedField",
-      "name": "episodes",
+      "name": "calls",
       "plural": false,
       "selections": [
         {
           "alias": null,
           "args": null,
-          "concreteType": "PodcastEpisodesConnectionEdge",
+          "concreteType": "QueryCallsConnectionEdge",
           "kind": "LinkedField",
           "name": "edges",
           "plural": true,
@@ -77,7 +62,7 @@ return {
             {
               "alias": null,
               "args": null,
-              "concreteType": "Episode",
+              "concreteType": "Call",
               "kind": "LinkedField",
               "name": "node",
               "plural": false,
@@ -96,27 +81,50 @@ return {
                   "name": "identifier",
                   "storageKey": null
                 },
-                (v0/*: any*/),
                 {
                   "args": null,
                   "kind": "FragmentSpread",
-                  "name": "EpisodeRow_episode"
+                  "name": "CallRow_call"
                 }
               ],
               "storageKey": null
             }
           ],
           "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "concreteType": "PageInfo",
+          "kind": "LinkedField",
+          "name": "pageInfo",
+          "plural": false,
+          "selections": [
+            {
+              "alias": null,
+              "args": null,
+              "kind": "ScalarField",
+              "name": "hasNextPage",
+              "storageKey": null
+            },
+            {
+              "alias": null,
+              "args": null,
+              "kind": "ScalarField",
+              "name": "endCursor",
+              "storageKey": null
+            }
+          ],
+          "storageKey": null
         }
       ],
-      "storageKey": "episodes(first:4)"
+      "storageKey": "calls(first:10)"
     }
   ],
-  "type": "Podcast",
+  "type": "Query",
   "abstractKey": null
 };
-})();
 
-(node as any).hash = "34430cdd33aea418e77b8ec426736f77";
+(node as any).hash = "fc0c06ac6a6c5dd8f86a02af4a7a2a4e";
 
 export default node;

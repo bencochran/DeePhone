@@ -1,9 +1,10 @@
 import React from 'react';
-
+import { useNavigate } from 'react-router';
 import { graphql, useFragment } from 'react-relay';
 import { PodcastCard_podcast$key } from './__generated__/PodcastCard_podcast.graphql';
 
 import { EpisodeRow } from './EpisodeRow';
+import { Card } from './Card';
 
 interface Props {
   data: PodcastCard_podcast$key;
@@ -19,6 +20,7 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
           edges {
             node {
               id
+              identifier
               title
               ...EpisodeRow_episode
             }
@@ -28,9 +30,10 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
     `,
     data
   );
+  const navigate = useNavigate();
 
   return (
-    <div className='p-2 rounded-lg bg-slate-50 dark:bg-slate-800 flex flex-col dark:text-white gap-3'>
+    <Card className='flex flex-col gap-3'>
       <div className='aspect-square rounded overflow-hidden'>
         {podcast.imageURL ? (
           <img
@@ -60,7 +63,7 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
               <button
                 key={edge.node.id}
                 className='text-left'
-                onClick={() => alert(`Selected ${edge.node.title}`)}
+                onClick={() => navigate(`/episode/${edge.node.identifier}`)}
               >
                 <EpisodeRow
                   className='-m-1 p-1 hover:bg-slate-200 hover:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer'
@@ -75,6 +78,6 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
           No recent episodes
         </p>
       )}
-    </div>
+    </Card>
   )
 }

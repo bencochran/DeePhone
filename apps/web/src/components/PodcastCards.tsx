@@ -1,21 +1,18 @@
 import React from 'react';
-
 import { graphql, useFragment } from 'react-relay';
-import { twJoin as cn } from 'tailwind-merge';
 
 import { PodcastCard } from './PodcastCard';
 
-import { PodcastGrid_podcastsQuery$key } from './__generated__/PodcastGrid_podcastsQuery.graphql';
+import { PodcastCardsQuery$key } from './__generated__/PodcastCardsQuery.graphql';
 
-interface PodcastGridProps {
-  className?: string;
-  data: PodcastGrid_podcastsQuery$key;
+interface PodcastCardsProps {
+  data: PodcastCardsQuery$key;
 }
 
-const PodcastGrid: React.FC<PodcastGridProps> = ({ data, className }) => {
+export const PodcastCards: React.FC<PodcastCardsProps> = ({ data }) => {
   const podcasts = useFragment(
     graphql`
-      fragment PodcastGrid_podcastsQuery on Query {
+      fragment PodcastCardsQuery on Query {
         podcasts(first: 10) {
           edges {
             node {
@@ -30,12 +27,10 @@ const PodcastGrid: React.FC<PodcastGridProps> = ({ data, className }) => {
   );
 
   return (
-    <div className={cn('grid grid-cols-[repeat(auto-fill,minmax(268px,1fr))] gap-2', className)}>
+    <>
       {podcasts.podcasts && podcasts.podcasts.edges.map(podcast =>
         podcast && <PodcastCard key={podcast.node.id} data={podcast.node} />
       )}
-    </div>
+    </>
   );
 };
-
-export default PodcastGrid;

@@ -6,7 +6,9 @@
     "baseUrl": ".",
     "types": ["vite/client"],
     "paths": {
-      "@/components/*": ["src/components/*"]
+      "@/components/*": ["src/components/*"],
+      "@/hooks/*": ["src/hooks/*"],
+      "@/utils/*": ["src/utils/*"]
     }
   }
 }
