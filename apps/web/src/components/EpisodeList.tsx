@@ -1,8 +1,9 @@
 import React from 'react';
-import { graphql, useFragment } from 'react-relay';
+import { graphql, usePaginationFragment } from 'react-relay';
 import { useNavigate } from 'react-router';
 
 import { EpisodeRow } from './EpisodeRow';
+import { Spinner } from './Spinner';
 
 import { EpisodeList_podcast$key } from './__generated__/EpisodeList_podcast.graphql';
 
@@ -11,10 +12,23 @@ export interface EpisodeListProps {
 }
 
 export const EpisodeList: React.FC<EpisodeListProps> = ({ data }) => {
-  const podcast = useFragment(
+  const {
+    data: { episodes },
+    hasNext,
+    loadNext,
+    isLoadingNext,
+  } = usePaginationFragment(
     graphql`
-      fragment EpisodeList_podcast on Podcast {
-        episodes(first: 4) {
+      fragment EpisodeList_podcast on Podcast
+      @refetchable(queryName: "EpisodeListPaginationQuery")
+      @argumentDefinitions(
+        first: { type: "Int!" },
+        cursor: { type: "ID" }
+      ) {
+        episodes(
+          first: $first,
+          after: $cursor
+        ) @connection(key: "EpisodeList_podcast_episodes") {
           edges {
             node {
               id
@@ -32,17 +46,17 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({ data }) => {
 
   return (
     <>
-    {podcast.episodes.edges.length > 0 ? (
+    {episodes.edges.length > 0 ? (
       <div className='flex flex-col gap-1.5'>
         <p className='font-medium text-slate-800 dark:text-slate-100 text-lg'>
-          {podcast.episodes.edges.length === 1 ? (
+          {episodes.edges.length === 1 ? (
             'Recent episode'
           ) : (
             'Recent episodes'
           )}
         </p>
-        <div className='flex flex-col gap-2'>
-          {podcast.episodes.edges.map(edge => edge &&
+        <div className='flex flex-col gap-3'>
+          {episodes.edges.map(edge => edge &&
             <button
               key={edge.node.id}
               className='text-left'
@@ -54,6 +68,21 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({ data }) => {
               />
             </button>
           )}
+          {hasNext &&
+            <button
+              className='text-white active:text-blue-100 font-medium bg-blue-500 hover:bg-blue-600 active:bg-blue-700 py-2 px-4 rounded flex flex-row items-center justify-center gap-2'
+              onClick={() => loadNext(4)}
+            >
+              {isLoadingNext ? (
+                <>
+                  <Spinner className='text-inherit' size='sm' />
+                  <span className='block'>Loading…</span>
+                </>
+              ) : (
+                <span className='block'>Load more</span>
+              )}
+            </button>
+          }
         </div>
       </div>
     ) : (

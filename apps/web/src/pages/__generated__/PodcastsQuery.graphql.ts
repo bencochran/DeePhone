@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<78b5d8ed6e8f24ae84fa17e9a2577e43>>
+ * @generated SignedSource<<722d94b624d91f15ff501706ea9fecd4>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -40,7 +40,14 @@ v2 = {
   "kind": "ScalarField",
   "name": "imageURL",
   "storageKey": null
-};
+},
+v3 = [
+  {
+    "kind": "Literal",
+    "name": "first",
+    "value": 4
+  }
+];
 return {
   "fragment": {
     "argumentDefinitions": [],
@@ -98,13 +105,7 @@ return {
                   (v2/*: any*/),
                   {
                     "alias": null,
-                    "args": [
-                      {
-                        "kind": "Literal",
-                        "name": "first",
-                        "value": 4
-                      }
-                    ],
+                    "args": (v3/*: any*/),
                     "concreteType": "PodcastEpisodesConnection",
                     "kind": "LinkedField",
                     "name": "episodes",
@@ -149,8 +150,47 @@ return {
                                 "kind": "ScalarField",
                                 "name": "callCount",
                                 "storageKey": null
+                              },
+                              {
+                                "alias": null,
+                                "args": null,
+                                "kind": "ScalarField",
+                                "name": "__typename",
+                                "storageKey": null
                               }
                             ],
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "cursor",
+                            "storageKey": null
+                          }
+                        ],
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "concreteType": "PageInfo",
+                        "kind": "LinkedField",
+                        "name": "pageInfo",
+                        "plural": false,
+                        "selections": [
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "endCursor",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "hasNextPage",
                             "storageKey": null
                           }
                         ],
@@ -158,6 +198,15 @@ return {
                       }
                     ],
                     "storageKey": "episodes(first:4)"
+                  },
+                  {
+                    "alias": null,
+                    "args": (v3/*: any*/),
+                    "filters": null,
+                    "handle": "connection",
+                    "key": "EpisodeList_podcast_episodes",
+                    "kind": "LinkedHandle",
+                    "name": "episodes"
                   }
                 ],
                 "storageKey": null
@@ -171,12 +220,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "54f5ef33da85dc23e1158b1ac3fc00ef",
+    "cacheID": "b66eb7300c1514a00004a6434ceb30b6",
     "id": null,
     "metadata": {},
     "name": "PodcastsQuery",
     "operationKind": "query",
-    "text": "query PodcastsQuery {\n  ...PodcastCardsQuery\n}\n\nfragment EpisodeList_podcast on Podcast {\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        identifier\n        ...EpisodeRow_episode\n      }\n    }\n  }\n}\n\nfragment EpisodeRow_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  ...EpisodeList_podcast\n}\n\nfragment PodcastCardsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
+    "text": "query PodcastsQuery {\n  ...PodcastCardsQuery\n}\n\nfragment EpisodeList_podcast_3z2gQm on Podcast {\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        identifier\n        ...EpisodeRow_episode\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment EpisodeRow_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  ...EpisodeList_podcast_3z2gQm\n}\n\nfragment PodcastCardsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
   }
 };
 })();

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7deb523144e700730202bb841fec08ec>>
+ * @generated SignedSource<<2ac8d5e4197c7b70e58e1ee2416b43df>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -42,7 +42,13 @@ const node: ReaderFragment = {
       "storageKey": null
     },
     {
-      "args": null,
+      "args": [
+        {
+          "kind": "Literal",
+          "name": "first",
+          "value": 4
+        }
+      ],
       "kind": "FragmentSpread",
       "name": "EpisodeList_podcast"
     }
@@ -51,6 +57,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "a20619e726357a152429bbe60a170bb0";
+(node as any).hash = "b4eb84b7f77833854735c3e103ac5677";
 
 export default node;

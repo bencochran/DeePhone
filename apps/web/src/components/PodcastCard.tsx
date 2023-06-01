@@ -15,7 +15,7 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
       fragment PodcastCard_podcast on Podcast {
         title
         imageURL
-        ...EpisodeList_podcast
+        ...EpisodeList_podcast @arguments(first: 4)
       }
     `,
     data

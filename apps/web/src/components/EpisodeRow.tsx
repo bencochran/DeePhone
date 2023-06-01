@@ -35,7 +35,7 @@ export const EpisodeRow: React.FC<Props & Omit<React.HTMLProps<HTMLDivElement>, 
   return (
     <div className={cn('flex flex-row gap-2 items-center group', className)} {...props}>
       {episode.imageURL &&
-        <div className='flex-grow-0 flex-shrink-0 aspect-square w-12 rounded-sm overflow-hidden'>
+        <div className='flex-grow-0 flex-shrink-0 aspect-square w-12 rounded overflow-hidden'>
           <img src={episode.imageURL} className='w-full h-full object-cover' />
         </div>
       }
