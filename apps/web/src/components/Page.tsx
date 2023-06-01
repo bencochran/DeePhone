@@ -14,7 +14,7 @@ export const Page: React.FC<React.PropsWithChildren<PageProps>> = ({ title, chil
           </h2>
         ) : ( title )}
       </div>
-      <div className='grid grid-cols-[repeat(auto-fill,minmax(268px,1fr))] gap-2'>
+      <div className='grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-2'>
         {children}
       </div>
     </div>
