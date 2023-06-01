@@ -40,7 +40,12 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
       duration: t.exposeInt('callDuration', { nullable: true }),
       events: t.relatedConnection('events', {
         cursor: 'date_id',
-        query: { orderBy: { date: 'desc' } },
+        args: {
+          oldestFirst: t.arg.boolean(),
+        },
+        query: (args) => ({
+          orderBy: { date: args.oldestFirst ? 'asc' : 'desc' },
+        }),
       }),
 
       // TODO: Re-expose these once we have authz
