@@ -47,6 +47,25 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
           orderBy: { date: args.oldestFirst ? 'asc' : 'desc' },
         }),
       }),
+      episode: t.prismaField({
+        type: 'Episode',
+        nullable: true,
+        select: {
+          events: {
+            where: { state: 'INTRODUCING_EPISODE' },
+            orderBy: { date: 'desc' },
+            take: 1,
+            select: {
+              download: {
+                select: {
+                  episode: true,
+                }
+              }
+            }
+          }
+        },
+        resolve: (_select, call) => call.events.at(0)?.download.episode,
+      }),
 
       // TODO: Re-expose these once we have authz
       callerName: t.string({

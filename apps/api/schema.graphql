@@ -6,6 +6,7 @@ type Call implements Node {
   callerZip: String
   duration: Int
   endDate: DateTime
+  episode: Episode
   events(after: ID, before: ID, first: Int, last: Int, oldestFirst: Boolean): CallEventsConnection!
   id: ID!
   identifier: Int!
