@@ -85,17 +85,17 @@ export const CallEventRow: React.FC<CallEventRowProps> = ({ data, isFirstEvent, 
 
   return (
     <tr className='hover:bg-slate-200/60 dark:hover:bg-slate-700/60'>
-      <td className='w-[3rem] text-right tabular-nums text-slate-500 dark:text-slate-400 font-light truncate'>
+      <td className='w-[3rem] min-w-[3rem] text-right tabular-nums text-slate-500 dark:text-slate-400 font-light truncate'>
         <span title={formattedTime}>
           {formattedTimeOffset}
         </span>
       </td>
-      <td className='text-slate-700 dark:text-slate-300 truncate'>
+      <td className='w-full max-w-[1px] text-slate-700 dark:text-slate-300 truncate'>
         <span className='mx-2'>
           {formatState(event, isFirstEvent)}
         </span>
       </td>
-      <td className='w-auto text-right text-slate-400 dark:text-slate-500 text-sm truncate'>
+      <td className='w-0 text-right text-slate-400 dark:text-slate-500 text-sm truncate'>
         {formattedFileSize ? (
           <span
             className='tabular-nums'
