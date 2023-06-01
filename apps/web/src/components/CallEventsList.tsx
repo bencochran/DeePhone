@@ -1,5 +1,6 @@
 import React from 'react';
 import { usePreloadedQuery, graphql, PreloadedQuery, usePaginationFragment } from 'react-relay';
+import { twMerge as cn } from 'tailwind-merge';
 
 import { CallEventRow } from '@/components/CallEventRow';
 import { Spinner } from '@/components/Spinner';
@@ -67,7 +68,7 @@ export const CallEventsList: React.FC<CallEventsListProps> = ({ queryReference, 
   }
 
   return (
-    <div className={className}>
+    <div className={cn('flex flex-col', className)}>
       <table>
         <tbody>
           {data.events.edges.map((edge, i) => edge &&
@@ -80,20 +81,20 @@ export const CallEventsList: React.FC<CallEventsListProps> = ({ queryReference, 
           )}
         </tbody>
       </table>
-      {isLoadingNext &&
-        <div className='flex flex-row justify-center items-center h-6 mt-2'>
-          <Spinner size='sm' />
-        </div>
-      }
-      {!isLoadingNext && hasNext &&
-        <div className='flex flex-row justify-center items-center h-6 mt-2'>
-          <button
-            className='text-blue-600 hover:text-blue-700 active:text-blue-800 font-medium hover:bg-blue-100 active:bg-blue-200 py-1 px-3 rounded'
-            onClick={() => loadNext(50)}
-          >
-            More events…
-          </button>
-        </div>
+      {hasNext &&
+        <button
+          className='text-blue-600 hover:text-blue-700 active:text-blue-800 font-medium hover:bg-blue-100 active:bg-blue-200 h-7 rounded mt-2 flex flex-row items-center justify-center gap-2'
+          onClick={() => loadNext(50)}
+        >
+          {isLoadingNext ? (
+            <>
+              <Spinner className='text-inherit' size='sm' />
+              <span className='block'>Loading…</span>
+            </>
+          ) : (
+            <span className='block'>More events</span>
+          )}
+        </button>
       }
     </div>
   );
