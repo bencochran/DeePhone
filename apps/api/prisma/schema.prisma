@@ -95,24 +95,27 @@ model Call {
 }
 
 model CallEvent {
-  id                    Int               @id @default(autoincrement())
-  callId                Int
-  call                  Call              @relation(fields: [callId], references: [id])
-  date                  DateTime
-  state                 CallState
-  downloadId            Int?
-  download              EpisodeDownload?  @relation(fields: [downloadId], references: [id])
-  currentPartId         Int?
-  currentPart           EpisodePart?      @relation(fields: [currentPartId], references: [id])
-  rawRequest            Json?
+  id          Int               @id @default(autoincrement())
+  callId      Int
+  call        Call              @relation(fields: [callId], references: [id])
+  date        DateTime
+  type        CallEventType
+  downloadId  Int?
+  download    EpisodeDownload?  @relation(fields: [downloadId], references: [id])
+  partId      Int?
+  part        EpisodePart?      @relation(fields: [partId], references: [id])
+  rawRequest  Json?
 
   @@unique([date, id])
 }
 
-enum CallState {
+enum CallEventType {
+  ANSWERED
   FETCHING_EPISODE
+  EPISODE_READY
   NO_EPISODE
   EPISODE_ERROR
+  WAITING_MESSAGE
   INTRODUCING_EPISODE
   PLAYING_EPISODE
   ENDING_EPISODE

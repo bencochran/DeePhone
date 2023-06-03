@@ -37,7 +37,7 @@ export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>, pr
                   _count: {
                     select: {
                       callEvents: {
-                        where: { state: 'INTRODUCING_EPISODE' },
+                        where: { type: 'INTRODUCING_EPISODE' },
                       },
                     },
                   },

@@ -9,14 +9,19 @@ import { CallEventRow_callEvent$key, CallEventRow_callEvent$data } from './__gen
 
 interface CallEventRowProps {
   data: CallEventRow_callEvent$key;
-  isFirstEvent: boolean;
   startTime: Date;
 }
 
-function formatState(event: CallEventRow_callEvent$data, isFirstEvent: boolean): string {
-  switch (event.state) {
+function formatState(event: CallEventRow_callEvent$data): string {
+  switch (event.type) {
+    case "ANSWERED":
+      return "Answered";
     case "FETCHING_EPISODE":
-      return isFirstEvent ? "Call received" : "Still fetching episode";
+      return "Fetching episode";
+    case "WAITING_MESSAGE":
+      return "Waiting message while fetching episode";
+    case "EPISODE_READY":
+      return "Episode ready to play";
     case "INTRODUCING_EPISODE":
       return "Introducing episode";
     case "PLAYING_EPISODE":
@@ -37,12 +42,12 @@ function formatState(event: CallEventRow_callEvent$data, isFirstEvent: boolean):
   }
 }
 
-export const CallEventRow: React.FC<CallEventRowProps> = ({ data, isFirstEvent, startTime }) => {
+export const CallEventRow: React.FC<CallEventRowProps> = ({ data, startTime }) => {
   const event = useFragment(
     graphql`
       fragment CallEventRow_callEvent on CallEvent {
         date
-        state
+        type
         download {
           partCount
           episode {
@@ -92,7 +97,7 @@ export const CallEventRow: React.FC<CallEventRowProps> = ({ data, isFirstEvent, 
       </td>
       <td className='w-full max-w-[1px] text-slate-700 dark:text-slate-300 truncate'>
         <span className='mx-2'>
-          {formatState(event, isFirstEvent)}
+          {formatState(event)}
         </span>
       </td>
       <td className='w-0 text-right text-slate-400 dark:text-slate-500 text-sm truncate'>

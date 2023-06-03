@@ -2,25 +2,16 @@ import { Router, Request, Response, NextFunction, urlencoded } from 'express';
 import twilio from 'twilio';
 import { PrismaClient, Podcast } from '@prisma/client';
 
-import logger, { loggableError } from './logger';
+import logger, { loggableError, loggableObject } from './logger';
 import {
-  enqueueNewCall,
-  getCallState,
-  endCallState,
-  incrementCallWaitingMessageCount,
-  loggableStatus,
-  advanceToNextPart,
+  handleVoiceRequest,
+  handleCallStatus
 } from './call-states';
 import type { VoiceRequest, VoiceStatusCallbackRequest } from './twilio-utilities';
 import { geocodeVoiceRequestFrom } from './twilio-utilities';
 import {
   initialAnswerUnauthorizedResponse,
-  initialAnswerResponse,
-  waitingResponse,
-  introduceEpisodeResponse,
-  playPartResponse,
-  endEpisodeResponse,
-  noEpisodeResponse,
+  voiceResponseForResponse,
   errorResponse,
 } from './responses';
 import { TWILIO_AUTH_TOKEN } from './env';
@@ -70,38 +61,23 @@ export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
     let voiceResponse: twilio.twiml.VoiceResponse;
     try {
       const voiceRequest: VoiceRequest = req.body;
-
-      const status = await getCallState(prisma, voiceRequest);
+      const callResponse = await handleVoiceRequest(prisma, podcast, voiceRequest);
 
       (async () => {
         const geocodedFrom = await geocodeVoiceRequestFrom(voiceRequest);
-        logger.info(`${status ? 'Continued' : 'New'} call from ${voiceRequest.From}`, { voiceRequest, status: loggableStatus(status), geocodedFrom });
+        logger.info(`Handling voice request from ${voiceRequest.From}`, {
+          voiceRequest,
+          callResponse: loggableObject(callResponse, { maxDepth: 4 }),
+          geocodedFrom
+        });
       })();
 
-      if (!status) {
-        await enqueueNewCall(prisma, podcast, voiceRequest);
-        voiceResponse = initialAnswerResponse();
-      } else if (status.state.status === 'introducing-episode') {
-        await advanceToNextPart(prisma, voiceRequest);
-        voiceResponse = introduceEpisodeResponse(status.state.playable, status.waitingMessageCount);
-      } else if (status.state.status === 'playing-episode') {
-        await advanceToNextPart(prisma, voiceRequest);
-        voiceResponse = playPartResponse(status.state.part);
-      } else if (status.state.status === 'ending-episode') {
-        voiceResponse = endEpisodeResponse();
-      } else if (status.state.status === 'no-episode') {
-        voiceResponse = noEpisodeResponse();
-      } else if (status.state.status === 'episode-error') {
-        voiceResponse = errorResponse();
-      } else {
-        await incrementCallWaitingMessageCount(prisma, voiceRequest);
-        voiceResponse = waitingResponse(status.waitingMessageCount)
-      }
+
+      voiceResponse = voiceResponseForResponse(callResponse, req.originalUrl);
     } catch (error) {
       logger.error('Error handling call', { error: loggableError(error) });
       voiceResponse = errorResponse();
     }
-
     res.type('text/xml');
     res.send(voiceResponse.toString());
   });
@@ -110,8 +86,7 @@ export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
     const voiceRequest: VoiceStatusCallbackRequest = req.body;
     logger.info(`Status from ${voiceRequest.From}, status: ${voiceRequest.CallStatus}, duration: ${voiceRequest.CallDuration}`, { voiceRequest });
 
-    const duration = Number(voiceRequest.CallDuration);
-    endCallState(prisma, voiceRequest, Number.isInteger(duration) ? duration : undefined);
+    await handleCallStatus(prisma, voiceRequest);
     const voiceResponse = new twilio.twiml.VoiceResponse();
     res.type('text/xml');
     res.send(voiceResponse.toString());

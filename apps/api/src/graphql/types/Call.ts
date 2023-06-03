@@ -52,7 +52,7 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
         nullable: true,
         select: {
           events: {
-            where: { state: 'INTRODUCING_EPISODE' },
+            where: { type: 'INTRODUCING_EPISODE' },
             orderBy: { date: 'desc' },
             take: 1,
             select: {
@@ -106,7 +106,7 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
       select: (args, ctx, nestedSelection) => ({
         callEvents: {
           ...downloadCallConnectionHelpers.getQuery(args, ctx, nestedSelection),
-          where: { state: 'INTRODUCING_EPISODE' },
+          where: { type: 'INTRODUCING_EPISODE' },
           orderBy: { date: 'desc' },
         }
       }),

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d2b5931d1a65a030dcec122e620b79f8>>
+ * @generated SignedSource<<cb07391aed2ef40be5817d1d55dc1ef1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -161,7 +161,7 @@ return {
                         "alias": null,
                         "args": null,
                         "kind": "ScalarField",
-                        "name": "state",
+                        "name": "type",
                         "storageKey": null
                       },
                       {
@@ -315,12 +315,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "069270f7f72369687d8e6fc8e977f19c",
+    "cacheID": "820f10179c9e9a3cde0342ac2e9ec796",
     "id": null,
     "metadata": {},
     "name": "CallEventsListQuery",
     "operationKind": "query",
-    "text": "query CallEventsListQuery(\n  $callId: Int!\n  $cursor: ID\n  $first: Int!\n) {\n  call(identifier: $callId) {\n    startDate\n    ...CallEventsListQuery_call\n    id\n  }\n}\n\nfragment CallEventRow_callEvent on CallEvent {\n  date\n  state\n  download {\n    partCount\n    episode {\n      title\n      publishDate\n      imageURL\n      id\n    }\n    id\n  }\n  part {\n    number\n    size\n    duration\n    id\n  }\n}\n\nfragment CallEventsListQuery_call on Call {\n  events(oldestFirst: true, first: $first, after: $cursor) {\n    edges {\n      node {\n        id\n        ...CallEventRow_callEvent\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query CallEventsListQuery(\n  $callId: Int!\n  $cursor: ID\n  $first: Int!\n) {\n  call(identifier: $callId) {\n    startDate\n    ...CallEventsListQuery_call\n    id\n  }\n}\n\nfragment CallEventRow_callEvent on CallEvent {\n  date\n  type\n  download {\n    partCount\n    episode {\n      title\n      publishDate\n      imageURL\n      id\n    }\n    id\n  }\n  part {\n    number\n    size\n    duration\n    id\n  }\n}\n\nfragment CallEventsListQuery_call on Call {\n  events(oldestFirst: true, first: $first, after: $cursor) {\n    edges {\n      node {\n        id\n        ...CallEventRow_callEvent\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();

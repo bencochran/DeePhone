@@ -1,4 +1,4 @@
-import { PrismaClient, CallState } from '@prisma/client';
+import { PrismaClient, CallEventType } from '@prisma/client';
 
 import { buildBuilder } from '../builder';
 
@@ -9,16 +9,16 @@ export function addCallEventToBuilder(builder: ReturnType<typeof buildBuilder>, 
       date: t.expose('date', {
         type: 'DateTime',
       }),
-      state: t.field({
-        type: CallState,
-        resolve: (event) => event.state,
+      type: t.field({
+        type: CallEventType,
+        resolve: (event) => event.type,
       }),
       download: t.relation('download', { nullable: true }),
-      part: t.relation('currentPart', { nullable: true }),
+      part: t.relation('part', { nullable: true }),
     })
   });
 
-  builder.enumType(CallState, {
-    name: 'CallState',
+  builder.enumType(CallEventType, {
+    name: 'CallEventType',
   });
 }

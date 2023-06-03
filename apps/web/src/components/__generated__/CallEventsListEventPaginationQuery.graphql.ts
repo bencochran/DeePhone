@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a9b7da1adee29d77572a0f6ef7fcc2c9>>
+ * @generated SignedSource<<d2994e0101492d5c91e3a06405c44dad>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -163,7 +163,7 @@ return {
                             "alias": null,
                             "args": null,
                             "kind": "ScalarField",
-                            "name": "state",
+                            "name": "type",
                             "storageKey": null
                           },
                           {
@@ -314,12 +314,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "be236c8305708c6f8c9c8e8c865409cf",
+    "cacheID": "150110bb6e654536671d30f84915d43c",
     "id": null,
     "metadata": {},
     "name": "CallEventsListEventPaginationQuery",
     "operationKind": "query",
-    "text": "query CallEventsListEventPaginationQuery(\n  $cursor: ID\n  $first: Int\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...CallEventsListQuery_call\n    id\n  }\n}\n\nfragment CallEventRow_callEvent on CallEvent {\n  date\n  state\n  download {\n    partCount\n    episode {\n      title\n      publishDate\n      imageURL\n      id\n    }\n    id\n  }\n  part {\n    number\n    size\n    duration\n    id\n  }\n}\n\nfragment CallEventsListQuery_call on Call {\n  events(oldestFirst: true, first: $first, after: $cursor) {\n    edges {\n      node {\n        id\n        ...CallEventRow_callEvent\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query CallEventsListEventPaginationQuery(\n  $cursor: ID\n  $first: Int\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...CallEventsListQuery_call\n    id\n  }\n}\n\nfragment CallEventRow_callEvent on CallEvent {\n  date\n  type\n  download {\n    partCount\n    episode {\n      title\n      publishDate\n      imageURL\n      id\n    }\n    id\n  }\n  part {\n    number\n    size\n    duration\n    id\n  }\n}\n\nfragment CallEventsListQuery_call on Call {\n  events(oldestFirst: true, first: $first, after: $cursor) {\n    edges {\n      node {\n        id\n        ...CallEventRow_callEvent\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();

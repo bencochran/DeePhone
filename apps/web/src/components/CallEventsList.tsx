@@ -71,11 +71,10 @@ export const CallEventsList: React.FC<CallEventsListProps> = ({ queryReference, 
     <div className={cn('flex flex-col', className)}>
       <table>
         <tbody>
-          {data.events.edges.map((edge, i) => edge &&
+          {data.events.edges.map(edge => edge &&
             <CallEventRow
               key={edge.node.id}
               data={edge.node}
-              isFirstEvent={i === 0}
               startTime={new Date(call.startDate)}
             />
           )}

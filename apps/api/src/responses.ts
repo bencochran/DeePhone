@@ -3,7 +3,36 @@ import { format as dateFormat, formatDistance } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import { EpisodePart } from '@prisma/client';
 
-import type { PlayableDownload } from './call-states';
+import type { CallResponse, PlayableDownload } from './call-states';
+
+export function voiceResponseForResponse(callResponse: CallResponse, voiceURL: string): twilio.twiml.VoiceResponse {
+  switch (callResponse.type) {
+    case 'no-op':
+      return noOpResponse(voiceURL);
+    case 'introduction':
+      return initialAnswerResponse(voiceURL);
+    case 'waiting':
+      return waitingResponse(callResponse.messageCount, voiceURL);
+    case 'no-episode':
+      return noEpisodeResponse();
+    case 'episode-error':
+      return errorResponse();
+    case 'episode-introduction':
+      return introduceEpisodeResponse(callResponse.playable, callResponse.waitingMessageCount, voiceURL);
+    case 'episode-play-part':
+      return playPartResponse(callResponse.part, voiceURL);
+    case 'outro':
+      return endEpisodeResponse();
+    case 'hang-up':
+      return hangUpResponse();
+  }
+}
+
+function noOpResponse(voiceURL: string) {
+  const voiceResponse = new twilio.twiml.VoiceResponse();
+  voiceResponse.redirect(voiceURL);
+  return voiceResponse;
+}
 
 export function initialAnswerUnauthorizedResponse() {
   const voiceResponse = new twilio.twiml.VoiceResponse();
@@ -17,7 +46,7 @@ export function initialAnswerUnauthorizedResponse() {
   return voiceResponse;
 }
 
-export function initialAnswerResponse() {
+function initialAnswerResponse(voiceURL: string) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   const today = utcToZonedTime(new Date(), 'America/New_York');
   const formattedToday = dateFormat(today, 'eeee, MMMM do');
@@ -29,11 +58,11 @@ export function initialAnswerResponse() {
   voiceResponse.pause({ length: 1 });
   voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Today is ${formattedToday}.`);
   voiceResponse.pause({ length: 1 });
-  voiceResponse.redirect('/voice');
+  voiceResponse.redirect(voiceURL);
   return voiceResponse;
 }
 
-export function waitingResponse(waitingCount: number) {
+function waitingResponse(waitingCount: number, voiceURL: string) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   if (waitingCount === 0) {
     voiceResponse.pause({ length: 1 });
@@ -55,11 +84,11 @@ export function waitingResponse(waitingCount: number) {
     voiceResponse.pause({ length: 7 });
   }
   voiceResponse.pause({ length: 7 });
-  voiceResponse.redirect('/voice');
+  voiceResponse.redirect(voiceURL);
   return voiceResponse;
 }
 
-export function introduceEpisodeResponse(playable: PlayableDownload, waitingCount: number) {
+function introduceEpisodeResponse(playable: PlayableDownload, waitingCount: number, voiceURL: string) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   const today = utcToZonedTime(new Date(), 'America/New_York');
   const latest = utcToZonedTime(playable.episode.publishDate, 'America/New_York');
@@ -73,18 +102,18 @@ export function introduceEpisodeResponse(playable: PlayableDownload, waitingCoun
     voiceResponse.pause({ length: 1 });
     voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `The latest episode from ${formattedAgo}, ${formattedLatest}.`);
   }
-  voiceResponse.redirect('/voice');
+  voiceResponse.redirect(voiceURL);
   return voiceResponse;
 }
 
-export function playPartResponse(part: EpisodePart) {
+function playPartResponse(part: EpisodePart, voiceURL: string) {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   voiceResponse.play(part.url);
-  voiceResponse.redirect('/voice');
+  voiceResponse.redirect(voiceURL);
   return voiceResponse;
 }
 
-export function endEpisodeResponse() {
+function endEpisodeResponse() {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   voiceResponse.pause({ length: 2 });
   voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `I hope you enjoyed the episode. Have a great day.`);
@@ -94,7 +123,7 @@ export function endEpisodeResponse() {
   return voiceResponse;
 }
 
-export function noEpisodeResponse() {
+function noEpisodeResponse() {
   const voiceResponse = new twilio.twiml.VoiceResponse();
   voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Sorry, I was unable to find the latest Ted Radio Hour. Please call again later.`);
   voiceResponse.pause({ length: 1 });
@@ -109,5 +138,11 @@ export function errorResponse() {
   voiceResponse.pause({ length: 1 });
   voiceResponse.say({ voice: 'Polly.Stephen-Neural' }, `Goodbye.`);
   voiceResponse.pause({ length: 2 });
+  return voiceResponse;
+}
+
+function hangUpResponse() {
+  const voiceResponse = new twilio.twiml.VoiceResponse();
+  voiceResponse.hangup();
   return voiceResponse;
 }

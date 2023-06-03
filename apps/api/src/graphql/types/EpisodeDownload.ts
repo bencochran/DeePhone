@@ -31,7 +31,7 @@ export function addEpisodeDownloadToBuilder(builder: ReturnType<typeof buildBuil
           _count: {
             select: {
               callEvents: {
-                where: { state: 'INTRODUCING_EPISODE' },
+                where: { type: 'INTRODUCING_EPISODE' },
               },
             },
           },

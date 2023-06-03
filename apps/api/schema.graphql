@@ -19,7 +19,20 @@ type CallEvent implements Node {
   download: EpisodeDownload
   id: ID!
   part: EpisodePart
-  state: CallState!
+  type: CallEventType!
+}
+
+enum CallEventType {
+  ANSWERED
+  ENDED
+  ENDING_EPISODE
+  EPISODE_ERROR
+  EPISODE_READY
+  FETCHING_EPISODE
+  INTRODUCING_EPISODE
+  NO_EPISODE
+  PLAYING_EPISODE
+  WAITING_MESSAGE
 }
 
 type CallEventsConnection {
@@ -30,16 +43,6 @@ type CallEventsConnection {
 type CallEventsConnectionEdge {
   cursor: String!
   node: CallEvent!
-}
-
-enum CallState {
-  ENDED
-  ENDING_EPISODE
-  EPISODE_ERROR
-  FETCHING_EPISODE
-  INTRODUCING_EPISODE
-  NO_EPISODE
-  PLAYING_EPISODE
 }
 
 """

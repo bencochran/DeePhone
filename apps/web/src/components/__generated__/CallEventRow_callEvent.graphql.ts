@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2d131f7a7f85213e3f544fd3c832ed0a>>
+ * @generated SignedSource<<23e5d2ac8e280c06b50a9c9726da7695>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,7 +9,7 @@
 // @ts-nocheck
 
 import { Fragment, ReaderFragment } from 'relay-runtime';
-export type CallState = "ENDED" | "ENDING_EPISODE" | "EPISODE_ERROR" | "FETCHING_EPISODE" | "INTRODUCING_EPISODE" | "NO_EPISODE" | "PLAYING_EPISODE" | "%future added value";
+export type CallEventType = "ANSWERED" | "ENDED" | "ENDING_EPISODE" | "EPISODE_ERROR" | "EPISODE_READY" | "FETCHING_EPISODE" | "INTRODUCING_EPISODE" | "NO_EPISODE" | "PLAYING_EPISODE" | "WAITING_MESSAGE" | "%future added value";
 import { FragmentRefs } from "relay-runtime";
 export type CallEventRow_callEvent$data = {
   readonly date: any;
@@ -26,7 +26,7 @@ export type CallEventRow_callEvent$data = {
     readonly number: number;
     readonly size: number;
   } | null;
-  readonly state: CallState;
+  readonly type: CallEventType;
   readonly " $fragmentType": "CallEventRow_callEvent";
 };
 export type CallEventRow_callEvent$key = {
@@ -51,7 +51,7 @@ const node: ReaderFragment = {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
-      "name": "state",
+      "name": "type",
       "storageKey": null
     },
     {
@@ -141,6 +141,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "005335a6765b1cc316e5c86f540bf656";
+(node as any).hash = "41779538fd6546bdefb692516c1d5f58";
 
 export default node;
