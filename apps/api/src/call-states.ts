@@ -228,26 +228,7 @@ export async function handleVoiceRequest(prisma: PrismaClient, podcast: Podcast,
     enqueueFetch(prisma, podcast, call);
   }
 
-  const nextEvent = await eventAfter(
-    lastEvent,
-    (download: EpisodeDownload): Promise<EpisodePart | null> => {
-      return prisma.episodePart.findFirst({
-        where: {
-          download: { id: download.id },
-        },
-        orderBy: { sortOrder: 'asc' },
-      })
-    },
-    (download: EpisodeDownload, part: EpisodePart): Promise<EpisodePart | null> => {
-      return prisma.episodePart.findFirst({
-        where: {
-          download: { id: download.id },
-          sortOrder: { gt: part.sortOrder },
-        },
-        orderBy: { sortOrder: 'asc' },
-      })
-    }
-  );
+  const nextEvent = await eventAfter(prisma, lastEvent);
 
   if (!nextEvent) {
     return { type: 'hang-up' };
@@ -284,13 +265,12 @@ export async function handleVoiceRequest(prisma: PrismaClient, podcast: Podcast,
   );
 }
 
-async function eventAfter(
+export async function eventAfter(
+  prisma: PrismaClient,
   event: CallEvent & {
     download: EpisodeDownload | null;
     part: EpisodePart | null;
-  } | null,
-  findFirstPart: (download: EpisodeDownload) => Promise<EpisodePart | null>,
-  findNextPart: (download: EpisodeDownload, afterPart: EpisodePart) => Promise<EpisodePart | null>,
+  } | null
 ): Promise<Omit<Prisma.CallEventCreateInput, 'date' | 'call' | 'rawRequest'> | null> {
   if (!event) {
     return { type: CallEventType.ANSWERED };
@@ -318,7 +298,12 @@ async function eventAfter(
         return { type: CallEventType.EPISODE_ERROR };
       }
 
-      const firstPart = await findFirstPart(event.download);
+      const firstPart = await prisma.episodePart.findFirst({
+        where: {
+          download: { id: event.download.id },
+        },
+        orderBy: { sortOrder: 'asc' },
+      });
 
       if (!firstPart) {
         logger.error('Missing first part for download', { download: event.download });
@@ -339,7 +324,13 @@ async function eventAfter(
         logger.error('Missing part for PLAYING_EPISODE event', { event });
         return { type: CallEventType.EPISODE_ERROR };
       }
-      const nextPart = await findNextPart(event.download, event.part);
+      const nextPart = await prisma.episodePart.findFirst({
+        where: {
+          download: { id: event.download.id },
+          sortOrder: { gt: event.part.sortOrder },
+        },
+        orderBy: { sortOrder: 'asc' },
+      });
       if (nextPart) {
         return {
           type: CallEventType.PLAYING_EPISODE,
