@@ -41,7 +41,7 @@ bootstrap()
     const app = express();
     app.enable('trust proxy');
 
-    app.use('/', buildVoiceRouter(prisma, podcast));
+    app.use('/voice', buildVoiceRouter(prisma, podcast));
     app.use('/api/graphql', buildGraphQLRouter(prisma, '/api/graphql'));
 
     // Serve static files as-is

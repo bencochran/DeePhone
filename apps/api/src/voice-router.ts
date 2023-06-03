@@ -1,4 +1,4 @@
-import { Router, urlencoded } from 'express';
+import { Router, Request, Response, NextFunction, urlencoded } from 'express';
 import twilio from 'twilio';
 import { PrismaClient, Podcast } from '@prisma/client';
 
@@ -25,29 +25,48 @@ import {
 } from './responses';
 import { TWILIO_AUTH_TOKEN } from './env';
 
+function validateTwilioRequest(req: Request, res: Response, next: NextFunction) {
+  logger.debug(`Validating Twilio request for URL: ${req.originalUrl}`, {
+    originalUrl: req.originalUrl,
+    hostname: req.hostname,
+    method: req.method,
+  });
+
+  if (req.method !== 'POST') {
+    logger.info(`Skipping Twilio validation for non-POST method "${req.method}"`, {
+      originalUrl: req.originalUrl,
+      hostname: req.hostname,
+      method: req.method,
+    });
+    return next();
+  }
+
+  const twilioSignature = req.header('X-Twilio-Signature');
+  if (!twilioSignature) {
+    logger.warning('Missing X-Twilio-Signature header', { headers: req.headers });
+    const voiceResponse = initialAnswerUnauthorizedResponse();
+    res.type('text/xml');
+    res.send(voiceResponse.toString());
+    return;
+  }
+  const url = new URL(req.originalUrl, `https://${req.hostname}`).toString();
+  const valid = twilio.validateRequest(TWILIO_AUTH_TOKEN, twilioSignature, url, req.body);
+  if (!valid) {
+    logger.warning(`Invalid ${req.url} request`, { headers: req.headers, body: req.body, url });
+    const voiceResponse = initialAnswerUnauthorizedResponse();
+    res.type('text/xml');
+    res.send(voiceResponse.toString());
+    return;
+  }
+  next();
+};
+
 export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
   const router = Router();
   router.use(urlencoded({ extended: false }));
+  router.use(validateTwilioRequest);
 
-  router.post('/voice', async (req, res) => {
-    const twilioSignature = req.header('X-Twilio-Signature');
-    if (!twilioSignature) {
-      logger.warning('Missing X-Twilio-Signature header', { headers: req.headers });
-      const voiceResponse = initialAnswerUnauthorizedResponse();
-      res.type('text/xml');
-      res.send(voiceResponse.toString());
-      return;
-    }
-    const url = new URL(req.url, `https://${req.hostname}`).toString()
-    const valid = twilio.validateRequest(TWILIO_AUTH_TOKEN, twilioSignature, url, req.body);
-    if (!valid) {
-      logger.warning('Invalid /voice request', { headers: req.headers, body: req.body, url });
-      const voiceResponse = initialAnswerUnauthorizedResponse();
-      res.type('text/xml');
-      res.send(voiceResponse.toString());
-      return;
-    }
-
+  router.post('/', async (req, res) => {
     let voiceResponse: twilio.twiml.VoiceResponse;
     try {
       const voiceRequest: VoiceRequest = req.body;
@@ -87,20 +106,12 @@ export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
     res.send(voiceResponse.toString());
   });
 
-  router.post('/voice/status-callback', async (req, res) => {
+  router.post('/status-callback', async (req, res) => {
     const voiceRequest: VoiceStatusCallbackRequest = req.body;
     logger.info(`Status from ${voiceRequest.From}, status: ${voiceRequest.CallStatus}, duration: ${voiceRequest.CallDuration}`, { voiceRequest });
-    if (voiceRequest.CallStatus === 'completed' || voiceRequest.CallStatus === 'failed') {
-      const twilioSignature = req.header('X-Twilio-Signature');
-      if (twilioSignature) {
-        const url = new URL(req.url, `https://${req.hostname}`).toString()
-        const valid = twilio.validateRequest(TWILIO_AUTH_TOKEN, twilioSignature, url, req.body);
-        if (valid) {
-          const duration = Number(voiceRequest.CallDuration);
-          endCallState(prisma, voiceRequest, Number.isInteger(duration) ? duration : undefined);
-        }
-      }
-    }
+
+    const duration = Number(voiceRequest.CallDuration);
+    endCallState(prisma, voiceRequest, Number.isInteger(duration) ? duration : undefined);
     const voiceResponse = new twilio.twiml.VoiceResponse();
     res.type('text/xml');
     res.send(voiceResponse.toString());
