@@ -3,6 +3,9 @@ on:
     branches: ['main']
   pull_request:
 
+env:
+  FORCE_COLOR: true
+
 jobs:
   tsc:
     name: test
