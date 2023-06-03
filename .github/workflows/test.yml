@@ -15,9 +15,6 @@ on:
         required: false
         default: false
 
-env:
-  FORCE_COLOR: true
-
 jobs:
   tsc:
     name: test
@@ -35,6 +32,8 @@ jobs:
 
     - run: yarn install --frozen-lockfile
     - run: yarn test
+      env:
+        FORCE_COLOR: true
 
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
