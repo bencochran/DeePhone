@@ -27,7 +27,7 @@ const CallsContent: React.FC<CallsContentProps> = ({ initialQueryRef }) => {
 
   return (
     <Page title='Recent calls'>
-      <Card className='max-w-[320px]'>
+      <Card>
         <CallList data={data} />
       </Card>
     </Page>
