@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<016ccb6e1361dc60314eb8e5bab7b8ed>>
+ * @generated SignedSource<<ae197ddd753635af880f7e3bfac82b2e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -133,6 +133,13 @@ return {
                   {
                     "alias": null,
                     "args": null,
+                    "kind": "ScalarField",
+                    "name": "status",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
                     "concreteType": "Episode",
                     "kind": "LinkedField",
                     "name": "episode",
@@ -220,12 +227,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "ade4f33207e9dfd5fe28c91ef8468b34",
+    "cacheID": "1a0510f77545327c47899ca6c533f87b",
     "id": null,
     "metadata": {},
     "name": "CallsQuery",
     "operationKind": "query",
-    "text": "query CallsQuery {\n  ...CallListQuery_4i7Unr\n}\n\nfragment CallListQuery_4i7Unr on Query {\n  calls(first: 10) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n"
+    "text": "query CallsQuery {\n  ...CallListQuery_4i7Unr\n}\n\nfragment CallListQuery_4i7Unr on Query {\n  calls(first: 10) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  status\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n"
   }
 };
 })();

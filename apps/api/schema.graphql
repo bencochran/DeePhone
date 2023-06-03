@@ -12,6 +12,7 @@ type Call implements Node {
   identifier: Int!
   phoneNumber: String!
   startDate: DateTime!
+  status: CallStatus!
 }
 
 type CallEvent implements Node {
@@ -43,6 +44,12 @@ type CallEventsConnection {
 type CallEventsConnectionEdge {
   cursor: String!
   node: CallEvent!
+}
+
+enum CallStatus {
+  ENDED
+  IN_PROGRESS
+  UNKNOWN
 }
 
 """

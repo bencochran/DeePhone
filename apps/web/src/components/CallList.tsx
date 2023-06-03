@@ -73,7 +73,7 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
           className='flex flex-col'
         >
           <button
-            className='text-left -m-1 p-1 hover:bg-slate-200 hover:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer'
+            className='text-left -m-1 p-1 hover:bg-slate-200 hover:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer group'
             onClick={() => {
               setNextExpandedCallIdentifier(i => i === edge.node.identifier ? null : edge.node.identifier)
               startTransition(() => {

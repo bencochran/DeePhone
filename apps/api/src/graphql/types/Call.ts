@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, CallEventType } from '@prisma/client';
 import { prismaConnectionHelpers } from '@pothos/plugin-prisma';
 import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
 
@@ -21,7 +21,17 @@ function maskPhoneNumber(phoneNumber: string) {
   return first + second.replaceAll(/\d/g, 'X');
 }
 
+enum CallStatus {
+  IN_PROGRESS = 'IN_PROGRESS',
+  ENDED = 'ENDED',
+  UNKNOWN = 'UNKNOWN',
+};
+
 export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient) {
+  const CallStatusRef = builder.enumType(CallStatus, {
+    name: 'CallStatus',
+  });
+
   const Call = builder.prismaNode('Call', {
     id: { field: 'id' },
     fields: (t) => ({
@@ -65,6 +75,32 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
           }
         },
         resolve: (_select, call) => call.events.at(0)?.download.episode,
+      }),
+      status: t.field({
+        type: CallStatusRef,
+        select: {
+          events: {
+            orderBy: { date: 'desc' },
+            take: 1,
+          },
+        },
+        resolve: (call) => {
+          if (call.endDate) {
+            return CallStatus.ENDED;
+          }
+          const lastEvent = call.events.at(-1);
+          if (!lastEvent) {
+            return CallStatus.UNKNOWN;
+          }
+          if (lastEvent.type === CallEventType.ENDED) {
+            return CallStatus.ENDED;
+          }
+          if (new Date().getTime() - lastEvent.date.getTime() > 1000 * 60 * 60) {
+            // It’s been an hours since the last event… we must’ve lost the hang up
+            return CallStatus.UNKNOWN;
+          }
+          return CallStatus.IN_PROGRESS;
+        },
       }),
 
       // TODO: Re-expose these once we have authz

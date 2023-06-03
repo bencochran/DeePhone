@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b268f09a7b4f4e3e153ce00f91be69b4>>
+ * @generated SignedSource<<c7553ae83b9e7b74f3907cef83472c38>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -174,6 +174,13 @@ return {
                   {
                     "alias": null,
                     "args": null,
+                    "kind": "ScalarField",
+                    "name": "status",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
                     "concreteType": "Episode",
                     "kind": "LinkedField",
                     "name": "episode",
@@ -261,12 +268,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "219e9a9fd03561284d9b76e84b2290f0",
+    "cacheID": "39e7f27130ed3a6a807a684ad2bbd102",
     "id": null,
     "metadata": {},
     "name": "CallListPaginationQuery",
     "operationKind": "query",
-    "text": "query CallListPaginationQuery(\n  $cursor: ID\n  $episodeIdentifier: Int\n  $first: Int!\n) {\n  ...CallListQuery_2Q8tVP\n}\n\nfragment CallListQuery_2Q8tVP on Query {\n  calls(first: $first, after: $cursor, episodeIdentifier: $episodeIdentifier) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n"
+    "text": "query CallListPaginationQuery(\n  $cursor: ID\n  $episodeIdentifier: Int\n  $first: Int!\n) {\n  ...CallListQuery_2Q8tVP\n}\n\nfragment CallListQuery_2Q8tVP on Query {\n  calls(first: $first, after: $cursor, episodeIdentifier: $episodeIdentifier) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  status\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n"
   }
 };
 })();

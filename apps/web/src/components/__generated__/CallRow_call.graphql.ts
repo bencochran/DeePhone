@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<96d0eced11591af5cee3a10f720cf21d>>
+ * @generated SignedSource<<643dfe93dafddfa470789e72a77d5355>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,6 +9,7 @@
 // @ts-nocheck
 
 import { Fragment, ReaderFragment } from 'relay-runtime';
+export type CallStatus = "ENDED" | "IN_PROGRESS" | "UNKNOWN" | "%future added value";
 import { FragmentRefs } from "relay-runtime";
 export type CallRow_call$data = {
   readonly callerName: string | null;
@@ -24,6 +25,7 @@ export type CallRow_call$data = {
   readonly identifier: number;
   readonly phoneNumber: string;
   readonly startDate: any;
+  readonly status: CallStatus;
   readonly " $fragmentType": "CallRow_call";
 };
 export type CallRow_call$key = {
@@ -90,6 +92,13 @@ return {
     {
       "alias": null,
       "args": null,
+      "kind": "ScalarField",
+      "name": "status",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
       "concreteType": "Episode",
       "kind": "LinkedField",
       "name": "episode",
@@ -119,6 +128,6 @@ return {
 };
 })();
 
-(node as any).hash = "01dd3e2e143ef046a446ebbec340c23e";
+(node as any).hash = "f5ed458575db6713adcd2b36559241ce";
 
 export default node;

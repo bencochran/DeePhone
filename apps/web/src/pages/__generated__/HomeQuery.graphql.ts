@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c11783529db168fde7fc55cae5466366>>
+ * @generated SignedSource<<170e3840004cab04a3a180e4f76e61d6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -285,6 +285,13 @@ return {
                   {
                     "alias": null,
                     "args": null,
+                    "kind": "ScalarField",
+                    "name": "status",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
                     "concreteType": "Episode",
                     "kind": "LinkedField",
                     "name": "episode",
@@ -348,12 +355,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "1f0e44dc7033640c1b3bdb59aea91312",
+    "cacheID": "83c71a986f79f47d85b356d383ffda28",
     "id": null,
     "metadata": {},
     "name": "HomeQuery",
     "operationKind": "query",
-    "text": "query HomeQuery {\n  ...PodcastCardsQuery\n  ...CallListQuery_4i7Unr\n}\n\nfragment CallListQuery_4i7Unr on Query {\n  calls(first: 10) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n\nfragment EpisodeList_podcast_3z2gQm on Podcast {\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        identifier\n        ...EpisodeRow_episode\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment EpisodeRow_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  ...EpisodeList_podcast_3z2gQm\n}\n\nfragment PodcastCardsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
+    "text": "query HomeQuery {\n  ...PodcastCardsQuery\n  ...CallListQuery_4i7Unr\n}\n\nfragment CallListQuery_4i7Unr on Query {\n  calls(first: 10) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  status\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n\nfragment EpisodeList_podcast_3z2gQm on Podcast {\n  episodes(first: 4) {\n    edges {\n      node {\n        id\n        identifier\n        ...EpisodeRow_episode\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment EpisodeRow_episode on Episode {\n  title\n  publishDate\n  imageURL\n  callCount\n}\n\nfragment PodcastCard_podcast on Podcast {\n  title\n  imageURL\n  ...EpisodeList_podcast_3z2gQm\n}\n\nfragment PodcastCardsQuery on Query {\n  podcasts(first: 10) {\n    edges {\n      node {\n        id\n        ...PodcastCard_podcast\n      }\n    }\n  }\n}\n"
   }
 };
 })();
