@@ -49,13 +49,13 @@ export const EpisodeHeader: React.FC<EpisodeHeaderProps> = ({ data, className })
             {formattedPublishDate}
           </p>
         </div>
-        <div>
-          {episode.description &&
+        {episode.description &&
+          <div className='mb-2'>
             <SanitizedHTML
               html={episode.description}
             />
-          }
-        </div>
+          </div>
+        }
       </div>
     </div>
   );
