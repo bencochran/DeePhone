@@ -5,8 +5,15 @@ import {
   Store,
   Variables,
   RequestParameters,
-  CacheConfig
+  CacheConfig,
+  Observable,
 } from 'relay-runtime';
+import { createClient, ExecutionResult } from 'graphql-sse';
+
+const base = import.meta.env.VITE_GRAPHQL_BASE ?? '';
+const client = createClient<true>({
+  url: `${base}/api/graphql/stream`,
+});
 
 async function fetchRelay(
   params: RequestParameters,
@@ -45,9 +52,26 @@ async function fetchRelay(
   return json;
 }
 
+export function subscribe(
+  params: RequestParameters,
+  variables: Variables,
+  _cacheConfig: CacheConfig
+) {
+  return Observable.create<any>((sink) => {
+    client.subscribe(
+      {
+        query:  params.text ?? '',
+        operationName: params.name,
+        variables,
+      },
+      sink
+    );
+  });
+}
+
 // Export a singleton instance of Relay Environment configured with our network layer:
 export default new Environment({
-  network: Network.create(fetchRelay),
+  network: Network.create(fetchRelay, subscribe),
   store: new Store(new RecordSource(), {
     // This property tells Relay to not immediately clear its cache when the user
     // navigates around the app. Relay will hold onto the specified number of
