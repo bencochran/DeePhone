@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ae197ddd753635af880f7e3bfac82b2e>>
+ * @generated SignedSource<<63be745eda66810e04837b638a736f6a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -220,7 +220,7 @@ return {
           "episodeIdentifier"
         ],
         "handle": "connection",
-        "key": "Query_calls",
+        "key": "CallListQuery_calls",
         "kind": "LinkedHandle",
         "name": "calls"
       }

@@ -1,24 +1,58 @@
 import React from 'react';
-import { usePreloadedQuery, graphql, PreloadedQuery, usePaginationFragment } from 'react-relay';
+import { usePreloadedQuery, graphql, PreloadedQuery, usePaginationFragment, useSubscription } from 'react-relay';
 import { twMerge as cn } from 'tailwind-merge';
+import { GraphQLSubscriptionConfig, ConnectionHandler } from 'relay-runtime';
 
 import { CallEventRow } from '@/components/CallEventRow';
 import { Spinner } from '@/components/Spinner';
 
 import * as CallEventsListQuery from './__generated__/CallEventsListQuery.graphql';
 import { CallEventsListQuery_call$key } from './__generated__/CallEventsListQuery_call.graphql';
-import { CallEventsListEventPaginationQuery } from './__generated__/CallEventsListEventPaginationQuery.graphql';
+import { CallEventsListEventPaginationQuery, CallEventsListEventPaginationQuery$data } from './__generated__/CallEventsListEventPaginationQuery.graphql';
+import { CallEventsListSubscription } from './__generated__/CallEventsListSubscription.graphql';
 
 interface CallEventsListProps extends React.HTMLProps<HTMLDivElement> {
   queryReference: PreloadedQuery<CallEventsListQuery.CallEventsListQuery>;
   className?: string;
 }
 
+const useCallUpdateSubscription = (callId: string, callIdentifier: number) => {
+  const config = React.useMemo<GraphQLSubscriptionConfig<CallEventsListSubscription>>(() => {
+    const connectionId = ConnectionHandler.getConnectionID(callId, 'Call_events', { oldestFirst: true });
+    return {
+      subscription: graphql`
+        subscription CallEventsListSubscription($callIdentifier: Int!, $connections: [ID!]!) {
+          callUpdated(callIdentifier: $callIdentifier) {
+            newEvents {
+              edges @appendEdge(connections: $connections) {
+                cursor
+                node {
+                  id
+                  ...CallEventRow_callEvent
+                }
+              }
+            }
+          }
+        }
+      `,
+      variables: {
+        callId,
+        callIdentifier,
+        connections: [connectionId],
+      },
+    };
+  }, [callId, callIdentifier]);
+
+  useSubscription<CallEventsListSubscription>(config);
+}
+
 export const CallEventsList: React.FC<CallEventsListProps> = ({ queryReference, className }) => {
   const fetched = usePreloadedQuery(
     graphql`
-      query CallEventsListQuery($callId: Int!, $cursor: ID, $first: Int!) {
-        call(identifier: $callId) {
+      query CallEventsListQuery($callIdentifier: Int!, $cursor: ID, $first: Int!) {
+        call(identifier: $callIdentifier) {
+          id
+          identifier
           startDate
           ...CallEventsListQuery_call
         }

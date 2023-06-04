@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c7553ae83b9e7b74f3907cef83472c38>>
+ * @generated SignedSource<<f60722267af3ab5132da8f63056b0793>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -261,7 +261,7 @@ return {
           "episodeIdentifier"
         ],
         "handle": "connection",
-        "key": "Query_calls",
+        "key": "CallListQuery_calls",
         "kind": "LinkedHandle",
         "name": "calls"
       }
@@ -278,6 +278,6 @@ return {
 };
 })();
 
-(node as any).hash = "275dc3b08e337ee5f4d943f3d960c976";
+(node as any).hash = "33dd90cadf1ccab6f019af5e148fb5d8";
 
 export default node;

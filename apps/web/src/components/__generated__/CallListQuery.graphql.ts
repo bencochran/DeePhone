@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4765654be12a9fa0f8cfbe577bdca722>>
+ * @generated SignedSource<<9e8dd4ab2671e82c4850560997b79dd3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -91,7 +91,7 @@ return {
       ],
       "concreteType": "QueryCallsConnection",
       "kind": "LinkedField",
-      "name": "__Query_calls_connection",
+      "name": "__CallListQuery_calls_connection",
       "plural": false,
       "selections": [
         {
@@ -183,6 +183,6 @@ return {
 };
 })();
 
-(node as any).hash = "275dc3b08e337ee5f4d943f3d960c976";
+(node as any).hash = "33dd90cadf1ccab6f019af5e148fb5d8";
 
 export default node;

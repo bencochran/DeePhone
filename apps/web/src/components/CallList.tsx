@@ -33,7 +33,7 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
           first: $first,
           after: $cursor,
           episodeIdentifier: $episodeIdentifier
-        ) @connection(key: "Query_calls") {
+        ) @connection(key: "CallListQuery_calls") {
           edges {
             node {
               id
@@ -78,7 +78,7 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
               setNextExpandedCallIdentifier(i => i === edge.node.identifier ? null : edge.node.identifier)
               startTransition(() => {
                 setExpandedCallIdentifier(i => i === edge.node.identifier ? null : edge.node.identifier)
-                loadQuery({ callId: edge.node.identifier, first: 50 });
+                loadQuery({ callIdentifier: edge.node.identifier, first: 50 });
               })
             }}
           >
