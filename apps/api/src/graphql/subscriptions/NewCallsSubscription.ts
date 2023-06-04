@@ -50,8 +50,7 @@ export function addNewCallsSubscriptionToBuilder(builder: ReturnType<typeof buil
       },
       subscribe: (_, args) => {
         if (args.episodeIdentifier) {
-          // For now, we don't support subscribing to new calls for a specific episode.
-          return { [Symbol.asyncIterator]: () => (async function* () { })() };
+          return pubsub.subscribe('episodeNewCall', args.episodeIdentifier);
         } else {
           return pubsub.subscribe('newCall');
         }

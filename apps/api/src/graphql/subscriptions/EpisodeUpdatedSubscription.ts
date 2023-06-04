@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { Repeater } from 'graphql-yoga';
 
 import { buildBuilder } from '../builder';
 import { Types } from '../types';
@@ -26,7 +27,13 @@ export function addEpisodeUpdatedSubscriptionToBuilder(builder: ReturnType<typeo
       args: {
         episodeIdentifier: t.arg.int({ required: true }),
       },
-      subscribe: (_, args) => pubsub.subscribe('episodeUpdated', args.episodeIdentifier),
+      subscribe: (_, args) => {
+        const a = Repeater.merge([
+          pubsub.subscribe('episodeNewCall', args.episodeIdentifier),
+          pubsub.subscribe('episodeUpdated', args.episodeIdentifier),
+        ])
+        return a;
+      },
       resolve: (event, a, b) => event,
     })
   );
