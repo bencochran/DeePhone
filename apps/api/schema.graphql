@@ -138,6 +138,10 @@ type EpisodePart implements Node {
   url: URL!
 }
 
+type EpisodeUpdatedSubscription {
+  episode: Episode!
+}
+
 type NewCallsConnection {
   edges: [NewCallsConnectionEdge!]!
 }
@@ -224,6 +228,7 @@ type QueryPodcastsConnectionEdge {
 
 type Subscription {
   callUpdated(callIdentifier: Int!): CallUpdatedSubscription!
+  episodeUpdated(episodeIdentifier: Int!): EpisodeUpdatedSubscription!
   newCalls(episodeIdentifier: Int): NewCallsConnection!
 }
 

@@ -108,6 +108,7 @@ export async function fetchEpisodes(prisma: PrismaClient, { id: podcastId }: Pod
         return null;
       }
       const description = item['content:encoded'] ?? item.content;
+      // TODO: pubsub episodeUpdated on updates
       return await prisma.episode.upsert({
         where: { podcastId_guid: { podcastId: podcast.id, guid }},
         create: {

@@ -257,6 +257,10 @@ export async function handleVoiceRequest(prisma: PrismaClient, podcast: Podcast,
   });
   pubsub.publish('callUpdated', call.id, { call, event: createdEvent });
 
+  if (createdEvent.type === CallEventType.INTRODUCING_EPISODE && createdEvent.download?.episode) {
+    pubsub.publish('episodeUpdated', createdEvent.download.episode.id, { episode: createdEvent.download.episode });
+  }
+
   return await responseForEvent(
     createdEvent,
     (): Promise<number> => {

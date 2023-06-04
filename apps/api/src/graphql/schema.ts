@@ -11,6 +11,6 @@ export function buildSchema(prisma: PrismaClient) {
   const types = addTypesToBuilder(builder);
   addQueriesToBuilder(builder, prisma, types);
   addConnectionsToBuilder(builder, types);
-  addSubscriptionsToBuilder(builder, types);
+  addSubscriptionsToBuilder(builder, prisma, types);
   return builder.toSchema();
 }
