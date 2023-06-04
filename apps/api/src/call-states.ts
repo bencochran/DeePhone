@@ -22,6 +22,7 @@ import {
 } from './podcast';
 import { s3, bucketName, bucketBaseURL } from './s3';
 import type { VoiceRequest, VoiceStatusCallbackRequest } from './twilio-utilities';
+import { pubsub } from './pubsub';
 
 const requestQueue = new PQueue({ concurrency: 1 });
 
@@ -77,13 +78,14 @@ function enqueueFetch(prisma: PrismaClient, podcast: Podcast, call: Call): void 
       if (!episode) {
         logger.error('Unable to find latest episode');
 
-        await prisma.callEvent.create({
+        const event = await prisma.callEvent.create({
           data: {
             call: { connect: { id: call.id } },
             date: new Date(),
             type: CallEventType.NO_EPISODE,
           },
         });
+        pubsub.publish('callUpdated', call.id, { call, event });
         return;
       }
 
@@ -172,7 +174,7 @@ function enqueueFetch(prisma: PrismaClient, podcast: Podcast, call: Call): void 
           },
         });
       }
-      await prisma.callEvent.create({
+      const event = await prisma.callEvent.create({
         data: {
           call: { connect: { id: call.id } },
           date: new Date(),
@@ -180,15 +182,17 @@ function enqueueFetch(prisma: PrismaClient, podcast: Podcast, call: Call): void 
           download: { connect: { id: downloadToPlay.id } },
         },
       });
+      pubsub.publish('callUpdated', call.id, { call, event });
     } catch (error) {
       logger.error('Unable to download or process latest episode', { error: loggableError(error) });
-      await prisma.callEvent.create({
+      const event = await prisma.callEvent.create({
         data: {
           call: { connect: { id: call.id } },
           date: new Date(),
           type: CallEventType.EPISODE_ERROR,
         },
       });
+      pubsub.publish('callUpdated', call.id, { call, event });
       return;
     }
   });
@@ -250,6 +254,7 @@ export async function handleVoiceRequest(prisma: PrismaClient, podcast: Podcast,
       part: true,
     }
   });
+  pubsub.publish('callUpdated', call.id, { call, event: createdEvent });
 
   return await responseForEvent(
     createdEvent,
@@ -415,7 +420,7 @@ export async function handleCallStatus(prisma: PrismaClient, request: Readonly<V
   if (request.CallStatus === 'completed' || request.CallStatus === 'failed') {
     const now = new Date();
     const duration = Number(request.CallDuration);
-    await prisma.call.update({
+    const call = await prisma.call.update({
       where: { twilioCallSid: request.CallSid },
       data: {
         callDuration: duration,
@@ -428,6 +433,13 @@ export async function handleCallStatus(prisma: PrismaClient, request: Readonly<V
           }
         }
       },
+      include: {
+        events: {
+          orderBy: { date: 'desc' },
+          take: 1,
+        },
+      },
     });
+    pubsub.publish('callUpdated', call.id, { call, event: call.events[0] });
   }
 }
