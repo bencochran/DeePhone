@@ -8,7 +8,7 @@ import { addEpisodeUpdatedSubscriptionToBuilder } from './EpisodeUpdatedSubscrip
 
 export function addSubscriptionsToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient, types: Types) {
   builder.subscriptionType({});
-  addCallUpdatedSubscriptionToBuilder(builder, types);
-  addNewCallsSubscriptionToBuilder(builder, types);
+  addCallUpdatedSubscriptionToBuilder(builder, prisma, types);
+  addNewCallsSubscriptionToBuilder(builder, prisma, types);
   addEpisodeUpdatedSubscriptionToBuilder(builder, prisma, types);
 }

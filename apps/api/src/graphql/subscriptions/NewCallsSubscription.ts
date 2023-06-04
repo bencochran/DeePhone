@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import { prismaConnectionHelpers } from '@pothos/plugin-prisma';
 import { encodeGlobalID } from '@pothos/plugin-relay';
 
@@ -5,7 +6,7 @@ import { buildBuilder } from '../builder';
 import { Types } from '../types';
 import { PubSubNewCall, pubsub } from '../../pubsub';
 
-export function addNewCallsSubscriptionToBuilder(builder: ReturnType<typeof buildBuilder>, types: Types) {
+export function addNewCallsSubscriptionToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient, types: Types) {
   const { Call } = types;
 
   const callEventsConnectionHelpers = prismaConnectionHelpers(
@@ -21,9 +22,12 @@ export function addNewCallsSubscriptionToBuilder(builder: ReturnType<typeof buil
         type: 'String',
         resolve: (event) => encodeGlobalID('Call', event.call.id),
       }),
-      node: t.field({
+      node: t.prismaField({
         type: Call,
-        resolve: (event) => event.call,
+        resolve: (query, event) => prisma.call.findUniqueOrThrow({
+          where: { id: event.call.id },
+          ...query
+        }),
       }),
     }),
   });

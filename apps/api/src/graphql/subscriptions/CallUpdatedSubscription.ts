@@ -1,10 +1,11 @@
 import { prismaConnectionHelpers, formatPrismaCursor } from '@pothos/plugin-prisma';
+import { PrismaClient } from '@prisma/client';
 
 import { buildBuilder } from '../builder';
 import { Types } from '../types';
 import { PubSubCallUpdated, pubsub } from '../../pubsub';
 
-export function addCallUpdatedSubscriptionToBuilder(builder: ReturnType<typeof buildBuilder>, types: Types) {
+export function addCallUpdatedSubscriptionToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient, types: Types) {
   const { Call, CallEvent } = types;
 
   const callEventsConnectionHelpers = prismaConnectionHelpers(
@@ -20,9 +21,13 @@ export function addCallUpdatedSubscriptionToBuilder(builder: ReturnType<typeof b
         type: 'String',
         resolve: (event) => formatPrismaCursor(event.event, ['date', 'id']),
       }),
-      node: t.field({
+      node: t.prismaField({
         type: CallEvent,
-        resolve: (event) => event.event,
+
+        resolve: (query, event) => prisma.callEvent.findUniqueOrThrow({
+          where: { id: event.event.id },
+          ...query
+        }),
       }),
     }),
   });
@@ -42,7 +47,10 @@ export function addCallUpdatedSubscriptionToBuilder(builder: ReturnType<typeof b
     fields: (t) => ({
       call: t.prismaField({
         type: Call,
-        resolve: (query, event) => event.call,
+        resolve: (query, event) => prisma.call.findUniqueOrThrow({
+          where: { id: event.call.id },
+          ...query
+        }),
       }),
       newEvents: t.field({
         type: CallUpdatedNewEventsConnection,
