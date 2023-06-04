@@ -41,18 +41,16 @@ export function addCallUpdatedSubscriptionToBuilder(builder: ReturnType<typeof b
     })
   });
 
-  builder.subscriptionType({
-    fields: (t) => ({
-      callUpdated: t.field({
-        type: CallUpdatedSubscription,
-        args: {
-          callIdentifier: t.arg.int({ required: true }),
-        },
-        subscribe: (_, args) => pubsub.subscribe('callUpdated', args.callIdentifier),
-        resolve: (event) => event,
-      }),
-    }),
-  });
+  builder.subscriptionField('callUpdated', (t) =>
+    t.field({
+      type: CallUpdatedSubscription,
+      args: {
+        callIdentifier: t.arg.int({ required: true }),
+      },
+      subscribe: (_, args) => pubsub.subscribe('callUpdated', args.callIdentifier),
+      resolve: (event) => event,
+    })
+  );
 
   return CallUpdatedSubscription;
 }

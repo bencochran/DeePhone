@@ -8,8 +8,13 @@ export interface PubSubCallUpdated extends PubSubEvent {
   event: CallEvent;
 }
 
+export interface PubSubNewCall extends PubSubEvent {
+  call: Call;
+}
+
 export interface PubSubEvents extends Record<string, [PubSubEvent] | [string | number, PubSubEvent]> {
   callUpdated: [number, PubSubCallUpdated];
+  newCall: [PubSubNewCall];
 }
 
 export const pubsub = createPubSub<PubSubEvents>({});

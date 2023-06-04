@@ -230,6 +230,7 @@ export async function handleVoiceRequest(prisma: PrismaClient, podcast: Podcast,
 
   if (lastEvent && lastEvent.type === CallEventType.ANSWERED) {
     enqueueFetch(prisma, podcast, call);
+    pubsub.publish('newCall', { call });
   }
 
   const nextEvent = await eventAfter(prisma, lastEvent);
