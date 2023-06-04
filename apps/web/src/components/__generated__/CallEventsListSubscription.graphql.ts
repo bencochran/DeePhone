@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<318ff0efb3b2b92fb00f37d8bc151e94>>
+ * @generated SignedSource<<56dcbe34a937237cba8f684c7cc03ce9>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -23,7 +23,7 @@ export type CallEventsListSubscription$data = {
           readonly id: string;
           readonly " $fragmentSpreads": FragmentRefs<"CallEventRow_callEvent">;
         };
-      } | null>;
+      }>;
     };
   };
 };
@@ -84,7 +84,7 @@ return {
           {
             "alias": null,
             "args": null,
-            "concreteType": "CallEventsConnection",
+            "concreteType": "CallUpdatedNewEventsConnection",
             "kind": "LinkedField",
             "name": "newEvents",
             "plural": false,
@@ -92,7 +92,7 @@ return {
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "CallEventsConnectionEdge",
+                "concreteType": "CallUpdatedNewEventsConnectionEdge",
                 "kind": "LinkedField",
                 "name": "edges",
                 "plural": true,
@@ -145,7 +145,7 @@ return {
           {
             "alias": null,
             "args": null,
-            "concreteType": "CallEventsConnection",
+            "concreteType": "CallUpdatedNewEventsConnection",
             "kind": "LinkedField",
             "name": "newEvents",
             "plural": false,
@@ -153,7 +153,7 @@ return {
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "CallEventsConnectionEdge",
+                "concreteType": "CallUpdatedNewEventsConnectionEdge",
                 "kind": "LinkedField",
                 "name": "edges",
                 "plural": true,

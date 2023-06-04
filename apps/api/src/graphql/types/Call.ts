@@ -47,6 +47,15 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>) {
       }),
       callerCountry: t.exposeString('callerCountry', { nullable: true }),
       duration: t.exposeInt('callDuration', { nullable: true }),
+      events: t.relatedConnection('events', {
+        cursor: 'date_id',
+        args: {
+          oldestFirst: t.arg.boolean(),
+        },
+        query: (args) => ({
+          orderBy: { date: args.oldestFirst ? 'asc' : 'desc' },
+        }),
+      }),
       episode: t.prismaField({
         type: 'Episode',
         nullable: true,

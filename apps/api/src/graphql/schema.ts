@@ -10,7 +10,7 @@ export function buildSchema(prisma: PrismaClient) {
   const builder = buildBuilder(prisma);
   const types = addTypesToBuilder(builder);
   addQueriesToBuilder(builder, prisma, types);
-  const connections = addConnectionsToBuilder(builder, types);
-  addSubscriptionsToBuilder(builder, types, connections);
+  addConnectionsToBuilder(builder, types);
+  addSubscriptionsToBuilder(builder, types);
   return builder.toSchema();
 }

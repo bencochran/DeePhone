@@ -1,13 +1,11 @@
-import { prismaConnectionHelpers } from '@pothos/plugin-prisma';
+import { prismaConnectionHelpers, formatPrismaCursor } from '@pothos/plugin-prisma';
 
 import { buildBuilder } from '../builder';
 import { Types } from '../types';
 import { PubSubCallUpdated, pubsub } from '../../pubsub';
-import { Connections } from '../connections';
 
-export function addCallUpdatedSubscriptionToBuilder(builder: ReturnType<typeof buildBuilder>, types: Types, connections: Connections) {
+export function addCallUpdatedSubscriptionToBuilder(builder: ReturnType<typeof buildBuilder>, types: Types) {
   const { Call, CallEvent } = types;
-  const { CallEventsConnection } = connections;
 
   const callEventsConnectionHelpers = prismaConnectionHelpers(
     builder,
@@ -15,29 +13,41 @@ export function addCallUpdatedSubscriptionToBuilder(builder: ReturnType<typeof b
     { cursor: 'date_id' },
   );
 
-  const CallUpdatedSubscription = builder.objectRef<PubSubCallUpdated>('CallUpdatedSubscription');
+  const CallUpdatedNewEventsConnectionEdge = builder.objectRef<PubSubCallUpdated>('CallUpdatedNewEventsConnectionEdge');
+  CallUpdatedNewEventsConnectionEdge.implement({
+    fields: (t) => ({
+      cursor: t.field({
+        type: 'String',
+        resolve: (event) => formatPrismaCursor(event.event, ['date', 'id']),
+      }),
+      node: t.field({
+        type: CallEvent,
+        resolve: (event) => event.event,
+      }),
+    }),
+  });
 
+  const CallUpdatedNewEventsConnection = builder.objectRef<PubSubCallUpdated>('CallUpdatedNewEventsConnection');
+  CallUpdatedNewEventsConnection.implement({
+    fields: (t) => ({
+      edges: t.field({
+        type: [CallUpdatedNewEventsConnectionEdge],
+        resolve: (event) => [event],
+      }),
+    }),
+  })
+
+  const CallUpdatedSubscription = builder.objectRef<PubSubCallUpdated>('CallUpdatedSubscription');
   CallUpdatedSubscription.implement({
     fields: (t) => ({
       call: t.prismaField({
         type: Call,
         resolve: (query, event) => event.call,
       }),
-      newEvents: t.connection(
-        {
-          type: CallEvent,
-          resolve: (event, args, ctx) => {
-            const resolved = callEventsConnectionHelpers.resolve(
-              [event.event],
-              args,
-              ctx
-            );
-            return resolved;
-          }
-        },
-        CallEventsConnection,
-        {}
-      ),
+      newEvents: t.field({
+        type: CallUpdatedNewEventsConnection,
+        resolve: (event, args, ctx) => event
+      }),
     })
   });
 

@@ -52,9 +52,18 @@ enum CallStatus {
   UNKNOWN
 }
 
+type CallUpdatedNewEventsConnection {
+  edges: [CallUpdatedNewEventsConnectionEdge!]!
+}
+
+type CallUpdatedNewEventsConnectionEdge {
+  cursor: String!
+  node: CallEvent!
+}
+
 type CallUpdatedSubscription {
   call: Call!
-  newEvents(after: ID, before: ID, first: Int, last: Int): CallEventsConnection!
+  newEvents: CallUpdatedNewEventsConnection!
 }
 
 """
