@@ -87,6 +87,8 @@ export const CallEventsList: React.FC<CallEventsListProps> = ({ queryReference, 
     fetched.call
   );
 
+  useCallUpdateSubscription(fetched.call!.id, fetched.call!.identifier);
+
   const { call } = fetched;
 
   if (!call || !data || data.events.edges.length === 0) {
