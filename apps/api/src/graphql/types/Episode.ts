@@ -27,10 +27,12 @@ export function addEpisodeToBuilder(builder: ReturnType<typeof buildBuilder>) {
           oldestFirst: t.arg.boolean(),
         },
         query: (args) => ({
-          where: { AND: [
-            args.excludeDeleted === true ? { deleted: false } : {},
-            args.onlyFinished === true ? { finished: true } : {},
-          ] },
+          where: {
+            AND: [
+              args.excludeDeleted === true ? { deleted: false } : {},
+              args.onlyFinished === true ? { finished: true } : {},
+            ]
+          },
           orderBy: { downloadDate: args.oldestFirst ? 'asc' : 'desc' },
         })
       }),

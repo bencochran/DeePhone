@@ -30,7 +30,7 @@ export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>) {
       callCount: t.int({
         select: {
           episodes: {
-            select:{
+            select: {
               downloads: {
                 select: {
                   _count: {
@@ -49,8 +49,8 @@ export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>) {
           .reduce((sum, e) =>
             sum + e.downloads.reduce((isum, dl) =>
               isum + dl._count.callEvents,
+              0 as number),
             0 as number),
-          0 as number),
       }),
     })
   });
