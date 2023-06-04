@@ -23,6 +23,7 @@ const EpisodeContent: React.FC<EpisodeContentProps> = ({ initialQueryRef }) => {
     graphql`
       query EpisodeQuery($episodeId: Int!) {
         episode(identifier: $episodeId) {
+          identifier
           podcast {
             ...PodcastHeader_podcast
           }
@@ -47,7 +48,7 @@ const EpisodeContent: React.FC<EpisodeContentProps> = ({ initialQueryRef }) => {
         <EpisodeHeader className='' data={data.episode} />
       </Card>
       <Card title='Calls'>
-        <CallList data={data} />
+        <CallList data={data} episodeIdentifier={data.episode.identifier} />
       </Card>
       <Card title='Episode fetches'>
         <DownloadList data={data.episode} />

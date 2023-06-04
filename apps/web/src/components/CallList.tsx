@@ -1,6 +1,7 @@
 import React from 'react';
-import { graphql, usePaginationFragment, useQueryLoader } from 'react-relay';
+import { graphql, usePaginationFragment, useQueryLoader, useSubscription } from 'react-relay';
 import { twMerge as cn } from 'tailwind-merge';
+import { GraphQLSubscriptionConfig, ConnectionHandler } from 'relay-runtime';
 
 import { CallRow } from '@/components/CallRow';
 import { CallEventsList } from '@/components/CallEventsList';
@@ -8,13 +9,40 @@ import { Spinner } from '@/components/Spinner';
 
 import { CallListQuery$key } from './__generated__/CallListQuery.graphql'
 import * as CallEventsListQuery from '@/components/__generated__/CallEventsListQuery.graphql';
+import { CallListNewCallsSubscription } from './__generated__/CallListNewCallsSubscription.graphql';
 
 export interface CallListProps {
   data: CallListQuery$key;
   className?: string;
+  episodeIdentifier?: number;
 }
 
-export const CallList: React.FC<CallListProps> = ({ data, className }) => {
+const useNewCallsSubscription = (episodeIdentifier?: number) => {
+  const config = React.useMemo<GraphQLSubscriptionConfig<CallListNewCallsSubscription>>(() => {
+    const connectionId = ConnectionHandler.getConnectionID('client:root', 'CallListQuery_calls', { episodeIdentifier });
+    return {
+      subscription: graphql`
+        subscription CallListNewCallsSubscription($episodeIdentifier: Int, $connections: [ID!]!) {
+          newCalls(episodeIdentifier: $episodeIdentifier) {
+            edges @prependEdge(connections: $connections) {
+              node {
+                ...CallRow_call
+              }
+            }
+          }
+        }
+      `,
+      variables: {
+        episodeIdentifier,
+        connections: [connectionId],
+      },
+    };
+  }, [episodeIdentifier]);
+
+  useSubscription<CallListNewCallsSubscription>(config);
+};
+
+export const CallList: React.FC<CallListProps> = ({ data, className, episodeIdentifier }) => {
   const {
     data: { calls },
     hasNext,
@@ -50,6 +78,8 @@ export const CallList: React.FC<CallListProps> = ({ data, className }) => {
     `,
     data
   );
+
+  useNewCallsSubscription(episodeIdentifier);
 
   const [expandedCallIdentifier, setExpandedCallIdentifier] = React.useState<number | null>(null);
   const [nextExpandedCallIdentifier, setNextExpandedCallIdentifier] = React.useState<number | null>(null);
