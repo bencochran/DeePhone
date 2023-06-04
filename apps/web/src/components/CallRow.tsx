@@ -1,21 +1,45 @@
 import React from 'react';
-import { graphql, useFragment } from 'react-relay';
+import { graphql, useFragment, useSubscription } from 'react-relay';
 import { MicrophoneIcon, PhoneIcon, PhoneXMarkIcon } from '@heroicons/react/24/solid';
 import { PhoneIcon as PhoneOutlineIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { GraphQLSubscriptionConfig } from 'relay-runtime';
 
 import { useYearOptionalFormattedDate } from '@/hooks/dates';
 import { formatDuration } from '@/utils/date-and-time';
 import { Spinner } from '@/components/Spinner';
 
 import { CallRow_call$key } from './__generated__/CallRow_call.graphql';
+import { CallRowSubscription } from './__generated__/CallRowSubscription.graphql';
 
 interface CallRowProps {
   data: CallRow_call$key;
   className?: string;
 }
 
+const useCallUpdateSubscription = (callIdentifier: number) => {
+  const config = React.useMemo<GraphQLSubscriptionConfig<CallRowSubscription>>(() => {
+    return {
+      subscription: graphql`
+        subscription CallRowSubscription($callIdentifier: Int!) {
+          callUpdated(callIdentifier: $callIdentifier) {
+            call {
+              ...CallRow_call
+            }
+          }
+        }
+      `,
+      variables: {
+        callIdentifier,
+      },
+    };
+  }, [callIdentifier]);
+
+  useSubscription<CallRowSubscription>(config);
+}
+
 export const CallRow: React.FC<CallRowProps> = ({ data, className }) => {
   const {
+    identifier,
     callerName,
     phoneNumber,
     startDate: startDateString,
@@ -43,6 +67,8 @@ export const CallRow: React.FC<CallRowProps> = ({ data, className }) => {
     `,
     data
   );
+
+  useCallUpdateSubscription(identifier);
 
   const startDate = React.useMemo(() => new Date(startDateString), [startDateString]);
   const endDate = React.useMemo(() => endDateString ? new Date(endDateString) : null, [endDateString]);
