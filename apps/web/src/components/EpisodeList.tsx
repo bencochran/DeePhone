@@ -1,6 +1,6 @@
 import React from 'react';
 import { graphql, usePaginationFragment } from 'react-relay';
-import { useNavigate } from 'react-router';
+import { Link } from 'react-router-dom';
 
 import { EpisodeRow } from './EpisodeRow';
 import { Spinner } from './Spinner';
@@ -42,8 +42,6 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({ data }) => {
     data
   );
 
-  const navigate = useNavigate();
-
   return (
     <>
     {episodes.edges.length > 0 ? (
@@ -57,16 +55,16 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({ data }) => {
         </p>
         <div className='flex flex-col gap-3'>
           {episodes.edges.map(edge => edge &&
-            <button
+            <Link
               key={edge.node.id}
+              to={`/episode/${edge.node.identifier}`}
               className='text-left'
-              onClick={() => navigate(`/episode/${edge.node.identifier}`)}
             >
               <EpisodeRow
                 className='-m-1 p-1 hover:bg-slate-200 hover:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer'
                 data={edge.node}
               />
-            </button>
+            </Link>
           )}
           {hasNext &&
             <button
