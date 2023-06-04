@@ -37,6 +37,11 @@ const useCallUpdateSubscription = (callIdentifier: number) => {
   useSubscription<CallRowSubscription>(config);
 }
 
+const CallSubscriber: React.FC<{ callIdentifier: number }> = ({ callIdentifier }) => {
+  useCallUpdateSubscription(callIdentifier);
+  return null;
+};
+
 export const CallRow: React.FC<CallRowProps> = ({ data, className }) => {
   const {
     identifier,
@@ -68,8 +73,6 @@ export const CallRow: React.FC<CallRowProps> = ({ data, className }) => {
     data
   );
 
-  useCallUpdateSubscription(identifier);
-
   const startDate = React.useMemo(() => new Date(startDateString), [startDateString]);
   const endDate = React.useMemo(() => endDateString ? new Date(endDateString) : null, [endDateString]);
 
@@ -89,6 +92,7 @@ export const CallRow: React.FC<CallRowProps> = ({ data, className }) => {
 
   return (
     <div className={className}>
+      {status === 'IN_PROGRESS' && <CallSubscriber callIdentifier={identifier} />}
       <div className='flex flex-row items-center gap-2'>
         <div className='bg-slate-300 aspect-square h-12 rounded overflow-hidden'>
           {episode ? (
