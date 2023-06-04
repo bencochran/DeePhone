@@ -24,6 +24,7 @@ async function fetchRelay(
   const response = await fetch(`${base}/api/graphql`, {
     method: "POST",
     headers: {
+      "Accept": "application/json",
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
