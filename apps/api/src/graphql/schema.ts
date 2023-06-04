@@ -8,9 +8,9 @@ import { addSubscriptionsToBuilder } from './subscriptions';
 
 export function buildSchema(prisma: PrismaClient) {
   const builder = buildBuilder(prisma);
-  const nodeTypes = addTypesToBuilder(builder);
-  addQueriesToBuilder(builder, prisma, nodeTypes);
-  const connections = addConnectionsToBuilder(builder, nodeTypes);
-  addSubscriptionsToBuilder(builder, nodeTypes, connections);
+  const types = addTypesToBuilder(builder);
+  addQueriesToBuilder(builder, prisma, types);
+  const connections = addConnectionsToBuilder(builder, types);
+  addSubscriptionsToBuilder(builder, types, connections);
   return builder.toSchema();
 }
