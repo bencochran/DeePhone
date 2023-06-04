@@ -4,6 +4,7 @@ import express from 'express';
 import http from 'http';
 import path from 'path';
 import { PrismaClient, Podcast } from '@prisma/client';
+import { WebSocketServer } from 'ws';
 
 import logger from './logger';
 import { buildRouter as buildVoiceRouter } from './voice-router';
@@ -39,10 +40,17 @@ async function bootstrap(): Promise<Boostrap> {
 bootstrap()
   .then(({ prisma, podcast }) => {
     const app = express();
+
+    const httpServer = http.createServer(app);
+    const wsServer = new WebSocketServer({
+      server: httpServer,
+      path: '/api/graphql/ws',
+    });
+
     app.enable('trust proxy');
 
     app.use('/voice', buildVoiceRouter(prisma, podcast));
-    app.use('/api/graphql', buildGraphQLRouter(prisma, '/api/graphql'));
+    app.use('/api/graphql', buildGraphQLRouter(prisma, '/api/graphql', httpServer, wsServer));
 
     // Serve static files as-is
     app.use(express.static(path.resolve('../web/dist')));
@@ -54,7 +62,6 @@ bootstrap()
 
     const port = process.env.PORT || 5000;
 
-    const httpServer = http.createServer(app);
     httpServer.listen(port, () => {
       logger.info(`HTTP server running on port ${port}!`);
     });

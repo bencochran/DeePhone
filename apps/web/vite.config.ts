@@ -5,6 +5,18 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react(), relay],
+  server: {
+    proxy: {
+      '/api/graphql/ws': {
+        target: 'ws://localhost:8080',
+        ws: true,
+      },
+      '/api': {
+        target: 'http://localhost:8080',
+      }
+    },
+    sourcemapIgnoreList: false,
+  },
   resolve: {
     alias: {
       '@/components/': path.join(__dirname, 'src/components/'),

@@ -8,11 +8,12 @@ import {
   CacheConfig,
   Observable,
 } from 'relay-runtime';
-import { createClient, ExecutionResult } from 'graphql-sse';
+import { createClient } from 'graphql-ws';
 
-const base = import.meta.env.VITE_GRAPHQL_BASE ?? '';
-const client = createClient<true>({
-  url: `${base}/api/graphql/stream`,
+const subscriptionsClient = createClient({
+  url: window.location.protocol === 'https:'
+    ? `wss://${window.location.host}/api/graphql/ws`
+    : `ws://${window.location.host}/api/graphql/ws`,
 });
 
 async function fetchRelay(
@@ -20,8 +21,7 @@ async function fetchRelay(
   variables: Variables,
   _cacheConfig: CacheConfig
 ) {
-  const base = import.meta.env.VITE_GRAPHQL_BASE ?? '';
-  const response = await fetch(`${base}/api/graphql`, {
+  const response = await fetch(`/api/graphql`, {
     method: "POST",
     headers: {
       "Accept": "application/json",
@@ -53,19 +53,21 @@ async function fetchRelay(
   return json;
 }
 
-export function subscribe(
-  params: RequestParameters,
+function subscribe(
+  operation: RequestParameters,
   variables: Variables,
-  _cacheConfig: CacheConfig
-) {
-  return Observable.create<any>((sink) => {
-    client.subscribe(
+): Observable<any> {
+  return Observable.create((sink) => {
+    if (!operation.text) {
+      return sink.error(new Error('Operation text cannot be empty'));
+    }
+    return subscriptionsClient.subscribe(
       {
-        query:  params.text ?? '',
-        operationName: params.name,
+        operationName: operation.name,
+        query: operation.text,
         variables,
       },
-      sink
+      sink,
     );
   });
 }
