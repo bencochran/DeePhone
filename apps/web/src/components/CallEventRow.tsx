@@ -37,6 +37,8 @@ function formatState(event: CallEventRow_callEvent$data): string {
       return "Error";
     case "ENDED":
       return "Call ended";
+    // For having typescript complain if we forget to handle a new type:
+    // case "%future added value":
     default:
       return "Unknown";
   }
