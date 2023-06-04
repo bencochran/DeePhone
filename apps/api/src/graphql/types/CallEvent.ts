@@ -1,9 +1,13 @@
-import { PrismaClient, CallEventType } from '@prisma/client';
+import { CallEventType } from '@prisma/client';
 
 import { buildBuilder } from '../builder';
 
-export function addCallEventToBuilder(builder: ReturnType<typeof buildBuilder>, _prisma: PrismaClient) {
-  builder.prismaNode('CallEvent', {
+export function addCallEventToBuilder(builder: ReturnType<typeof buildBuilder>) {
+  builder.enumType(CallEventType, {
+    name: 'CallEventType',
+  });
+
+  return builder.prismaNode('CallEvent', {
     id: { field: 'id' },
     fields: (t) => ({
       date: t.expose('date', {
@@ -16,9 +20,5 @@ export function addCallEventToBuilder(builder: ReturnType<typeof buildBuilder>, 
       download: t.relation('download', { nullable: true }),
       part: t.relation('part', { nullable: true }),
     })
-  });
-
-  builder.enumType(CallEventType, {
-    name: 'CallEventType',
   });
 }

@@ -1,5 +1,4 @@
-import { PrismaClient, CallEventType } from '@prisma/client';
-import { prismaConnectionHelpers } from '@pothos/plugin-prisma';
+import { CallEventType } from '@prisma/client';
 import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
 
 import { buildBuilder } from '../builder';
@@ -27,12 +26,12 @@ enum CallStatus {
   UNKNOWN = 'UNKNOWN',
 };
 
-export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient) {
+export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>) {
   const CallStatusRef = builder.enumType(CallStatus, {
     name: 'CallStatus',
   });
 
-  const Call = builder.prismaNode('Call', {
+  return builder.prismaNode('Call', {
     id: { field: 'id' },
     fields: (t) => ({
       identifier: t.exposeInt('id'),
@@ -122,69 +121,4 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>, prism
       }),
     })
   });
-
-  const downloadCallConnectionHelpers = prismaConnectionHelpers(
-    builder,
-    'CallEvent',
-    {
-      cursor: 'date_id',
-      select: (nodeSelection) => ({
-        call: nodeSelection({
-        }),
-      }),
-      resolveNode: (callEvent) => callEvent.call,
-    },
-  );
-
-  builder.prismaObjectField('EpisodeDownload', 'calls', (t) =>
-    t.connection({
-      type: Call,
-      select: (args, ctx, nestedSelection) => ({
-        callEvents: {
-          ...downloadCallConnectionHelpers.getQuery(args, ctx, nestedSelection),
-          where: { type: 'INTRODUCING_EPISODE' },
-          orderBy: { date: 'desc' },
-        }
-      }),
-      resolve: (download, args, ctx) => downloadCallConnectionHelpers.resolve(
-        download.callEvents,
-        args,
-        ctx
-      ),
-    })
-  )
-
-  builder.queryFields((t) => ({
-    call: t.prismaField({
-      type: 'Call',
-      nullable: true,
-      args: {
-        identifier: t.arg.int({ required: true }),
-      },
-      resolve: (query, _parent, args, _ctx, _info) =>
-        prisma.call.findUnique({
-          ...query,
-          where: { id: args.identifier },
-        })
-    }),
-    calls: t.prismaConnection({
-      type: 'Call',
-      cursor: 'startDate_id',
-      args: {
-        onlyInProgress: t.arg.boolean(),
-        onlyComplete: t.arg.boolean(),
-        episodeIdentifier: t.arg.int(),
-      },
-      resolve: (query, _parent, args, _ctx, _info) =>
-        prisma.call.findMany({
-          ...query,
-          where: { AND: [
-            args.episodeIdentifier ? { events: { some: { download: { episode: { id: args.episodeIdentifier } } } } } : { },
-            args.onlyInProgress ? { endDate: null } : { },
-            args.onlyComplete ? { NOT: { endDate: null } } : { },
-          ] },
-          orderBy: { startDate: 'desc' }
-        })
-    }),
-  }));
 }

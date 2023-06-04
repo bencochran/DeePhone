@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-
 import { buildBuilder } from '../builder';
 
-export function addEpisodeToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient) {
-  builder.prismaNode('Episode', {
+export function addEpisodeToBuilder(builder: ReturnType<typeof buildBuilder>) {
+  return builder.prismaNode('Episode', {
     id: { field: 'id' },
     fields: (t) => ({
       identifier: t.exposeInt('id'),
@@ -54,25 +52,4 @@ export function addEpisodeToBuilder(builder: ReturnType<typeof buildBuilder>, pr
       }),
     })
   });
-
-  builder.queryFields((t) => ({
-    episode: t.prismaField({
-      type: 'Episode',
-      nullable: true,
-      args: {
-        identifier: t.arg.int({ required: true }),
-      },
-      resolve: (query, _parent, args, _ctx, _info) =>
-        prisma.episode.findUnique({
-          ...query,
-          where: { id: args.identifier },
-        })
-    }),
-    episodes: t.prismaConnection({
-      type: 'Episode',
-      cursor: 'publishDate_id',
-      resolve: (query, _parent, _args, _ctx, _info) =>
-        prisma.episode.findMany({ ...query, orderBy: { publishDate: 'desc' } })
-    }),
-  }));
 }

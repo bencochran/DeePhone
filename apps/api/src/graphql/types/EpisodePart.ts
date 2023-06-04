@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-
 import { buildBuilder } from '../builder';
 
-export function addEpisodePartToBuilder(builder: ReturnType<typeof buildBuilder>, _prisma: PrismaClient) {
-  builder.prismaNode('EpisodePart', {
+export function addEpisodePartToBuilder(builder: ReturnType<typeof buildBuilder>) {
+  return builder.prismaNode('EpisodePart', {
     id: { field: 'id' },
     fields: (t) => ({
       download: t.relation('download'),
