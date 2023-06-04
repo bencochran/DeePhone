@@ -6,7 +6,9 @@
       "outputs": ["dist/**"]
     },
     "dev": {
-      "cache": false
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["db:generate"]
     },
     "lint": {
       "cache": false
@@ -16,6 +18,10 @@
     },
     "clean": {
       "cache": false
+    },
+    "//start": {
+      "persistent": true,
+      "dependsOn": ["build"]
     },
     "db:generate": {
       "cache": false

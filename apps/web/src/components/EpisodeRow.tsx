@@ -1,21 +1,45 @@
 import React from 'react';
 import { twMerge as cn } from 'tailwind-merge'
-import { graphql, useFragment } from 'react-relay';
+import { graphql, useFragment, useSubscription } from 'react-relay';
 import { PhoneArrowDownLeftIcon } from '@heroicons/react/24/outline';
+import { GraphQLSubscriptionConfig } from 'relay-runtime';
 
 import { useFormattedDate } from '@/hooks/dates';
 
 import { EpisodeRow_episode$key } from './__generated__/EpisodeRow_episode.graphql';
+import { EpisodeRowSubscription } from './__generated__/EpisodeRowSubscription.graphql';
 
 interface Props {
   data: EpisodeRow_episode$key;
   className?: string;
 }
 
+const useEpisodeUpdateSubscription = (episodeIdentifier: number) => {
+  const config = React.useMemo<GraphQLSubscriptionConfig<EpisodeRowSubscription>>(() => {
+    return {
+      subscription: graphql`
+        subscription EpisodeRowSubscription($episodeIdentifier: Int!) {
+          episodeUpdated(episodeIdentifier: $episodeIdentifier) {
+            episode {
+              ...EpisodeRow_episode
+            }
+          }
+        }
+      `,
+      variables: {
+        episodeIdentifier,
+      },
+    };
+  }, [episodeIdentifier]);
+
+  useSubscription<EpisodeRowSubscription>(config);
+}
+
 export const EpisodeRow: React.FC<Props & Omit<React.HTMLProps<HTMLDivElement>, 'data'>> = ({ data, className, ...props }) => {
   const episode = useFragment(
     graphql`
       fragment EpisodeRow_episode on Episode {
+        identifier
         title
         publishDate
         imageURL
@@ -24,6 +48,7 @@ export const EpisodeRow: React.FC<Props & Omit<React.HTMLProps<HTMLDivElement>, 
     `,
     data
   );
+  useEpisodeUpdateSubscription(episode.identifier);
 
   const formattedPublishDate = useFormattedDate(episode.publishDate, {
     year: 'numeric',
