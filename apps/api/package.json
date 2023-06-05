@@ -14,7 +14,7 @@
     "dev:prisma": "yarn prisma generate --watch",
     "dev:graphql": "nodemon --exec \"yarn graphql:generate\" -e ts -w src/graphql -w scripts/generate-graphql-schema.ts",
     "db:generate": "yarn prisma generate",
-    "graphql:generate": "tsx ./scripts/generate-graphql-schema.ts",
+    "graphql:generate": "tsx ./scripts/generate-graphql-schema.ts && prettier --write schema.graphql",
     "release": "yarn prisma migrate deploy"
   },
   "devDependencies": {
