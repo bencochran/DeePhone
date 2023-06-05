@@ -43,6 +43,13 @@ const useEpisodeDownloadUpdateSubscription = (
   useSubscription<DownloadRowSubscription>(config);
 };
 
+const DownloadSubscriber: React.FC<{ identifier: number }> = ({
+  identifier,
+}) => {
+  useEpisodeDownloadUpdateSubscription(identifier);
+  return null;
+};
+
 export const DownloadRow: React.FC<DownloadRowProps> = ({
   data,
   className,
@@ -61,7 +68,6 @@ export const DownloadRow: React.FC<DownloadRowProps> = ({
       `,
       data
     );
-  useEpisodeDownloadUpdateSubscription(identifier);
 
   const formattedDate = useYearOptionalFormattedDate(downloadDate, {
     year: 'numeric',
@@ -73,6 +79,7 @@ export const DownloadRow: React.FC<DownloadRowProps> = ({
 
   return (
     <div className={cn('flex flex-row gap-2 items-center group', className)}>
+      {!deleted && <DownloadSubscriber identifier={identifier} />}
       <div className="flex flex-col flex-shrink min-w-0">
         <p className="font-medium text-slate-900 dark:text-slate-100 group-hover:dark:text-slate-50 group-active:dark:text-slate-50 truncate">
           {partCount} parts
