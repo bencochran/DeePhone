@@ -127,6 +127,10 @@ export async function geocodeVoiceRequestFrom(
         return result;
       }
     }
+    logger.warning(`Geocoding got no results`, {
+      voiceRequest,
+      response: { data: response.data },
+    });
     return null;
   } catch (error) {
     logger.warning('Failed to geocode', {
