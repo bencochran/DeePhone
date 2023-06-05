@@ -1,0 +1,51 @@
+module.exports = {
+  env: {
+    browser: true,
+    node: true,
+    es2021: true,
+  },
+  extends: ['airbnb', 'airbnb-typescript', 'eslint-config-prettier'],
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+    project: ['./apps/*/tsconfig.json'],
+  },
+  ignorePatterns: [
+    '.eslintrc.cjs',
+    'dist/',
+    'node_modules/',
+    'src/migrations/',
+    '__tests__/',
+    '__generated__/',
+    '*.config.ts',
+    '*.config.js',
+  ],
+  plugins: ['@typescript-eslint'],
+  root: true,
+  rules: {
+    'react/require-default-props': 'off',
+    'react/function-component-definition': [
+      'error',
+      { namedComponents: 'arrow-function' },
+    ],
+    'import/prefer-default-export': 'off',
+    'no-unused-vars': ['error', { destructuredArrayIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { destructuredArrayIgnorePattern: '^_' },
+    ],
+    '@typescript-eslint/naming-convention': 'off',
+    'no-underscore-dangle': ['error', { allow: ['_count'] }],
+    'default-case': 'off',
+    'no-restricted-syntax': [
+      'error',
+      'ForInStatement',
+      'LabeledStatement',
+      'WithStatement',
+    ],
+    'no-async-promise-executor': 'off',
+    'import/extensions': 'off',
+    'no-nested-ternary': 'off',
+    'react/jsx-props-no-spreading': 'off',
+  },
+};
