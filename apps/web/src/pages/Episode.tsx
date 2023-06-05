@@ -33,14 +33,16 @@ const EpisodeContent: React.FC<EpisodeContentProps> = ({ initialQueryRef }) => {
     graphql`
       query EpisodeQuery($episodeId: Int!) {
         episode(identifier: $episodeId) {
+          id
           identifier
           podcast {
             ...PodcastHeader_podcast
           }
           ...EpisodeHeader_episode
-          ...DownloadList_episodeDownloadQuery
         }
         ...CallListQuery @arguments(first: 10, episodeIdentifier: $episodeId)
+        ...DownloadListQuery
+          @arguments(first: 10, episodeIdentifier: $episodeId)
       }
     `,
     initialQueryRef
@@ -61,7 +63,11 @@ const EpisodeContent: React.FC<EpisodeContentProps> = ({ initialQueryRef }) => {
         <CallList data={data} episodeIdentifier={data.episode.identifier} />
       </Card>
       <Card title="Episode fetches">
-        <DownloadList data={data.episode} />
+        <DownloadList
+          data={data}
+          episodeIdentifier={data.episode.identifier}
+          episodeId={data.episode.id}
+        />
       </Card>
     </Page>
   );

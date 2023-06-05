@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<31a8a4107c3797d2dab8ddbbfb32e2dd>>
+ * @generated SignedSource<<f90aef93f69109ee165ce9cd160ce2ab>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,13 +15,14 @@ export type EpisodeQuery$variables = {
 };
 export type EpisodeQuery$data = {
   readonly episode: {
+    readonly id: string;
     readonly identifier: number;
     readonly podcast: {
       readonly " $fragmentSpreads": FragmentRefs<"PodcastHeader_podcast">;
     };
-    readonly " $fragmentSpreads": FragmentRefs<"DownloadList_episodeDownloadQuery" | "EpisodeHeader_episode">;
+    readonly " $fragmentSpreads": FragmentRefs<"EpisodeHeader_episode">;
   } | null;
-  readonly " $fragmentSpreads": FragmentRefs<"CallListQuery">;
+  readonly " $fragmentSpreads": FragmentRefs<"CallListQuery" | "DownloadListQuery">;
 };
 export type EpisodeQuery = {
   response: EpisodeQuery$data;
@@ -47,41 +48,41 @@ v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "identifier",
+  "name": "id",
   "storageKey": null
 },
 v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "identifier",
+  "storageKey": null
+},
+v4 = {
   "kind": "Literal",
   "name": "first",
   "value": 10
 },
-v4 = [
+v5 = [
   {
     "kind": "Variable",
     "name": "episodeIdentifier",
     "variableName": "episodeId"
   },
-  (v3/*: any*/)
+  (v4/*: any*/)
 ],
-v5 = {
+v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "title",
   "storageKey": null
 },
-v6 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "imageURL",
-  "storageKey": null
-},
 v7 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "id",
+  "name": "imageURL",
   "storageKey": null
 },
 v8 = {
@@ -92,10 +93,41 @@ v8 = {
   "name": "podcast",
   "plural": false,
   "selections": [
-    (v5/*: any*/),
     (v6/*: any*/),
-    (v7/*: any*/)
+    (v7/*: any*/),
+    (v2/*: any*/)
   ],
+  "storageKey": null
+},
+v9 = [
+  (v4/*: any*/)
+],
+v10 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "__typename",
+  "storageKey": null
+},
+v11 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "cursor",
+  "storageKey": null
+},
+v12 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "endCursor",
+  "storageKey": null
+},
+v13 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "hasNextPage",
   "storageKey": null
 };
 return {
@@ -114,6 +146,7 @@ return {
         "plural": false,
         "selections": [
           (v2/*: any*/),
+          (v3/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -134,19 +167,19 @@ return {
             "args": null,
             "kind": "FragmentSpread",
             "name": "EpisodeHeader_episode"
-          },
-          {
-            "args": null,
-            "kind": "FragmentSpread",
-            "name": "DownloadList_episodeDownloadQuery"
           }
         ],
         "storageKey": null
       },
       {
-        "args": (v4/*: any*/),
+        "args": (v5/*: any*/),
         "kind": "FragmentSpread",
         "name": "CallListQuery"
+      },
+      {
+        "args": (v5/*: any*/),
+        "kind": "FragmentSpread",
+        "name": "DownloadListQuery"
       }
     ],
     "type": "Query",
@@ -167,8 +200,9 @@ return {
         "plural": false,
         "selections": [
           (v2/*: any*/),
+          (v3/*: any*/),
           (v8/*: any*/),
-          (v5/*: any*/),
+          (v6/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -176,7 +210,7 @@ return {
             "name": "publishDate",
             "storageKey": null
           },
-          (v6/*: any*/),
+          (v7/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -186,9 +220,7 @@ return {
           },
           {
             "alias": null,
-            "args": [
-              (v3/*: any*/)
-            ],
+            "args": (v9/*: any*/),
             "concreteType": "EpisodeDownloadsConnection",
             "kind": "LinkedField",
             "name": "downloads",
@@ -210,7 +242,7 @@ return {
                     "name": "node",
                     "plural": false,
                     "selections": [
-                      (v7/*: any*/),
+                      (v2/*: any*/),
                       {
                         "alias": null,
                         "args": null,
@@ -245,23 +277,46 @@ return {
                         "kind": "ScalarField",
                         "name": "callCount",
                         "storageKey": null
-                      }
+                      },
+                      (v10/*: any*/)
                     ],
                     "storageKey": null
-                  }
+                  },
+                  (v11/*: any*/)
+                ],
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "PageInfo",
+                "kind": "LinkedField",
+                "name": "pageInfo",
+                "plural": false,
+                "selections": [
+                  (v12/*: any*/),
+                  (v13/*: any*/)
                 ],
                 "storageKey": null
               }
             ],
             "storageKey": "downloads(first:10)"
           },
-          (v7/*: any*/)
+          {
+            "alias": null,
+            "args": (v9/*: any*/),
+            "filters": null,
+            "handle": "connection",
+            "key": "Episode_downloads",
+            "kind": "LinkedHandle",
+            "name": "downloads"
+          }
         ],
         "storageKey": null
       },
       {
         "alias": null,
-        "args": (v4/*: any*/),
+        "args": (v5/*: any*/),
         "concreteType": "QueryCallsConnection",
         "kind": "LinkedField",
         "name": "calls",
@@ -283,8 +338,8 @@ return {
                 "name": "node",
                 "plural": false,
                 "selections": [
-                  (v7/*: any*/),
                   (v2/*: any*/),
+                  (v3/*: any*/),
                   {
                     "alias": null,
                     "args": null,
@@ -328,30 +383,18 @@ return {
                     "name": "episode",
                     "plural": false,
                     "selections": [
-                      (v5/*: any*/),
                       (v6/*: any*/),
+                      (v7/*: any*/),
                       (v8/*: any*/),
-                      (v7/*: any*/)
+                      (v2/*: any*/)
                     ],
                     "storageKey": null
                   },
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "__typename",
-                    "storageKey": null
-                  }
+                  (v10/*: any*/)
                 ],
                 "storageKey": null
               },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "cursor",
-                "storageKey": null
-              }
+              (v11/*: any*/)
             ],
             "storageKey": null
           },
@@ -363,20 +406,8 @@ return {
             "name": "pageInfo",
             "plural": false,
             "selections": [
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "hasNextPage",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "endCursor",
-                "storageKey": null
-              }
+              (v13/*: any*/),
+              (v12/*: any*/)
             ],
             "storageKey": null
           }
@@ -385,7 +416,7 @@ return {
       },
       {
         "alias": null,
-        "args": (v4/*: any*/),
+        "args": (v5/*: any*/),
         "filters": [
           "episodeIdentifier"
         ],
@@ -397,16 +428,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "5554ce27f27f1814875368afdc7c6e1d",
+    "cacheID": "1ab13d2174ebae5de396bc2ac18627bf",
     "id": null,
     "metadata": {},
     "name": "EpisodeQuery",
     "operationKind": "query",
-    "text": "query EpisodeQuery(\n  $episodeId: Int!\n) {\n  episode(identifier: $episodeId) {\n    identifier\n    podcast {\n      ...PodcastHeader_podcast\n      id\n    }\n    ...EpisodeHeader_episode\n    ...DownloadList_episodeDownloadQuery\n    id\n  }\n  ...CallListQuery_2kAcFf\n}\n\nfragment CallListQuery_2kAcFf on Query {\n  calls(first: 10, episodeIdentifier: $episodeId) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  status\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n\nfragment DownloadList_episodeDownloadQuery on Episode {\n  downloads(first: 10) {\n    edges {\n      node {\n        id\n        ...DownloadRow_episodeDownload\n      }\n    }\n  }\n}\n\nfragment DownloadRow_episodeDownload on EpisodeDownload {\n  downloadDate\n  partCount\n  finished\n  deleted\n  callCount\n}\n\nfragment EpisodeHeader_episode on Episode {\n  title\n  publishDate\n  imageURL\n  description\n}\n\nfragment PodcastHeader_podcast on Podcast {\n  title\n  imageURL\n}\n"
+    "text": "query EpisodeQuery(\n  $episodeId: Int!\n) {\n  episode(identifier: $episodeId) {\n    id\n    identifier\n    podcast {\n      ...PodcastHeader_podcast\n      id\n    }\n    ...EpisodeHeader_episode\n  }\n  ...CallListQuery_2kAcFf\n  ...DownloadListQuery_2kAcFf\n}\n\nfragment CallListQuery_2kAcFf on Query {\n  calls(first: 10, episodeIdentifier: $episodeId) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  status\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n\nfragment DownloadListQuery_2kAcFf on Query {\n  episode(identifier: $episodeId) {\n    downloads(first: 10) {\n      edges {\n        node {\n          id\n          ...DownloadRow_episodeDownload\n          __typename\n        }\n        cursor\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n    id\n  }\n}\n\nfragment DownloadRow_episodeDownload on EpisodeDownload {\n  downloadDate\n  partCount\n  finished\n  deleted\n  callCount\n}\n\nfragment EpisodeHeader_episode on Episode {\n  title\n  publishDate\n  imageURL\n  description\n}\n\nfragment PodcastHeader_podcast on Podcast {\n  title\n  imageURL\n}\n"
   }
 };
 })();
 
-(node as any).hash = "33cfbecff0d93e274ead413b17e5fcf4";
+(node as any).hash = "f539272c3b395e9a0e208b1245c7435e";
 
 export default node;
