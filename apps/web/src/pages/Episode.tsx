@@ -54,15 +54,15 @@ const EpisodeContent: React.FC<EpisodeContentProps> = ({ initialQueryRef }) => {
 
   return (
     <Page
-      title={<PodcastHeader className="mb-4" data={data.episode.podcast} />}
+      title={<PodcastHeader className='mb-4' data={data.episode.podcast} />}
     >
       <Card>
-        <EpisodeHeader className="" data={data.episode} />
+        <EpisodeHeader className='' data={data.episode} />
       </Card>
-      <Card title="Calls">
+      <Card title='Calls'>
         <CallList data={data} episodeIdentifier={data.episode.identifier} />
       </Card>
-      <Card title="Episode fetches">
+      <Card title='Episode fetches'>
         <DownloadList
           data={data}
           episodeIdentifier={data.episode.identifier}

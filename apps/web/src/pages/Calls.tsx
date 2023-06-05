@@ -32,7 +32,7 @@ const CallsContent: React.FC<CallsContentProps> = ({ initialQueryRef }) => {
   );
 
   return (
-    <Page title="Recent calls">
+    <Page title='Recent calls'>
       <Card>
         <CallList data={data} />
       </Card>

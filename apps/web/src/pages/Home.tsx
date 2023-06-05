@@ -33,10 +33,10 @@ const HomeContent: React.FC<HomeContentProps> = ({ initialQueryRef }) => {
   );
 
   return (
-    <Page title="Home">
+    <Page title='Home'>
       <Card>
-        <div className="mb-4">
-          <h2 className="text-slate-900 dark:text-slate-300 font-medium text-2xl">
+        <div className='mb-4'>
+          <h2 className='text-slate-900 dark:text-slate-300 font-medium text-2xl'>
             Recent calls
           </h2>
         </div>

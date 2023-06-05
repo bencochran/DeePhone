@@ -32,7 +32,7 @@ const PodcastsContent: React.FC<PodcastsContentProps> = ({
   );
 
   return (
-    <Page title="Podcasts">
+    <Page title='Podcasts'>
       <PodcastCards data={data} />
     </Page>
   );

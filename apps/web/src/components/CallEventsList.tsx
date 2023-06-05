@@ -110,8 +110,8 @@ export const CallEventsList: React.FC<CallEventsListProps> = ({
 
   if (!call || !data || data.events.edges.length === 0) {
     return (
-      <div className="flex flex-row justify-center items-center h-6 mt-2">
-        <p className="italic text-slate-500 dark:text-slate-400 text-center">
+      <div className='flex flex-row justify-center items-center h-6 mt-2'>
+        <p className='italic text-slate-500 dark:text-slate-400 text-center'>
           No call events
         </p>
       </div>
@@ -136,17 +136,17 @@ export const CallEventsList: React.FC<CallEventsListProps> = ({
       </table>
       {hasNext && (
         <button
-          className="text-blue-600 hover:text-blue-700 active:text-blue-800 dark:text-blue-500 dark:hover:text-blue-100 dark:active:text-blue-50 font-medium hover:bg-blue-100 active:bg-blue-200 dark:hover:bg-blue-900 dark:active:bg-blue-800 h-7 rounded mt-2 flex flex-row items-center justify-center gap-2"
-          type="button"
+          className='text-blue-600 hover:text-blue-700 active:text-blue-800 dark:text-blue-500 dark:hover:text-blue-100 dark:active:text-blue-50 font-medium hover:bg-blue-100 active:bg-blue-200 dark:hover:bg-blue-900 dark:active:bg-blue-800 h-7 rounded mt-2 flex flex-row items-center justify-center gap-2'
+          type='button'
           onClick={() => loadNext(50)}
         >
           {isLoadingNext ? (
             <>
-              <Spinner className="text-inherit" size="sm" />
-              <span className="block">Loading…</span>
+              <Spinner className='text-inherit' size='sm' />
+              <span className='block'>Loading…</span>
             </>
           ) : (
-            <span className="block">More events</span>
+            <span className='block'>More events</span>
           )}
         </button>
       )}

@@ -111,44 +111,44 @@ export const CallRow: React.FC<CallRowProps> = ({ data, className }) => {
       {status === 'IN_PROGRESS' && (
         <CallSubscriber callIdentifier={identifier} />
       )}
-      <div className="flex flex-row items-center gap-2">
-        <div className="bg-slate-300 aspect-square h-12 rounded overflow-hidden">
+      <div className='flex flex-row items-center gap-2'>
+        <div className='bg-slate-300 aspect-square h-12 rounded overflow-hidden'>
           {episode ? (
             <div
-              className="w-full h-full flex items-center justify-center"
+              className='w-full h-full flex items-center justify-center'
               data-tooltip-html={`${episode.podcast.title}<br />${episode.title}`}
-              data-tooltip-id="dee-tooltip"
+              data-tooltip-id='dee-tooltip'
             >
               {episode.imageURL || episode.podcast.imageURL ? (
                 <img
                   alt={`${episode.podcast.title} - ${episode.title}`}
                   src={episode.imageURL ?? episode.podcast.imageURL}
-                  className="w-full h-full object-cover"
+                  className='w-full h-full object-cover'
                 />
               ) : (
-                <MicrophoneIcon className="w-6 h-6 text-slate-400" />
+                <MicrophoneIcon className='w-6 h-6 text-slate-400' />
               )}
             </div>
           ) : status === 'IN_PROGRESS' ? (
             <div
-              className="w-full h-full flex items-center justify-center"
-              data-tooltip-content="No episode started yet"
-              data-tooltip-id="dee-tooltip"
+              className='w-full h-full flex items-center justify-center'
+              data-tooltip-content='No episode started yet'
+              data-tooltip-id='dee-tooltip'
             >
-              <Spinner size="sm" className="text-slate-400" />
+              <Spinner size='sm' className='text-slate-400' />
             </div>
           ) : (
             <div
-              className="w-full h-full flex items-center justify-center"
-              data-tooltip-content="No episode played"
-              data-tooltip-id="dee-tooltip"
+              className='w-full h-full flex items-center justify-center'
+              data-tooltip-content='No episode played'
+              data-tooltip-id='dee-tooltip'
             >
-              <PhoneXMarkIcon className="w-6 h-6 text-slate-400" />
+              <PhoneXMarkIcon className='w-6 h-6 text-slate-400' />
             </div>
           )}
         </div>
-        <div className="flex flex-col min-w-0">
-          <p className="font-medium truncate">
+        <div className='flex flex-col min-w-0'>
+          <p className='font-medium truncate'>
             {callerName ? (
               <>
                 <span>{callerName}</span>
@@ -159,25 +159,25 @@ export const CallRow: React.FC<CallRowProps> = ({ data, className }) => {
               <span>{phoneNumber}</span>
             )}
           </p>
-          <p className="text-sm truncate">{formattedStartDate}</p>
+          <p className='text-sm truncate'>{formattedStartDate}</p>
         </div>
-        <div className="flex flex-col items-end ml-auto whitespace-nowrap">
+        <div className='flex flex-col items-end ml-auto whitespace-nowrap'>
           {duration ? (
-            <p className="">{duration}</p>
+            <p className=''>{duration}</p>
           ) : status === 'IN_PROGRESS' ? (
             <div
-              className="relative w-5 h-5"
-              data-tooltip-html="Call in progress"
-              data-tooltip-id="dee-tooltip"
+              className='relative w-5 h-5'
+              data-tooltip-html='Call in progress'
+              data-tooltip-id='dee-tooltip'
             >
-              <PhoneIcon className="absolute w-5 h-5 text-green-600 inline-block align-text-bottom" />
-              <PhoneOutlineIcon className="absolute w-5 h-5 text-green-600 inline-block align-text-bottom animate-phone-ping" />
+              <PhoneIcon className='absolute w-5 h-5 text-green-600 inline-block align-text-bottom' />
+              <PhoneOutlineIcon className='absolute w-5 h-5 text-green-600 inline-block align-text-bottom animate-phone-ping' />
             </div>
           ) : (
             <ExclamationTriangleIcon
-              className="w-6 h-6 text-red-300 dark:text-red-700 group-hover:text-red-400 group-hover:dark:text-red-600"
-              data-tooltip-html="Call seems to have dropped"
-              data-tooltip-id="dee-tooltip"
+              className='w-6 h-6 text-red-300 dark:text-red-700 group-hover:text-red-400 group-hover:dark:text-red-600'
+              data-tooltip-html='Call seems to have dropped'
+              data-tooltip-id='dee-tooltip'
             />
           )}
         </div>

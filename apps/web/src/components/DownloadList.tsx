@@ -94,26 +94,26 @@ export const DownloadList: React.FC<DownloadListProps> = ({
 
   if (!episode || episode.downloads.edges.length === 0) {
     return (
-      <p className="italic text-slate-500 dark:text-slate-400 text-center">
+      <p className='italic text-slate-500 dark:text-slate-400 text-center'>
         No fetches
       </p>
     );
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className='flex flex-col gap-2'>
       {episode.downloads.edges.map(
         edge =>
           edge && (
             <button
               key={edge.node.id}
-              type="button"
-              className="block text-left"
+              type='button'
+              className='block text-left'
               // eslint-disable-next-line no-alert
               onClick={() => alert(`Download ${edge.node.id}`)}
             >
               <DownloadRow
-                className="-m-1 p-1 hover:bg-slate-200 hover:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer"
+                className='-m-1 p-1 hover:bg-slate-200 hover:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer'
                 data={edge.node}
               />
             </button>
@@ -121,17 +121,17 @@ export const DownloadList: React.FC<DownloadListProps> = ({
       )}
       {hasNext && (
         <button
-          className="text-white active:text-blue-100 dark:active:text-white font-medium bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 dark:active:bg-blue-500 py-2 px-4 rounded flex flex-row items-center justify-center gap-2"
-          type="button"
+          className='text-white active:text-blue-100 dark:active:text-white font-medium bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 dark:active:bg-blue-500 py-2 px-4 rounded flex flex-row items-center justify-center gap-2'
+          type='button'
           onClick={() => loadNext(10)}
         >
           {isLoadingNext ? (
             <>
-              <Spinner className="text-inherit" size="sm" />
-              <span className="block">Loading…</span>
+              <Spinner className='text-inherit' size='sm' />
+              <span className='block'>Loading…</span>
             </>
           ) : (
-            <span className="block">Load more fetches</span>
+            <span className='block'>Load more fetches</span>
           )}
         </button>
       )}

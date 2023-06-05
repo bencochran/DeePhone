@@ -45,7 +45,7 @@ export const App: React.FC = () => (
   <React.StrictMode>
     <RelayEnvironmentProvider environment={RelayEnvironment}>
       <RouterProvider router={router} />
-      <Tooltip id="dee-tooltip" />
+      <Tooltip id='dee-tooltip' />
     </RelayEnvironmentProvider>
   </React.StrictMode>
 );

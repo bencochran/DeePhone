@@ -14,9 +14,9 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className }) => (
       size === 'lg' && 'w-8 h-8',
       className
     )}
-    role="status"
-    aria-label="loading"
+    role='status'
+    aria-label='loading'
   >
-    <span className="sr-only">Loading…</span>
+    <span className='sr-only'>Loading…</span>
   </div>
 );

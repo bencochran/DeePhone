@@ -113,7 +113,7 @@ export const CallList: React.FC<CallListProps> = ({
 
   if (calls.edges.length === 0) {
     return (
-      <p className="italic text-slate-500 dark:text-slate-400 text-center">
+      <p className='italic text-slate-500 dark:text-slate-400 text-center'>
         No calls
       </p>
     );
@@ -124,10 +124,10 @@ export const CallList: React.FC<CallListProps> = ({
       {calls.edges.map(
         edge =>
           edge && (
-            <div key={edge.node.id} className="flex flex-col">
+            <div key={edge.node.id} className='flex flex-col'>
               <button
-                className="text-left -m-1 p-1 hover:bg-slate-200 hover:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer group"
-                type="button"
+                className='text-left -m-1 p-1 hover:bg-slate-200 hover:dark:bg-slate-700 active:bg-slate-300 active:dark:bg-slate-600 rounded cursor-pointer group'
+                type='button'
                 onClick={() => {
                   setNextExpandedCallIdentifier(i =>
                     i === edge.node.identifier ? null : edge.node.identifier
@@ -148,14 +148,14 @@ export const CallList: React.FC<CallListProps> = ({
               {expandedCallIdentifier === edge.node.identifier &&
                 queryReference && (
                   <CallEventsList
-                    className="mt-2 mb-4"
+                    className='mt-2 mb-4'
                     queryReference={queryReference}
                   />
                 )}
               {nextExpandedCallIdentifier === edge.node.identifier &&
                 loadingEvents && (
-                  <div className="flex flex-row justify-center items-center h-6 mt-2">
-                    <Spinner size="sm" />
+                  <div className='flex flex-row justify-center items-center h-6 mt-2'>
+                    <Spinner size='sm' />
                   </div>
                 )}
             </div>
@@ -163,17 +163,17 @@ export const CallList: React.FC<CallListProps> = ({
       )}
       {hasNext && (
         <button
-          className="text-white active:text-blue-100 dark:active:text-white font-medium bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 dark:active:bg-blue-500 py-2 px-4 rounded flex flex-row items-center justify-center gap-2"
-          type="button"
+          className='text-white active:text-blue-100 dark:active:text-white font-medium bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 dark:active:bg-blue-500 py-2 px-4 rounded flex flex-row items-center justify-center gap-2'
+          type='button'
           onClick={() => loadNext(10)}
         >
           {isLoadingNext ? (
             <>
-              <Spinner className="text-inherit" size="sm" />
-              <span className="block">Loading…</span>
+              <Spinner className='text-inherit' size='sm' />
+              <span className='block'>Loading…</span>
             </>
           ) : (
-            <span className="block">Load more calls</span>
+            <span className='block'>Load more calls</span>
           )}
         </button>
       )}
