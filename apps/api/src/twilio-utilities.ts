@@ -104,10 +104,21 @@ export async function geocodeVoiceRequestFrom(
         const result = { longitude: first.lng, latitude: first.lat };
         logger.info(`Geocoding result: ${url.toString()}`);
 
-        await prisma.postalCodeLocation.create({
-          data: {
+        prisma.postalCodeLocation.upsert({
+          where: {
+            postalCode_country: {
+              postalCode: voiceRequest.FromZip,
+              country: voiceRequest.FromCountry,
+            },
+          },
+          create: {
             postalCode: voiceRequest.FromZip,
             country: voiceRequest.FromCountry,
+            latitude: result.latitude,
+            longitude: result.longitude,
+            fetchDate: new Date(),
+          },
+          update: {
             latitude: result.latitude,
             longitude: result.longitude,
             fetchDate: new Date(),
