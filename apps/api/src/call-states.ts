@@ -338,7 +338,8 @@ export async function eventAfter(
   throw new Error(`Unknown event type: ${event.type}`);
 }
 
-async function responseForEvent(
+export async function responseForEvent(
+  prisma: PrismaClient,
   event: CallEvent & {
     download:
       | (EpisodeDownload & {
@@ -346,9 +347,16 @@ async function responseForEvent(
         })
       | null;
     part: EpisodePart | null;
-  },
-  getWaitingMessageCount: () => Promise<number>
+  }
 ): Promise<CallResponse> {
+  const getWaitingMessageCount = () =>
+    prisma.callEvent.count({
+      where: {
+        id: { not: event.id },
+        call: { id: event.callId },
+        type: CallEventType.WAITING_MESSAGE,
+      },
+    });
   switch (event.type) {
     case CallEventType.ANSWERED:
       return { type: 'no-op' };
@@ -487,17 +495,7 @@ export async function handleVoiceRequest(
     });
   }
 
-  return responseForEvent(
-    createdEvent,
-    (): Promise<number> =>
-      prisma.callEvent.count({
-        where: {
-          id: { not: createdEvent.id },
-          call: { id: call.id },
-          type: CallEventType.WAITING_MESSAGE,
-        },
-      })
-  );
+  return responseForEvent(prisma, createdEvent);
 }
 
 export async function handleCallStatus(
