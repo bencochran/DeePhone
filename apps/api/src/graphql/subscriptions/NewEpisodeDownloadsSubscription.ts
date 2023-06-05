@@ -69,7 +69,7 @@ export function addNewEpisodeDownloadsSubscriptionToBuilder(
     }),
   });
 
-  builder.subscriptionField('newEpisodeDownlaods', t =>
+  builder.subscriptionField('newEpisodeDownloads', t =>
     t.field({
       type: NewEpisodeDownloadsConnection,
       args: {

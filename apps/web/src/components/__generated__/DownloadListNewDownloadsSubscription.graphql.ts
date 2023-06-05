@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d5d0c1e75fdc51a84cb876ae775a2927>>
+ * @generated SignedSource<<b2c03e7bd5e0bbe17f85df46a55f6604>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,7 +15,7 @@ export type DownloadListNewDownloadsSubscription$variables = {
   episodeIdentifier?: number | null;
 };
 export type DownloadListNewDownloadsSubscription$data = {
-  readonly newEpisodeDownlaods: {
+  readonly newEpisodeDownloads: {
     readonly edges: ReadonlyArray<{
       readonly node: {
         readonly " $fragmentSpreads": FragmentRefs<"DownloadRow_episodeDownload">;
@@ -61,7 +61,7 @@ return {
         "args": (v2/*: any*/),
         "concreteType": "NewEpisodeDownloadsConnection",
         "kind": "LinkedField",
-        "name": "newEpisodeDownlaods",
+        "name": "newEpisodeDownloads",
         "plural": false,
         "selections": [
           {
@@ -112,7 +112,7 @@ return {
         "args": (v2/*: any*/),
         "concreteType": "NewEpisodeDownloadsConnection",
         "kind": "LinkedField",
-        "name": "newEpisodeDownlaods",
+        "name": "newEpisodeDownloads",
         "plural": false,
         "selections": [
           {
@@ -208,16 +208,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "abb081dd3a9023d529c6e1c88e4cf3f7",
+    "cacheID": "e321f056de073a7beef437e4af5d226d",
     "id": null,
     "metadata": {},
     "name": "DownloadListNewDownloadsSubscription",
     "operationKind": "subscription",
-    "text": "subscription DownloadListNewDownloadsSubscription(\n  $episodeIdentifier: Int\n) {\n  newEpisodeDownlaods(episodeIdentifier: $episodeIdentifier) {\n    edges {\n      node {\n        ...DownloadRow_episodeDownload\n        id\n      }\n    }\n  }\n}\n\nfragment DownloadRow_episodeDownload on EpisodeDownload {\n  identifier\n  downloadDate\n  partCount\n  finished\n  deleted\n  callCount\n}\n"
+    "text": "subscription DownloadListNewDownloadsSubscription(\n  $episodeIdentifier: Int\n) {\n  newEpisodeDownloads(episodeIdentifier: $episodeIdentifier) {\n    edges {\n      node {\n        ...DownloadRow_episodeDownload\n        id\n      }\n    }\n  }\n}\n\nfragment DownloadRow_episodeDownload on EpisodeDownload {\n  identifier\n  downloadDate\n  partCount\n  finished\n  deleted\n  callCount\n}\n"
   }
 };
 })();
 
-(node as any).hash = "7f61e1e0777cd638f7702efb156e7407";
+(node as any).hash = "4d563bde15c2f2eac8a465af2425e94c";
 
 export default node;

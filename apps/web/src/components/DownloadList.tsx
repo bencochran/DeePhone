@@ -36,7 +36,7 @@ const useNewDownloadsSubscription = (
           $episodeIdentifier: Int
           $connections: [ID!]!
         ) {
-          newEpisodeDownlaods(episodeIdentifier: $episodeIdentifier) {
+          newEpisodeDownloads(episodeIdentifier: $episodeIdentifier) {
             edges @prependEdge(connections: $connections) {
               node {
                 ...DownloadRow_episodeDownload

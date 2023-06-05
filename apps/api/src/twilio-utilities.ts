@@ -42,16 +42,16 @@ export interface VoiceStatusCallbackRequest extends VoiceRequest {
   RecordingDuration?: string;
 }
 
-interface LatitudeAndLongtude {
+interface LatitudeAndLongitude {
   latitude: number;
   longitude: number;
 }
 
-const geocodeCache: Record<string, LatitudeAndLongtude> = {};
+const geocodeCache: Record<string, LatitudeAndLongitude> = {};
 
 export async function geocodeVoiceRequestFrom(
   voiceRequest: VoiceRequest
-): Promise<LatitudeAndLongtude | null> {
+): Promise<LatitudeAndLongitude | null> {
   if (
     !process.env.GEONAMES_USERNAME ||
     !voiceRequest.FromCountry ||

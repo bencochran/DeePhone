@@ -10,12 +10,12 @@ import logger from './logger';
 import { buildRouter as buildVoiceRouter } from './voice-router';
 import { buildRouter as buildGraphQLRouter } from './graphql/router';
 
-interface Boostrap {
+interface Bootstrap {
   prisma: PrismaClient;
   podcast: Podcast;
 }
 
-async function bootstrap(): Promise<Boostrap> {
+async function bootstrap(): Promise<Bootstrap> {
   const prisma = new PrismaClient();
   const count = await prisma.podcast.count();
   if (count === 0) {

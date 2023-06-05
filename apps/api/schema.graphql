@@ -300,7 +300,7 @@ type Subscription {
   ): EpisodeDownloadUpdatedSubscription!
   episodeUpdated(episodeIdentifier: Int!): EpisodeUpdatedSubscription!
   newCalls(episodeIdentifier: Int): NewCallsConnection!
-  newEpisodeDownlaods(episodeIdentifier: Int): NewEpisodeDownloadsConnection!
+  newEpisodeDownloads(episodeIdentifier: Int): NewEpisodeDownloadsConnection!
 }
 
 """

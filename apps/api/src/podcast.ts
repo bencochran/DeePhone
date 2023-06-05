@@ -232,21 +232,21 @@ export async function chopEpisode(
   filename: string
 ): Promise<TempFile[]> {
   const inputFile = path.resolve('downloads/media', filename);
-  const desinationDir = path.resolve(
+  const destinationDir = path.resolve(
     'downloads/media',
     `${episodeDownload.id}`
   );
 
-  if (fs.existsSync(desinationDir)) {
-    const files = await fs.promises.readdir(desinationDir);
+  if (fs.existsSync(destinationDir)) {
+    const files = await fs.promises.readdir(destinationDir);
     if (files.length > 0) {
       return files.map(f => ({
         filename: f,
-        filePath: path.resolve(desinationDir, f),
+        filePath: path.resolve(destinationDir, f),
       }));
     }
   } else {
-    await fs.promises.mkdir(desinationDir, { recursive: true });
+    await fs.promises.mkdir(destinationDir, { recursive: true });
   }
 
   // Detect periods of silence
@@ -280,7 +280,7 @@ export async function chopEpisode(
 
   // Split on those periods of silence
 
-  const desinationFilePattern = path.resolve(desinationDir, `%5d.mp3`);
+  const destinationFilePattern = path.resolve(destinationDir, `%5d.mp3`);
 
   // prettier-ignore
   const segmentArgs = [
@@ -290,7 +290,7 @@ export async function chopEpisode(
     '-reset_timestamps', '1',
     '-map', '0:a',
     '-c:a', 'copy',
-    desinationFilePattern,
+    destinationFilePattern,
   ];
 
   await new Promise<void>((resolve, reject) => {
@@ -299,7 +299,7 @@ export async function chopEpisode(
     });
     proc.once('error', error => {
       // Make sure we delete any broken files
-      fs.promises.rm(desinationDir, { recursive: true, force: true });
+      fs.promises.rm(destinationDir, { recursive: true, force: true });
 
       reject(error);
     });
@@ -308,10 +308,10 @@ export async function chopEpisode(
     });
   });
 
-  const files = await fs.promises.readdir(desinationDir);
+  const files = await fs.promises.readdir(destinationDir);
   return files.map(f => ({
     filename: f,
-    filePath: path.resolve(desinationDir, f),
+    filePath: path.resolve(destinationDir, f),
   }));
 }
 
