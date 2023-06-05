@@ -430,6 +430,12 @@ export async function handleVoiceRequest(
     },
   });
 
+  // Get get one last call to the webhook as they hang up,
+  // respond in kind (and don't create a new event).
+  if (request.CallStatus === 'completed') {
+    return { type: 'hang-up' };
+  }
+
   const lastEvent = call.events.at(0) ?? null;
 
   if (lastEvent && lastEvent.type === CallEventType.ANSWERED) {
