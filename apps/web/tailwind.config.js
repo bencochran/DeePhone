@@ -12,6 +12,7 @@ module.exports = {
         },
       },
       animation: {
+        'spin-slow': 'spin 2s linear infinite',
         'phone-ping': 'phone-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
       },
     },

@@ -82,10 +82,10 @@ export const DownloadRow: React.FC<DownloadRowProps> = ({
       {!deleted && <DownloadSubscriber identifier={identifier} />}
       <div className="flex flex-col flex-shrink min-w-0">
         <p className="font-medium text-slate-900 dark:text-slate-100 group-hover:dark:text-slate-50 group-active:dark:text-slate-50 truncate">
-          {partCount} parts
+          {partCount === 0 && !finished ? 'Downloading…' : `${partCount} parts`}
           {!finished && (
             <ArrowPathIcon
-              className="ml-1 w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:text-blue-600 group-hover:dark:text-blue-300 inline-block"
+              className="ml-1 w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:text-blue-600 group-hover:dark:text-blue-300 inline-block animate-spin-slow"
               data-tooltip-content="Fetch still in progress or has failed"
               data-tooltip-id="dee-tooltip"
             />
