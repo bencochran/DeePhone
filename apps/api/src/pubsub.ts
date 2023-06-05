@@ -1,5 +1,5 @@
 import { createPubSub } from 'graphql-yoga';
-import type { Call, CallEvent, Episode } from '@prisma/client';
+import type { Call, CallEvent, Episode, EpisodeDownload } from '@prisma/client';
 
 export interface PubSubEvent {}
 
@@ -21,12 +21,18 @@ export interface PubSubEpisodeNewCall extends PubSubEvent {
   call: Call;
 }
 
+export interface PubSubEpisodeNewDownload extends PubSubEvent {
+  episode: Episode;
+  episodeDownload: EpisodeDownload;
+}
+
 export interface PubSubEvents
   extends Record<string, [PubSubEvent] | [string | number, PubSubEvent]> {
   callUpdated: [number, PubSubCallUpdated];
   newCall: [PubSubNewCall];
   episodeUpdated: [number, PubSubEpisodeUpdated];
   episodeNewCall: [number, PubSubEpisodeNewCall];
+  episodeNewDownload: [number, PubSubEpisodeNewDownload];
 }
 
 export const pubsub = createPubSub<PubSubEvents>({});

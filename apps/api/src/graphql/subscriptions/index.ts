@@ -5,6 +5,7 @@ import { Types } from '../types';
 import { addCallUpdatedSubscriptionToBuilder } from './CallUpdatedSubscription';
 import { addNewCallsSubscriptionToBuilder } from './NewCallsSubscription';
 import { addEpisodeUpdatedSubscriptionToBuilder } from './EpisodeUpdatedSubscription';
+import { addNewEpisodeDownloadsSubscriptionToBuilder } from './NewEpisodeDownloadsSubscription';
 
 export function addSubscriptionsToBuilder(
   builder: ReturnType<typeof buildBuilder>,
@@ -15,4 +16,5 @@ export function addSubscriptionsToBuilder(
   addCallUpdatedSubscriptionToBuilder(builder, prisma, types);
   addNewCallsSubscriptionToBuilder(builder, prisma, types);
   addEpisodeUpdatedSubscriptionToBuilder(builder, prisma, types);
+  addNewEpisodeDownloadsSubscriptionToBuilder(builder, prisma, types);
 }

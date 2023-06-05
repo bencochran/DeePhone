@@ -175,6 +175,20 @@ type NewCallsConnectionEdge {
   node: Call!
 }
 
+type NewEpisodeDownloadsConnection {
+  edges: [NewEpisodeDownloadsConnectionEdge!]!
+}
+
+type NewEpisodeDownloadsConnectionEdge {
+  cursor: String!
+  node: EpisodeDownload!
+}
+
+type NewEpisodeDownloadsSubscription {
+  episode: Episode!
+  newDownloads: NewEpisodeDownloadsConnection!
+}
+
 interface Node {
   id: ID!
 }
@@ -278,6 +292,7 @@ type Subscription {
   callUpdated(callIdentifier: Int!): CallUpdatedSubscription!
   episodeUpdated(episodeIdentifier: Int!): EpisodeUpdatedSubscription!
   newCalls(episodeIdentifier: Int): NewCallsConnection!
+  newEpisodeDownlaods(episodeIdentifier: Int): NewEpisodeDownloadsConnection!
 }
 
 """

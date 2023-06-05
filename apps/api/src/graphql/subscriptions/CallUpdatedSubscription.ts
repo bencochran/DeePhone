@@ -22,7 +22,6 @@ export function addCallUpdatedSubscriptionToBuilder(
       }),
       node: t.prismaField({
         type: CallEvent,
-
         resolve: (query, event) =>
           prisma.callEvent.findUniqueOrThrow({
             where: { id: event.event.id },

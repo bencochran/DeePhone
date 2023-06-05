@@ -158,6 +158,10 @@ function enqueueFetch(
           },
           include: { episode: { include: { podcast: true } } },
         });
+        pubsub.publish('episodeNewDownload', episode.id, {
+          episode,
+          episodeDownload: inProgressDownload,
+        });
 
         const { filename } = await downloadEpisode(inProgressDownload);
 
