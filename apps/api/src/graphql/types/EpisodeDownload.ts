@@ -1,9 +1,11 @@
 import { buildBuilder } from '../builder';
 
-export function addEpisodeDownloadToBuilder(builder: ReturnType<typeof buildBuilder>) {
+export function addEpisodeDownloadToBuilder(
+  builder: ReturnType<typeof buildBuilder>
+) {
   return builder.prismaNode('EpisodeDownload', {
     id: { field: 'id' },
-    fields: (t) => ({
+    fields: t => ({
       contentURL: t.expose('contentURL', {
         type: 'URL',
       }),
@@ -21,7 +23,7 @@ export function addEpisodeDownloadToBuilder(builder: ReturnType<typeof buildBuil
         cursor: 'sortOrder_downloadId',
         query: {
           orderBy: { sortOrder: 'asc' },
-        }
+        },
       }),
       partCount: t.relationCount('parts'),
       callCount: t.int({
@@ -34,8 +36,8 @@ export function addEpisodeDownloadToBuilder(builder: ReturnType<typeof buildBuil
             },
           },
         },
-        resolve: (download) => download._count.callEvents,
+        resolve: download => download._count.callEvents,
       }),
-    })
+    }),
   });
 }

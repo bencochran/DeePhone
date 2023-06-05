@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import 'dotenv/config';
 
 import express from 'express';
 import http from 'http';
@@ -27,42 +27,43 @@ async function bootstrap(): Promise<Boostrap> {
     });
     logger.info(`Created podcast`, { podcast });
     return { prisma, podcast };
-  } else {
-    const podcast = await prisma.podcast.findFirstOrThrow();
-    if (count > 1) {
-      logger.error(`Multiple podcasts found in database"`, { podcast });
-    }
-    logger.info(`Using podcast "${podcast.title}"`, { podcast });
-    return { prisma, podcast };
   }
+  const podcast = await prisma.podcast.findFirstOrThrow();
+  if (count > 1) {
+    logger.error(`Multiple podcasts found in database"`, { podcast });
+  }
+  logger.info(`Using podcast "${podcast.title}"`, { podcast });
+  return { prisma, podcast };
 }
 
-bootstrap()
-  .then(({ prisma, podcast }) => {
-    const app = express();
+bootstrap().then(({ prisma, podcast }) => {
+  const app = express();
 
-    const httpServer = http.createServer(app);
-    const wsServer = new WebSocketServer({
-      server: httpServer,
-      path: '/api/graphql/ws',
-    });
-
-    app.enable('trust proxy');
-
-    app.use('/voice', buildVoiceRouter(prisma, podcast));
-    app.use('/api/graphql', buildGraphQLRouter(prisma, '/api/graphql', httpServer, wsServer));
-
-    // Serve static files as-is
-    app.use(express.static(path.resolve('../web/dist')));
-
-    // All other routes send the SPA root to let it do routing
-    app.get('*', (_req, res) => {
-      res.sendFile(path.resolve('../web/dist/index.html'));
-    });
-
-    const port = process.env.PORT || 5000;
-
-    httpServer.listen(port, () => {
-      logger.info(`HTTP server running on port ${port}!`);
-    });
+  const httpServer = http.createServer(app);
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/api/graphql/ws',
   });
+
+  app.enable('trust proxy');
+
+  app.use('/voice', buildVoiceRouter(prisma, podcast));
+  app.use(
+    '/api/graphql',
+    buildGraphQLRouter(prisma, '/api/graphql', httpServer, wsServer)
+  );
+
+  // Serve static files as-is
+  app.use(express.static(path.resolve('../web/dist')));
+
+  // All other routes send the SPA root to let it do routing
+  app.get('*', (_req, res) => {
+    res.sendFile(path.resolve('../web/dist/index.html'));
+  });
+
+  const port = process.env.PORT || 5000;
+
+  httpServer.listen(port, () => {
+    logger.info(`HTTP server running on port ${port}!`);
+  });
+});

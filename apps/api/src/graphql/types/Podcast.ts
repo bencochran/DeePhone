@@ -3,7 +3,7 @@ import { buildBuilder } from '../builder';
 export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>) {
   return builder.prismaNode('Podcast', {
     id: { field: 'id' },
-    fields: (t) => ({
+    fields: t => ({
       identifier: t.exposeInt('id'),
       title: t.exposeString('title'),
       feedURL: t.expose('feedURL', {
@@ -23,9 +23,9 @@ export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>) {
         args: {
           oldestFirst: t.arg.boolean(),
         },
-        query: (args) => ({
+        query: args => ({
           orderBy: { publishDate: args.oldestFirst ? 'asc' : 'desc' },
-        })
+        }),
       }),
       callCount: t.int({
         select: {
@@ -45,13 +45,17 @@ export function addPodcastToBuilder(builder: ReturnType<typeof buildBuilder>) {
             },
           },
         },
-        resolve: (episode) => episode.episodes
-          .reduce((sum, e) =>
-            sum + e.downloads.reduce((isum, dl) =>
-              isum + dl._count.callEvents,
-              0 as number),
-            0 as number),
+        resolve: episode =>
+          episode.episodes.reduce(
+            (sum, e) =>
+              sum +
+              e.downloads.reduce(
+                (isum, dl) => isum + dl._count.callEvents,
+                0 as number
+              ),
+            0 as number
+          ),
       }),
-    })
+    }),
   });
 }

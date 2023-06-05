@@ -1,6 +1,12 @@
 import React from 'react';
 import { useLoaderData, defer, Await } from 'react-router-dom';
-import { graphql, PreloadedQuery, usePreloadedQuery, loadQuery, Environment } from 'react-relay';
+import {
+  graphql,
+  PreloadedQuery,
+  usePreloadedQuery,
+  loadQuery,
+  Environment,
+} from 'react-relay';
 import * as HomeQuery from './__generated__/HomeQuery.graphql';
 
 import { Page } from '@/components/Page';
@@ -12,7 +18,7 @@ export const loadHome = (environment: Environment) =>
   defer({ loadQuery: loadQuery(environment, HomeQuery.default, {}) });
 
 interface HomeContentProps {
-  initialQueryRef: PreloadedQuery<HomeQuery.HomeQuery>
+  initialQueryRef: PreloadedQuery<HomeQuery.HomeQuery>;
 }
 
 const HomeContent: React.FC<HomeContentProps> = ({ initialQueryRef }) => {
@@ -27,10 +33,10 @@ const HomeContent: React.FC<HomeContentProps> = ({ initialQueryRef }) => {
   );
 
   return (
-    <Page title='Home'>
+    <Page title="Home">
       <Card>
-        <div className='mb-4'>
-          <h2 className='text-slate-900 dark:text-slate-300 font-medium text-2xl'>
+        <div className="mb-4">
+          <h2 className="text-slate-900 dark:text-slate-300 font-medium text-2xl">
             Recent calls
           </h2>
         </div>
@@ -39,20 +45,15 @@ const HomeContent: React.FC<HomeContentProps> = ({ initialQueryRef }) => {
       <PodcastCards data={data} />
     </Page>
   );
-}
+};
 
 export const Home: React.FC = () => {
   const data = useLoaderData() as any;
   return (
-    <React.Suspense
-      fallback={<p>Loading</p>}
-    >
-      <Await
-        resolve={data.loadQuery}
-        errorElement={<p>Error loading.</p>}
-      >
-        {(ref) => <HomeContent initialQueryRef={ref as any} />}
+    <React.Suspense fallback={<p>Loading</p>}>
+      <Await resolve={data.loadQuery} errorElement={<p>Error loading.</p>}>
+        {ref => <HomeContent initialQueryRef={ref as any} />}
       </Await>
     </React.Suspense>
   );
-}
+};

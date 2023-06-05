@@ -1,5 +1,10 @@
 import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended';
-import { PrismaClient, CallEventType, EpisodeDownload, EpisodePart } from '@prisma/client';
+import {
+  PrismaClient,
+  CallEventType,
+  EpisodeDownload,
+  EpisodePart,
+} from '@prisma/client';
 import { Logger } from 'winston';
 
 import { eventAfter } from '../call-states';
@@ -7,7 +12,7 @@ import logger from '../logger';
 
 jest.mock('../logger', () => ({
   __esModule: true,
-  default: mockDeep<Logger>()
+  default: mockDeep<Logger>(),
 }));
 
 const date = new Date('1988-02-20T09:47:00-06:00');
@@ -34,8 +39,10 @@ describe('eventAfter', () => {
 
   describe('Answered', () => {
     it('Returns fetching', async () => {
-      const nextEvent = await eventAfter(prismaMock,
-        fakeEvent({ type: CallEventType.ANSWERED }));
+      const nextEvent = await eventAfter(
+        prismaMock,
+        fakeEvent({ type: CallEventType.ANSWERED })
+      );
 
       expect(nextEvent).toStrictEqual<Output>({
         type: CallEventType.FETCHING_EPISODE,
@@ -45,8 +52,10 @@ describe('eventAfter', () => {
 
   describe('Fetching episode', () => {
     it('Returns waiting', async () => {
-      const nextEvent = await eventAfter(prismaMock,
-        fakeEvent({ type: CallEventType.FETCHING_EPISODE }));
+      const nextEvent = await eventAfter(
+        prismaMock,
+        fakeEvent({ type: CallEventType.FETCHING_EPISODE })
+      );
 
       expect(nextEvent).toStrictEqual<Output>({
         type: CallEventType.WAITING_MESSAGE,
@@ -54,25 +63,28 @@ describe('eventAfter', () => {
     });
   });
 
-
   describe('Waiting', () => {
     it('Returns waiting for waiting', async () => {
-      const nextEvent = await eventAfter(prismaMock,
-        fakeEvent({ type: CallEventType.WAITING_MESSAGE }));
+      const nextEvent = await eventAfter(
+        prismaMock,
+        fakeEvent({ type: CallEventType.WAITING_MESSAGE })
+      );
 
       expect(nextEvent).toStrictEqual<Output>({
         type: CallEventType.WAITING_MESSAGE,
       });
     });
-  })
+  });
 
   describe('Episode ready', () => {
     it('Returns introducing', async () => {
-      const nextEvent = await eventAfter(prismaMock,
+      const nextEvent = await eventAfter(
+        prismaMock,
         fakeEvent({
           type: CallEventType.EPISODE_READY,
           download: fakeDownload({ id: 42 }),
-        }));
+        })
+      );
 
       expect(nextEvent).toStrictEqual<Output>({
         type: CallEventType.INTRODUCING_EPISODE,
@@ -84,28 +96,28 @@ describe('eventAfter', () => {
       const event = fakeEvent({ type: CallEventType.EPISODE_READY });
       const nextEvent = await eventAfter(prismaMock, event);
 
-        expect(nextEvent).toStrictEqual<Output>({
-          type: CallEventType.EPISODE_ERROR,
-        });
+      expect(nextEvent).toStrictEqual<Output>({
+        type: CallEventType.EPISODE_ERROR,
+      });
 
-        expect(loggerMock.error).toHaveBeenCalledWith(
-          'Missing download for EPISODE_READY event',
-          { event }
-        );
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        'Missing download for EPISODE_READY event',
+        { event }
+      );
     });
   });
 
   describe('Introducing episode', () => {
     it('Returns playing first part', async () => {
-      prismaMock.episodePart.findFirst.mockResolvedValue(
-        fakePart({ id: 954 })
-      );
+      prismaMock.episodePart.findFirst.mockResolvedValue(fakePart({ id: 954 }));
 
-      const nextEvent = await eventAfter(prismaMock,
+      const nextEvent = await eventAfter(
+        prismaMock,
         fakeEvent({
           type: CallEventType.INTRODUCING_EPISODE,
           download: fakeDownload({ id: 345 }),
-        }));
+        })
+      );
 
       expect(nextEvent).toStrictEqual<Output>({
         type: CallEventType.PLAYING_EPISODE,
@@ -138,16 +150,16 @@ describe('eventAfter', () => {
 
   describe('Playing episode', () => {
     it('Returns playing next part', async () => {
-      prismaMock.episodePart.findFirst.mockResolvedValue(
-        fakePart({ id: 391 })
-      );
+      prismaMock.episodePart.findFirst.mockResolvedValue(fakePart({ id: 391 }));
 
-      const nextEvent = await eventAfter(prismaMock,
+      const nextEvent = await eventAfter(
+        prismaMock,
         fakeEvent({
           type: CallEventType.PLAYING_EPISODE,
           download: fakeDownload({ id: 137 }),
           part: fakePart({ sortOrder: 620 }),
-        }));
+        })
+      );
 
       expect(nextEvent).toStrictEqual<Output>({
         type: CallEventType.PLAYING_EPISODE,
@@ -167,12 +179,14 @@ describe('eventAfter', () => {
     it('Returns ending episode if no next part', async () => {
       prismaMock.episodePart.findFirst.mockResolvedValue(null);
 
-      const nextEvent = await eventAfter(prismaMock,
+      const nextEvent = await eventAfter(
+        prismaMock,
         fakeEvent({
           type: CallEventType.PLAYING_EPISODE,
           download: fakeDownload({ id: 507 }),
           part: fakePart({ sortOrder: 743 }),
-        }));
+        })
+      );
 
       expect(nextEvent).toStrictEqual<Output>({
         type: CallEventType.ENDING_EPISODE,
@@ -224,8 +238,10 @@ describe('eventAfter', () => {
 
   describe('Ending episode', () => {
     it('Returns null', async () => {
-      const nextEvent = await eventAfter(prismaMock,
-        fakeEvent({ type: CallEventType.ENDING_EPISODE }));
+      const nextEvent = await eventAfter(
+        prismaMock,
+        fakeEvent({ type: CallEventType.ENDING_EPISODE })
+      );
 
       expect(nextEvent).toBeNull();
     });
@@ -233,8 +249,10 @@ describe('eventAfter', () => {
 
   describe('No episode', () => {
     it('Returns null', async () => {
-      const nextEvent = await eventAfter(prismaMock,
-        fakeEvent({ type: CallEventType.ENDING_EPISODE }));
+      const nextEvent = await eventAfter(
+        prismaMock,
+        fakeEvent({ type: CallEventType.ENDING_EPISODE })
+      );
 
       expect(nextEvent).toBeNull();
     });
@@ -242,8 +260,10 @@ describe('eventAfter', () => {
 
   describe('Episode error', () => {
     it('Returns null', async () => {
-      const nextEvent = await eventAfter(prismaMock,
-        fakeEvent({ type: CallEventType.EPISODE_ERROR }));
+      const nextEvent = await eventAfter(
+        prismaMock,
+        fakeEvent({ type: CallEventType.EPISODE_ERROR })
+      );
 
       expect(nextEvent).toBeNull();
     });
@@ -251,23 +271,24 @@ describe('eventAfter', () => {
 
   describe('Ended', () => {
     it('Returns null', async () => {
-      const nextEvent = await eventAfter(prismaMock,
-        fakeEvent({ type: CallEventType.ENDED }));
+      const nextEvent = await eventAfter(
+        prismaMock,
+        fakeEvent({ type: CallEventType.ENDED })
+      );
 
       expect(nextEvent).toBeNull();
     });
   });
-
 });
 
-
 //// Helpers
-
 
 type Input = Parameters<typeof eventAfter>[1];
 type Output = Awaited<ReturnType<typeof eventAfter>>;
 
-function fakeDownload<T extends Partial<EpisodeDownload>>(overrides: T): T & EpisodeDownload {
+function fakeDownload<T extends Partial<EpisodeDownload>>(
+  overrides: T
+): T & EpisodeDownload {
   return {
     id: 300,
     episodeId: 400,
@@ -276,11 +297,13 @@ function fakeDownload<T extends Partial<EpisodeDownload>>(overrides: T): T & Epi
     downloadFinishDate: date,
     finished: true,
     deleted: false,
-    ...overrides
+    ...overrides,
   };
 }
 
-function fakePart<T extends Partial<EpisodePart>>(overrides: T): T & EpisodePart {
+function fakePart<T extends Partial<EpisodePart>>(
+  overrides: T
+): T & EpisodePart {
   return {
     id: 500,
     downloadId: 300,
@@ -289,7 +312,7 @@ function fakePart<T extends Partial<EpisodePart>>(overrides: T): T & EpisodePart
     url: 'https://example.com/part-4.mp3',
     size: 1024,
     duration: 10,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -304,6 +327,6 @@ function fakeEvent<T extends Partial<Input>>(overrides: T): T & Input {
     part: null,
     partId: null,
     rawRequest: null,
-    ...overrides
+    ...overrides,
   };
 }

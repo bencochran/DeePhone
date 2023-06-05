@@ -18,10 +18,13 @@ import {
   chopEpisode,
   uploadEpisodeParts,
   measureFiles,
-  fileDurations
+  fileDurations,
 } from './podcast';
 import { s3, bucketName, bucketBaseURL } from './s3';
-import type { VoiceRequest, VoiceStatusCallbackRequest } from './twilio-utilities';
+import type {
+  VoiceRequest,
+  VoiceStatusCallbackRequest,
+} from './twilio-utilities';
 import { pubsub } from './pubsub';
 
 const requestQueue = new PQueue({ concurrency: 1 });
@@ -69,9 +72,22 @@ interface HangUp {
   type: 'hang-up';
 }
 
-export type CallResponse = NoOp | Introduction | StillFetching | NoEpisode | EpisodeError | EpisodeIntroduction | EpisodePlayPart | Outro | HangUp;
+export type CallResponse =
+  | NoOp
+  | Introduction
+  | StillFetching
+  | NoEpisode
+  | EpisodeError
+  | EpisodeIntroduction
+  | EpisodePlayPart
+  | Outro
+  | HangUp;
 
-function enqueueFetch(prisma: PrismaClient, podcast: Podcast, call: Call): void {
+function enqueueFetch(
+  prisma: PrismaClient,
+  podcast: Podcast,
+  call: Call
+): void {
   requestQueue.add(async () => {
     try {
       const episode = await fetchLatestEpisode(prisma, podcast);
@@ -100,23 +116,36 @@ function enqueueFetch(prisma: PrismaClient, podcast: Podcast, call: Call): void 
       });
 
       let downloadToPlay: PlayableDownload;
-      if (existingDownload
-        && existingDownload.contentURL === episode.contentURL
-        && existingDownload.parts.length > 0
+      if (
+        existingDownload &&
+        existingDownload.contentURL === episode.contentURL &&
+        existingDownload.parts.length > 0
       ) {
-        logger.info(`Using existing download (${existingDownload.id}) of "${episode.title}"`, {
-          download: omit(existingDownload, 'parts')
-        });
+        logger.info(
+          `Using existing download (${existingDownload.id}) of "${episode.title}"`,
+          {
+            download: omit(existingDownload, 'parts'),
+          }
+        );
         downloadToPlay = existingDownload;
       } else {
-        if (existingDownload && existingDownload.contentURL !== episode.contentURL) {
-          logger.info(`New contentURL for "${episode.title}". Downloading again`, {
-            existingDownload: omit(existingDownload, 'parts')
-          });
+        if (
+          existingDownload &&
+          existingDownload.contentURL !== episode.contentURL
+        ) {
+          logger.info(
+            `New contentURL for "${episode.title}". Downloading again`,
+            {
+              existingDownload: omit(existingDownload, 'parts'),
+            }
+          );
         } else if (existingDownload && existingDownload.parts.length === 0) {
-          logger.warning(`No download parts for "${episode.title}". Downloading again`, {
-            existingDownload: omit(existingDownload, 'parts')
-          });
+          logger.warning(
+            `No download parts for "${episode.title}". Downloading again`,
+            {
+              existingDownload: omit(existingDownload, 'parts'),
+            }
+          );
         }
 
         const downloadStartDate = new Date();
@@ -134,7 +163,10 @@ function enqueueFetch(prisma: PrismaClient, podcast: Podcast, call: Call): void 
 
         const tempFiles = await chopEpisode(inProgressDownload, filename);
         if (tempFiles.length === 0) {
-          logger.error(`No parts produced chopping ${filename}`, { download: inProgressDownload, filename });
+          logger.error(`No parts produced chopping ${filename}`, {
+            download: inProgressDownload,
+            filename,
+          });
           await prisma.callEvent.create({
             data: {
               call: { connect: { id: call.id } },
@@ -147,7 +179,13 @@ function enqueueFetch(prisma: PrismaClient, podcast: Podcast, call: Call): void 
 
         const sizedTempFiles = await measureFiles(tempFiles);
         const durationedTempFiles = await fileDurations(sizedTempFiles);
-        const uploadedFiles = await uploadEpisodeParts(inProgressDownload, durationedTempFiles, s3, bucketName, bucketBaseURL);
+        const uploadedFiles = await uploadEpisodeParts(
+          inProgressDownload,
+          durationedTempFiles,
+          s3,
+          bucketName,
+          bucketBaseURL
+        );
 
         const downloadFinishDate = new Date();
 
@@ -184,7 +222,9 @@ function enqueueFetch(prisma: PrismaClient, podcast: Podcast, call: Call): void 
       });
       pubsub.publish('callUpdated', call.id, { call, event });
     } catch (error) {
-      logger.error('Unable to download or process latest episode', { error: loggableError(error) });
+      logger.error('Unable to download or process latest episode', {
+        error: loggableError(error),
+      });
       const event = await prisma.callEvent.create({
         data: {
           call: { connect: { id: call.id } },
@@ -193,12 +233,176 @@ function enqueueFetch(prisma: PrismaClient, podcast: Podcast, call: Call): void 
         },
       });
       pubsub.publish('callUpdated', call.id, { call, event });
-      return;
     }
   });
 }
 
-export async function handleVoiceRequest(prisma: PrismaClient, podcast: Podcast, request: Readonly<VoiceRequest>): Promise<CallResponse> {
+export async function eventAfter(
+  prisma: PrismaClient,
+  event:
+    | (CallEvent & {
+        download: EpisodeDownload | null;
+        part: EpisodePart | null;
+      })
+    | null
+): Promise<Omit<
+  Prisma.CallEventCreateInput,
+  'date' | 'call' | 'rawRequest'
+> | null> {
+  if (!event) {
+    return { type: CallEventType.ANSWERED };
+  }
+
+  switch (event.type) {
+    case CallEventType.ANSWERED:
+      return { type: CallEventType.FETCHING_EPISODE };
+    case CallEventType.FETCHING_EPISODE:
+      return { type: CallEventType.WAITING_MESSAGE };
+    case CallEventType.EPISODE_READY:
+      if (!event.download) {
+        logger.error('Missing download for EPISODE_READY event', { event });
+        return { type: CallEventType.EPISODE_ERROR };
+      }
+      return {
+        type: CallEventType.INTRODUCING_EPISODE,
+        download: { connect: { id: event.download.id } },
+      };
+    case CallEventType.WAITING_MESSAGE:
+      return { type: CallEventType.WAITING_MESSAGE };
+    case CallEventType.INTRODUCING_EPISODE: {
+      if (!event.download) {
+        logger.error('Missing download for INTRODUCING_EPISODE event', {
+          event,
+        });
+        return { type: CallEventType.EPISODE_ERROR };
+      }
+
+      const firstPart = await prisma.episodePart.findFirst({
+        where: {
+          download: { id: event.download.id },
+        },
+        orderBy: { sortOrder: 'asc' },
+      });
+
+      if (!firstPart) {
+        logger.error('Missing first part for download', {
+          download: event.download,
+        });
+        return { type: CallEventType.EPISODE_ERROR };
+      }
+
+      return {
+        type: CallEventType.PLAYING_EPISODE,
+        download: { connect: { id: event.download.id } },
+        part: { connect: { id: firstPart.id } },
+      };
+    }
+    case CallEventType.PLAYING_EPISODE: {
+      if (!event.download) {
+        logger.error('Missing download for PLAYING_EPISODE event', { event });
+        return { type: CallEventType.EPISODE_ERROR };
+      }
+      if (!event.part) {
+        logger.error('Missing part for PLAYING_EPISODE event', { event });
+        return { type: CallEventType.EPISODE_ERROR };
+      }
+      const nextPart = await prisma.episodePart.findFirst({
+        where: {
+          download: { id: event.download.id },
+          sortOrder: { gt: event.part.sortOrder },
+        },
+        orderBy: { sortOrder: 'asc' },
+      });
+      if (nextPart) {
+        return {
+          type: CallEventType.PLAYING_EPISODE,
+          download: { connect: { id: event.download.id } },
+          part: { connect: { id: nextPart.id } },
+        };
+      }
+      return { type: CallEventType.ENDING_EPISODE };
+    }
+    case CallEventType.NO_EPISODE:
+    case CallEventType.EPISODE_ERROR:
+    case CallEventType.ENDING_EPISODE:
+    case CallEventType.ENDED:
+      return null;
+  }
+  throw new Error(`Unknown event type: ${event.type}`);
+}
+
+async function responseForEvent(
+  event: CallEvent & {
+    download:
+      | (EpisodeDownload & {
+          episode: Episode;
+        })
+      | null;
+    part: EpisodePart | null;
+  },
+  getWaitingMessageCount: () => Promise<number>
+): Promise<CallResponse> {
+  switch (event.type) {
+    case CallEventType.ANSWERED:
+      return { type: 'no-op' };
+    case CallEventType.FETCHING_EPISODE: {
+      const messageCount = await getWaitingMessageCount();
+      if (messageCount === 0) {
+        return { type: 'introduction' };
+      }
+      return { type: 'waiting', messageCount };
+    }
+    case CallEventType.EPISODE_READY:
+      return { type: 'no-op' };
+    case CallEventType.NO_EPISODE:
+      return { type: 'no-episode' };
+    case CallEventType.EPISODE_ERROR:
+      return { type: 'episode-error' };
+    case CallEventType.WAITING_MESSAGE: {
+      return {
+        type: 'waiting',
+        messageCount: await getWaitingMessageCount(),
+      };
+    }
+    case CallEventType.INTRODUCING_EPISODE:
+      if (!event.download) {
+        logger.error('Missing download for INTRODUCING_EPISODE event', {
+          event,
+        });
+        throw new Error(`Missing download for INTRODUCING_EPISODE event`);
+      }
+      return {
+        type: 'episode-introduction',
+        playable: event.download,
+        waitingMessageCount: await getWaitingMessageCount(),
+      };
+    case CallEventType.PLAYING_EPISODE:
+      if (!event.download) {
+        logger.error('Missing download for PLAYING_EPISODE event', { event });
+        throw new Error(`Missing download for PLAYING_EPISODE event`);
+      }
+      if (!event.part) {
+        logger.error('Missing part for PLAYING_EPISODE event', { event });
+        throw new Error(`Missing part for PLAYING_EPISODE event`);
+      }
+      return {
+        type: 'episode-play-part',
+        playable: event.download,
+        part: event.part,
+      };
+    case CallEventType.ENDING_EPISODE:
+      return { type: 'outro' };
+    case CallEventType.ENDED:
+      return { type: 'hang-up' };
+  }
+  throw new Error(`Unknown event type: ${event.type}`);
+}
+
+export async function handleVoiceRequest(
+  prisma: PrismaClient,
+  podcast: Podcast,
+  request: Readonly<VoiceRequest>
+): Promise<CallResponse> {
   const handledDate = new Date();
 
   const call = await prisma.call.upsert({
@@ -253,178 +457,37 @@ export async function handleVoiceRequest(prisma: PrismaClient, podcast: Podcast,
         },
       },
       part: true,
-    }
+    },
   });
   pubsub.publish('callUpdated', call.id, { call, event: createdEvent });
 
-  if (createdEvent.type === CallEventType.INTRODUCING_EPISODE && createdEvent.download?.episode) {
+  if (
+    createdEvent.type === CallEventType.INTRODUCING_EPISODE &&
+    createdEvent.download?.episode
+  ) {
     pubsub.publish('episodeNewCall', createdEvent.download.episode.id, {
       episode: createdEvent.download.episode,
-      call: call,
+      call,
     });
   }
 
-  return await responseForEvent(
+  return responseForEvent(
     createdEvent,
-    (): Promise<number> => {
-      return prisma.callEvent.count({
+    (): Promise<number> =>
+      prisma.callEvent.count({
         where: {
           id: { not: createdEvent.id },
           call: { id: call.id },
           type: CallEventType.WAITING_MESSAGE,
         },
-      });
-    }
+      })
   );
 }
 
-export async function eventAfter(
+export async function handleCallStatus(
   prisma: PrismaClient,
-  event: CallEvent & {
-    download: EpisodeDownload | null;
-    part: EpisodePart | null;
-  } | null
-): Promise<Omit<Prisma.CallEventCreateInput, 'date' | 'call' | 'rawRequest'> | null> {
-  if (!event) {
-    return { type: CallEventType.ANSWERED };
-  }
-
-  switch (event.type) {
-    case CallEventType.ANSWERED:
-      return { type: CallEventType.FETCHING_EPISODE };
-    case CallEventType.FETCHING_EPISODE:
-      return { type: CallEventType.WAITING_MESSAGE };
-    case CallEventType.EPISODE_READY:
-      if (!event.download) {
-        logger.error('Missing download for EPISODE_READY event', { event });
-        return { type: CallEventType.EPISODE_ERROR };
-      }
-      return {
-        type: CallEventType.INTRODUCING_EPISODE,
-        download: { connect: { id: event.download.id } },
-      };
-    case CallEventType.WAITING_MESSAGE:
-      return { type: CallEventType.WAITING_MESSAGE };
-    case CallEventType.INTRODUCING_EPISODE:
-      if (!event.download) {
-        logger.error('Missing download for INTRODUCING_EPISODE event', { event });
-        return { type: CallEventType.EPISODE_ERROR };
-      }
-
-      const firstPart = await prisma.episodePart.findFirst({
-        where: {
-          download: { id: event.download.id },
-        },
-        orderBy: { sortOrder: 'asc' },
-      });
-
-      if (!firstPart) {
-        logger.error('Missing first part for download', { download: event.download });
-        return { type: CallEventType.EPISODE_ERROR };
-      }
-
-      return {
-        type: CallEventType.PLAYING_EPISODE,
-        download: { connect: { id: event.download.id } },
-        part: { connect: { id: firstPart.id }}
-      };
-    case CallEventType.PLAYING_EPISODE:
-      if (!event.download) {
-        logger.error('Missing download for PLAYING_EPISODE event', { event });
-        return { type: CallEventType.EPISODE_ERROR };
-      }
-      if (!event.part) {
-        logger.error('Missing part for PLAYING_EPISODE event', { event });
-        return { type: CallEventType.EPISODE_ERROR };
-      }
-      const nextPart = await prisma.episodePart.findFirst({
-        where: {
-          download: { id: event.download.id },
-          sortOrder: { gt: event.part.sortOrder },
-        },
-        orderBy: { sortOrder: 'asc' },
-      });
-      if (nextPart) {
-        return {
-          type: CallEventType.PLAYING_EPISODE,
-          download: { connect: { id: event.download.id } },
-          part: { connect: { id: nextPart.id } },
-        };
-      } else {
-        return { type: CallEventType.ENDING_EPISODE };
-      }
-    case CallEventType.NO_EPISODE:
-    case CallEventType.EPISODE_ERROR:
-    case CallEventType.ENDING_EPISODE:
-    case CallEventType.ENDED:
-      return null;
-  }
-}
-
-async function responseForEvent(
-  event: CallEvent & {
-    download: EpisodeDownload & {
-      episode: Episode;
-    } | null;
-    part: EpisodePart | null;
-  },
-  getWaitingMessageCount: () => Promise<number>
-): Promise<CallResponse> {
-  switch (event.type) {
-    case CallEventType.ANSWERED:
-      return { type: 'no-op' };
-    case CallEventType.FETCHING_EPISODE: {
-      const messageCount = await getWaitingMessageCount()
-      if (messageCount === 0) {
-        return { type: 'introduction' };
-      } else {
-        return { type: 'waiting', messageCount };
-      }
-    }
-    case CallEventType.EPISODE_READY:
-      return { type: 'no-op' };
-    case CallEventType.NO_EPISODE:
-      return { type: 'no-episode' };
-    case CallEventType.EPISODE_ERROR:
-      return { type: 'episode-error' };
-    case CallEventType.WAITING_MESSAGE: {
-      return {
-        type: 'waiting',
-        messageCount: await getWaitingMessageCount(),
-      };
-    }
-    case CallEventType.INTRODUCING_EPISODE:
-      if (!event.download) {
-        logger.error('Missing download for INTRODUCING_EPISODE event', { event });
-        throw new Error(`Missing download for INTRODUCING_EPISODE event`);
-      }
-      return {
-        type: 'episode-introduction',
-        playable: event.download,
-        waitingMessageCount: await getWaitingMessageCount(),
-      };
-    case CallEventType.PLAYING_EPISODE:
-      if (!event.download) {
-        logger.error('Missing download for PLAYING_EPISODE event', { event });
-        throw new Error(`Missing download for PLAYING_EPISODE event`);
-      }
-      if (!event.part) {
-        logger.error('Missing part for PLAYING_EPISODE event', { event });
-        throw new Error(`Missing part for PLAYING_EPISODE event`);
-      }
-      return {
-        type: 'episode-play-part',
-        playable: event.download,
-        part: event.part,
-      };
-    case CallEventType.ENDING_EPISODE:
-      return { type: 'outro' };
-    case CallEventType.ENDED:
-      return { type: 'hang-up' };
-  }
-}
-
-export async function handleCallStatus(prisma: PrismaClient, request: Readonly<VoiceStatusCallbackRequest>): Promise<void> {
+  request: Readonly<VoiceStatusCallbackRequest>
+): Promise<void> {
   if (request.CallStatus === 'completed' || request.CallStatus === 'failed') {
     const now = new Date();
     const duration = Number(request.CallDuration);
@@ -438,8 +501,8 @@ export async function handleCallStatus(prisma: PrismaClient, request: Readonly<V
             date: now,
             type: CallEventType.ENDED,
             rawRequest: request,
-          }
-        }
+          },
+        },
       },
       include: {
         events: {

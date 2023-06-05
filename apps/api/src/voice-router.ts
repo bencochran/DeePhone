@@ -3,11 +3,11 @@ import twilio from 'twilio';
 import { PrismaClient, Podcast } from '@prisma/client';
 
 import logger, { loggableError, loggableObject } from './logger';
-import {
-  handleVoiceRequest,
-  handleCallStatus
-} from './call-states';
-import type { VoiceRequest, VoiceStatusCallbackRequest } from './twilio-utilities';
+import { handleVoiceRequest, handleCallStatus } from './call-states';
+import type {
+  VoiceRequest,
+  VoiceStatusCallbackRequest,
+} from './twilio-utilities';
 import { geocodeVoiceRequestFrom } from './twilio-utilities';
 import {
   initialAnswerUnauthorizedResponse,
@@ -16,7 +16,11 @@ import {
 } from './responses';
 import { TWILIO_AUTH_TOKEN } from './env';
 
-function validateTwilioRequest(req: Request, res: Response, next: NextFunction) {
+function validateTwilioRequest(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   logger.debug(`Validating Twilio request for URL: ${req.originalUrl}`, {
     originalUrl: req.originalUrl,
     hostname: req.hostname,
@@ -24,33 +28,48 @@ function validateTwilioRequest(req: Request, res: Response, next: NextFunction) 
   });
 
   if (req.method !== 'POST') {
-    logger.info(`Skipping Twilio validation for non-POST method "${req.method}"`, {
-      originalUrl: req.originalUrl,
-      hostname: req.hostname,
-      method: req.method,
-    });
-    return next();
+    logger.info(
+      `Skipping Twilio validation for non-POST method "${req.method}"`,
+      {
+        originalUrl: req.originalUrl,
+        hostname: req.hostname,
+        method: req.method,
+      }
+    );
+    next();
+    return;
   }
 
   const twilioSignature = req.header('X-Twilio-Signature');
   if (!twilioSignature) {
-    logger.warning('Missing X-Twilio-Signature header', { headers: req.headers });
+    logger.warning('Missing X-Twilio-Signature header', {
+      headers: req.headers,
+    });
     const voiceResponse = initialAnswerUnauthorizedResponse();
     res.type('text/xml');
     res.send(voiceResponse.toString());
     return;
   }
   const url = new URL(req.originalUrl, `https://${req.hostname}`).toString();
-  const valid = twilio.validateRequest(TWILIO_AUTH_TOKEN, twilioSignature, url, req.body);
+  const valid = twilio.validateRequest(
+    TWILIO_AUTH_TOKEN,
+    twilioSignature,
+    url,
+    req.body
+  );
   if (!valid) {
-    logger.warning(`Invalid ${req.url} request`, { headers: req.headers, body: req.body, url });
+    logger.warning(`Invalid ${req.url} request`, {
+      headers: req.headers,
+      body: req.body,
+      url,
+    });
     const voiceResponse = initialAnswerUnauthorizedResponse();
     res.type('text/xml');
     res.send(voiceResponse.toString());
     return;
   }
   next();
-};
+}
 
 export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
   const router = Router();
@@ -61,17 +80,20 @@ export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
     let voiceResponse: twilio.twiml.VoiceResponse;
     try {
       const voiceRequest: VoiceRequest = req.body;
-      const callResponse = await handleVoiceRequest(prisma, podcast, voiceRequest);
+      const callResponse = await handleVoiceRequest(
+        prisma,
+        podcast,
+        voiceRequest
+      );
 
       (async () => {
         const geocodedFrom = await geocodeVoiceRequestFrom(voiceRequest);
         logger.info(`Handling voice request from ${voiceRequest.From}`, {
           voiceRequest,
           callResponse: loggableObject(callResponse, { maxDepth: 4 }),
-          geocodedFrom
+          geocodedFrom,
         });
       })();
-
 
       voiceResponse = voiceResponseForResponse(callResponse, req.originalUrl);
     } catch (error) {
@@ -84,7 +106,10 @@ export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
 
   router.post('/status-callback', async (req, res) => {
     const voiceRequest: VoiceStatusCallbackRequest = req.body;
-    logger.info(`Status from ${voiceRequest.From}, status: ${voiceRequest.CallStatus}, duration: ${voiceRequest.CallDuration}`, { voiceRequest });
+    logger.info(
+      `Status from ${voiceRequest.From}, status: ${voiceRequest.CallStatus}, duration: ${voiceRequest.CallDuration}`,
+      { voiceRequest }
+    );
 
     await handleCallStatus(prisma, voiceRequest);
     const voiceResponse = new twilio.twiml.VoiceResponse();

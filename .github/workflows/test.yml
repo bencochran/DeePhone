@@ -4,12 +4,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: current
-        cache: 'yarn'
-    - run: yarn install --frozen-lockfile
-    - run: yarn test
-      env:
-        FORCE_COLOR: true
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: current
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: yarn test
+        env:
+          FORCE_COLOR: true

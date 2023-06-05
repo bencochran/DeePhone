@@ -21,7 +21,8 @@ export interface PubSubEpisodeNewCall extends PubSubEvent {
   call: Call;
 }
 
-export interface PubSubEvents extends Record<string, [PubSubEvent] | [string | number, PubSubEvent]> {
+export interface PubSubEvents
+  extends Record<string, [PubSubEvent] | [string | number, PubSubEvent]> {
   callUpdated: [number, PubSubCallUpdated];
   newCall: [PubSubNewCall];
   episodeUpdated: [number, PubSubEpisodeUpdated];

@@ -1,48 +1,49 @@
 import { PrismaClient } from '@prisma/client';
-import { prismaConnectionHelpers } from '@pothos/plugin-prisma';
 import { encodeGlobalID } from '@pothos/plugin-relay';
 
 import { buildBuilder } from '../builder';
 import { Types } from '../types';
 import { PubSubNewCall, pubsub } from '../../pubsub';
 
-export function addNewCallsSubscriptionToBuilder(builder: ReturnType<typeof buildBuilder>, prisma: PrismaClient, types: Types) {
+export function addNewCallsSubscriptionToBuilder(
+  builder: ReturnType<typeof buildBuilder>,
+  prisma: PrismaClient,
+  types: Types
+) {
   const { Call } = types;
 
-  const callEventsConnectionHelpers = prismaConnectionHelpers(
-    builder,
-    'Call',
-    { cursor: 'startDate_id' },
+  const NewCallsConnectionEdge = builder.objectRef<PubSubNewCall>(
+    'NewCallsConnectionEdge'
   );
-
-  const NewCallsConnectionEdge = builder.objectRef<PubSubNewCall>('NewCallsConnectionEdge');
   NewCallsConnectionEdge.implement({
-    fields: (t) => ({
+    fields: t => ({
       cursor: t.field({
         type: 'String',
-        resolve: (event) => encodeGlobalID('Call', event.call.id),
+        resolve: event => encodeGlobalID('Call', event.call.id),
       }),
       node: t.prismaField({
         type: Call,
-        resolve: (query, event) => prisma.call.findUniqueOrThrow({
-          where: { id: event.call.id },
-          ...query
-        }),
+        resolve: (query, event) =>
+          prisma.call.findUniqueOrThrow({
+            where: { id: event.call.id },
+            ...query,
+          }),
       }),
     }),
   });
 
-  const NewCallsConnection = builder.objectRef<PubSubNewCall>('NewCallsConnection');
+  const NewCallsConnection =
+    builder.objectRef<PubSubNewCall>('NewCallsConnection');
   NewCallsConnection.implement({
-    fields: (t) => ({
+    fields: t => ({
       edges: t.field({
         type: [NewCallsConnectionEdge],
-        resolve: (event) => [event],
+        resolve: event => [event],
       }),
     }),
-  })
+  });
 
-  builder.subscriptionField('newCalls', (t) =>
+  builder.subscriptionField('newCalls', t =>
     t.field({
       type: NewCallsConnection,
       args: {
@@ -51,11 +52,10 @@ export function addNewCallsSubscriptionToBuilder(builder: ReturnType<typeof buil
       subscribe: (_, args) => {
         if (args.episodeIdentifier) {
           return pubsub.subscribe('episodeNewCall', args.episodeIdentifier);
-        } else {
-          return pubsub.subscribe('newCall');
         }
+        return pubsub.subscribe('newCall');
       },
-      resolve: (event, args, ctx) => event,
+      resolve: event => event,
     })
   );
 }

@@ -4,15 +4,17 @@ const logger = createLogger({
   levels: config.syslog.levels,
   transports: [new transports.Console()],
   level: process.env.LOGGER_LEVEL ?? 'info',
-  format: process.env.LOGGER_FORMAT === 'human'
-    ? format.combine(
-        format.colorize(),
-        format.timestamp(),
-        format.printf(({ timestamp, level, message }) => {
-          return `[${timestamp}] ${level}: ${message}`;
-        })
-      )
-    : format.json(),
+  format:
+    process.env.LOGGER_FORMAT === 'human'
+      ? format.combine(
+          format.colorize(),
+          format.timestamp(),
+          format.printf(
+            ({ timestamp, level, message }) =>
+              `[${timestamp}] ${level}: ${message}`
+          )
+        )
+      : format.json(),
 });
 
 export function loggableError(error: any) {
@@ -29,7 +31,10 @@ export interface LoggableObjectOptions {
   maxStringLength?: number;
 }
 
-export function loggableObject(object: any, { maxDepth = 5, ...options }: LoggableObjectOptions = {}): any {
+export function loggableObject(
+  object: any,
+  { maxDepth = 5, ...options }: LoggableObjectOptions = {}
+): any {
   if (object === null) {
     return null;
   }
@@ -43,48 +48,66 @@ export function loggableObject(object: any, { maxDepth = 5, ...options }: Loggab
   if (maxDepth === 0) {
     const string = `${object}`;
     if (string.length > maxStringLength) {
-      return string.slice(0, maxStringLength) + `… (${string.length - maxStringLength} more characters)`;
-    } else {
-      return string;
+      return `${string.slice(0, maxStringLength)}… (${
+        string.length - maxStringLength
+      } more characters)`;
     }
+    return string;
   }
 
   if (Array.isArray(object)) {
     return object
       .slice(0, maxArrayLength)
       .map(v => loggableObject(v, { maxDepth: maxDepth - 1, ...options }))
-      .concat(object.length > maxArrayLength ? `… ${object.length - maxArrayLength} more`: [])
+      .concat(
+        object.length > maxArrayLength
+          ? `… ${object.length - maxArrayLength} more`
+          : []
+      );
   }
   if (typeof object === 'object') {
     if (object.toString !== Object.prototype.toString) {
       const string = object.toString();
       if (string.length > maxStringLength) {
-        return string.slice(0, maxStringLength) + `… (${string.length - maxStringLength} more characters)`;
-      } else {
-        return string;
+        return `${string.slice(0, maxStringLength)}… (${
+          string.length - maxStringLength
+        } more characters)`;
       }
+      return string;
     }
     const entries = Object.entries(object);
     return Object.fromEntries(
       entries
         .slice(0, maxObjectProperties)
-        .map(([k, v]) =>
-          [k, loggableObject(v, { maxDepth: maxDepth - 1, ...options })])
-        .concat([entries.length > maxObjectProperties ? ['__and__', `… ${entries.length - maxArrayLength} more`] : []]));
+        .map(([k, v]) => [
+          k,
+          loggableObject(v, { maxDepth: maxDepth - 1, ...options }),
+        ])
+        .concat([
+          entries.length > maxObjectProperties
+            ? ['__and__', `… ${entries.length - maxArrayLength} more`]
+            : [],
+        ])
+    );
   }
   const string = `${object}`;
   if (string.length > maxStringLength) {
-    return string.slice(0, maxStringLength) + `… (${string.length - maxStringLength} more characters)`;
-  } else {
-    return string;
+    return `${string.slice(0, maxStringLength)}… (${
+      string.length - maxStringLength
+    } more characters)`;
   }
+  return string;
 }
 
-export function omit<T extends {}>(object: T, omittedKeys: (keyof T)[] | keyof T) {
-  const omittedKeysArray = Array.isArray(omittedKeys) ? omittedKeys : [omittedKeys];
+export function omit<T extends {}>(
+  object: T,
+  omittedKeys: (keyof T)[] | keyof T
+) {
+  const omittedKeysArray = Array.isArray(omittedKeys)
+    ? omittedKeys
+    : [omittedKeys];
   return Object.fromEntries(
-    Object
-      .keys(object)
+    Object.keys(object)
       .map(k => k as keyof T)
       .filter(k => !omittedKeysArray.includes(k))
       .map(k => [k, object[k]])

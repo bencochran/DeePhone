@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { RelayEnvironmentProvider } from 'react-relay';
 import { Tooltip } from 'react-tooltip';
 
@@ -16,36 +13,39 @@ import { ErrorPage } from './error-page';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <Home />,
     errorElement: <ErrorPage />,
     loader: () => loadHome(RelayEnvironment),
   },
-    {
-    path: "/podcasts",
+  {
+    path: '/podcasts',
     element: <Podcasts />,
     errorElement: <ErrorPage />,
     loader: () => loadPodcasts(RelayEnvironment),
   },
   {
-    path: "/episode/:episodeId",
+    path: '/episode/:episodeId',
     element: <Episode />,
     errorElement: <ErrorPage />,
-    loader: (args) => loadEpisode(RelayEnvironment, { episodeId: Number.parseInt(args.params.episodeId!, 10) }),
+    loader: args =>
+      loadEpisode(RelayEnvironment, {
+        episodeId: Number.parseInt(args.params.episodeId!, 10),
+      }),
   },
   {
-    path: "/calls",
+    path: '/calls',
     element: <Calls />,
     errorElement: <ErrorPage />,
     loader: () => loadCalls(RelayEnvironment),
   },
 ]);
 
-
-export const App: React.FC = () =>
+export const App: React.FC = () => (
   <React.StrictMode>
     <RelayEnvironmentProvider environment={RelayEnvironment}>
       <RouterProvider router={router} />
-      <Tooltip id='dee-tooltip' />
+      <Tooltip id="dee-tooltip" />
     </RelayEnvironmentProvider>
-  </React.StrictMode>;
+  </React.StrictMode>
+);

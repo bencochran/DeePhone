@@ -1,4 +1,4 @@
-import logger from './logger'
+import logger from './logger';
 
 // When testing, let the `undefined`s flow
 const tests = process.env.NODE_ENV === 'test';

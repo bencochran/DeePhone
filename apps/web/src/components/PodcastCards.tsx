@@ -27,10 +27,13 @@ export const PodcastCards: React.FC<PodcastCardsProps> = ({ data }) => {
   );
 
   return (
+    // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
-      {podcasts.podcasts && podcasts.podcasts.edges.map(podcast =>
-        podcast && <PodcastCard key={podcast.node.id} data={podcast.node} />
-      )}
+      {podcasts.podcasts &&
+        podcasts.podcasts.edges.map(
+          podcast =>
+            podcast && <PodcastCard key={podcast.node.id} data={podcast.node} />
+        )}
     </>
   );
 };

@@ -9,11 +9,11 @@ interface PodcastHeaderProps {
   className?: string;
 }
 
-export const PodcastHeader: React.FC<PodcastHeaderProps> = ({ data, className }) => {
-  const {
-    title,
-    imageURL,
-  } = useFragment(
+export const PodcastHeader: React.FC<PodcastHeaderProps> = ({
+  data,
+  className,
+}) => {
+  const { title, imageURL } = useFragment(
     graphql`
       fragment PodcastHeader_podcast on Podcast {
         title
@@ -25,13 +25,14 @@ export const PodcastHeader: React.FC<PodcastHeaderProps> = ({ data, className })
 
   return (
     <div className={cn('flex flex-row items-center gap-3', className)}>
-      {imageURL &&
+      {imageURL && (
         <img
-          className='aspect-square h-12 rounded'
+          className="aspect-square h-12 rounded"
           src={imageURL}
+          alt={title}
         />
-      }
-      <h2 className='text-slate-900 dark:text-slate-300 font-medium text-3xl'>
+      )}
+      <h2 className="text-slate-900 dark:text-slate-300 font-medium text-3xl">
         {title}
       </h2>
     </div>

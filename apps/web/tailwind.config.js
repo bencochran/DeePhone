@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./index.html",
-    "./src/**/*.{ts,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       keyframes: {
@@ -11,14 +8,13 @@ module.exports = {
           '75%, 100%': {
             transform: 'scale(1.6) translate(7%, -7%)',
             opacity: 0,
-          }
+          },
         },
       },
       animation: {
-        'phone-ping': 'phone-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite'
+        'phone-ping': 'phone-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
       },
     },
   },
   plugins: [],
-}
-
+};

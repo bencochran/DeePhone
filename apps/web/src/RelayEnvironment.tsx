@@ -5,32 +5,28 @@ import {
   Store,
   Variables,
   RequestParameters,
-  CacheConfig,
   Observable,
 } from 'relay-runtime';
 import { createClient } from 'graphql-ws';
 
 const subscriptionsClient = createClient({
-  url: window.location.protocol === 'https:'
-    ? `wss://${window.location.host}/api/graphql/ws`
-    : `ws://${window.location.host}/api/graphql/ws`,
+  url:
+    window.location.protocol === 'https:'
+      ? `wss://${window.location.host}/api/graphql/ws`
+      : `ws://${window.location.host}/api/graphql/ws`,
 });
 
-async function fetchRelay(
-  params: RequestParameters,
-  variables: Variables,
-  _cacheConfig: CacheConfig
-) {
+async function fetchRelay(params: RequestParameters, variables: Variables) {
   const response = await fetch(`/api/graphql`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json"
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       query: params.text,
-      variables
-    })
+      variables,
+    }),
   });
 
   const json = await response.json();
@@ -39,7 +35,6 @@ async function fetchRelay(
   // property of the response. If any exceptions occurred when processing the request,
   // throw an error to indicate to the developer what went wrong.
   if (Array.isArray(json.errors)) {
-    console.log(json.errors);
     throw new Error(
       `Error fetching GraphQL query '${
         params.name
@@ -55,9 +50,9 @@ async function fetchRelay(
 
 function subscribe(
   operation: RequestParameters,
-  variables: Variables,
+  variables: Variables
 ): Observable<any> {
-  return Observable.create((sink) => {
+  return Observable.create(sink => {
     if (!operation.text) {
       return sink.error(new Error('Operation text cannot be empty'));
     }
@@ -67,7 +62,7 @@ function subscribe(
         query: operation.text,
         variables,
       },
-      sink,
+      sink
     );
   });
 }
@@ -80,6 +75,6 @@ export default new Environment({
     // navigates around the app. Relay will hold onto the specified number of
     // query results, allowing the user to return to recently visited pages
     // and reusing cached data if its available/fresh.
-    gcReleaseBufferSize: 10
-  })
+    gcReleaseBufferSize: 10,
+  }),
 });

@@ -22,17 +22,18 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
   );
   return (
     <Card>
-      <div className='flex flex-col gap-3'>
-        <div className='aspect-square rounded overflow-hidden max-h-96 self-center'>
+      <div className="flex flex-col gap-3">
+        <div className="aspect-square rounded overflow-hidden max-h-96 self-center">
           {podcast.imageURL ? (
             <img
-              className='object-cover'
+              className="object-cover"
               title={podcast.title}
+              alt={podcast.title}
               src={podcast.imageURL}
             />
           ) : (
-            <div className='bg-slate-100 dark:bg-slate-700 h-full flex items-center justify-center'>
-              <span className='text-slate-700 dark:text-slate-300 font-medium text-lg'>
+            <div className="bg-slate-100 dark:bg-slate-700 h-full flex items-center justify-center">
+              <span className="text-slate-700 dark:text-slate-300 font-medium text-lg">
                 {podcast.title}
               </span>
             </div>
@@ -41,5 +42,5 @@ export const PodcastCard: React.FC<Props> = ({ data }) => {
         <EpisodeList data={podcast} />
       </div>
     </Card>
-  )
-}
+  );
+};

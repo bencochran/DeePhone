@@ -7,7 +7,13 @@ type Call implements Node {
   duration: Int
   endDate: DateTime
   episode: Episode
-  events(after: ID, before: ID, first: Int, last: Int, oldestFirst: Boolean): CallEventsConnection!
+  events(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+    oldestFirst: Boolean
+  ): CallEventsConnection!
   id: ID!
   identifier: Int!
   phoneNumber: String!
@@ -75,7 +81,15 @@ type Episode implements Node {
   callCount: Int!
   contentURL: URL!
   description: String
-  downloads(after: ID, before: ID, excludeDeleted: Boolean, first: Int, last: Int, oldestFirst: Boolean, onlyFinished: Boolean): EpisodeDownloadsConnection!
+  downloads(
+    after: ID
+    before: ID
+    excludeDeleted: Boolean
+    first: Int
+    last: Int
+    oldestFirst: Boolean
+    onlyFinished: Boolean
+  ): EpisodeDownloadsConnection!
   guid: String!
   id: ID!
   identifier: Int!
@@ -87,7 +101,12 @@ type Episode implements Node {
 
 type EpisodeDownload implements Node {
   callCount: Int!
-  calls(after: ID, before: ID, first: Int, last: Int): EpisodeDownloadCallsConnection!
+  calls(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): EpisodeDownloadCallsConnection!
   contentURL: URL!
   deleted: Boolean!
   downloadDate: DateTime!
@@ -96,7 +115,12 @@ type EpisodeDownload implements Node {
   finished: Boolean!
   id: ID!
   partCount: Int!
-  parts(after: ID, before: ID, first: Int, last: Int): EpisodeDownloadPartsConnection!
+  parts(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): EpisodeDownloadPartsConnection!
 }
 
 type EpisodeDownloadCallsConnection {
@@ -165,7 +189,13 @@ type PageInfo {
 type Podcast implements Node {
   callCount: Int!
   description: String
-  episodes(after: ID, before: ID, first: Int, last: Int, oldestFirst: Boolean): PodcastEpisodesConnection!
+  episodes(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+    oldestFirst: Boolean
+  ): PodcastEpisodesConnection!
   feedURL: URL!
   id: ID!
   identifier: Int!
@@ -186,14 +216,32 @@ type PodcastEpisodesConnectionEdge {
 
 type Query {
   call(identifier: Int!): Call
-  calls(after: ID, before: ID, episodeIdentifier: Int, first: Int, last: Int, onlyComplete: Boolean, onlyInProgress: Boolean): QueryCallsConnection!
+  calls(
+    after: ID
+    before: ID
+    episodeIdentifier: Int
+    first: Int
+    last: Int
+    onlyComplete: Boolean
+    onlyInProgress: Boolean
+  ): QueryCallsConnection!
   episode(identifier: Int!): Episode
-  episodes(after: ID, before: ID, first: Int, last: Int): QueryEpisodesConnection!
+  episodes(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): QueryEpisodesConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
   ok: Boolean!
   podcast(identifier: Int!): Podcast
-  podcasts(after: ID, before: ID, first: Int, last: Int): QueryPodcastsConnection!
+  podcasts(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): QueryPodcastsConnection!
 }
 
 type QueryCallsConnection {

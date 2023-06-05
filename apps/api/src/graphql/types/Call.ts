@@ -3,7 +3,7 @@ import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
 
 import { buildBuilder } from '../builder';
 
-const phoneUtil = PhoneNumberUtil.getInstance()
+const phoneUtil = PhoneNumberUtil.getInstance();
 
 function formatPhoneNumber(phoneNumber: string, countryCode?: string) {
   const number = phoneUtil.parseAndKeepRawInput(phoneNumber, countryCode);
@@ -16,7 +16,7 @@ function maskPhoneNumber(phoneNumber: string) {
     // Couldn’t find last 4, just obscure the whole thing
     return phoneNumber.replaceAll(/\d/g, 'X');
   }
-  const [_, first, second] = match;
+  const [_unused, first, second] = match;
   return first + second.replaceAll(/\d/g, 'X');
 }
 
@@ -24,7 +24,7 @@ enum CallStatus {
   IN_PROGRESS = 'IN_PROGRESS',
   ENDED = 'ENDED',
   UNKNOWN = 'UNKNOWN',
-};
+}
 
 export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>) {
   const CallStatusRef = builder.enumType(CallStatus, {
@@ -33,10 +33,13 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>) {
 
   return builder.prismaNode('Call', {
     id: { field: 'id' },
-    fields: (t) => ({
+    fields: t => ({
       identifier: t.exposeInt('id'),
       phoneNumber: t.string({
-        resolve: (call) => maskPhoneNumber(formatPhoneNumber(call.phoneNumber, call.callerCountry ?? undefined)),
+        resolve: call =>
+          maskPhoneNumber(
+            formatPhoneNumber(call.phoneNumber, call.callerCountry ?? undefined)
+          ),
       }),
       startDate: t.expose('startDate', {
         type: 'DateTime',
@@ -52,7 +55,7 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>) {
         args: {
           oldestFirst: t.arg.boolean(),
         },
-        query: (args) => ({
+        query: args => ({
           orderBy: { date: args.oldestFirst ? 'asc' : 'desc' },
         }),
       }),
@@ -68,10 +71,10 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>) {
               download: {
                 select: {
                   episode: true,
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
         resolve: (_select, call) => call.events.at(0)?.download.episode,
       }),
@@ -83,7 +86,7 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>) {
             take: 1,
           },
         },
-        resolve: (call) => {
+        resolve: call => {
           if (call.endDate) {
             return CallStatus.ENDED;
           }
@@ -94,7 +97,10 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>) {
           if (lastEvent.type === CallEventType.ENDED) {
             return CallStatus.ENDED;
           }
-          if (new Date().getTime() - lastEvent.date.getTime() > 1000 * 60 * 60) {
+          if (
+            new Date().getTime() - lastEvent.date.getTime() >
+            1000 * 60 * 60
+          ) {
             // It’s been an hours since the last event… we must’ve lost the hang up
             return CallStatus.UNKNOWN;
           }
@@ -119,6 +125,6 @@ export function addCallToBuilder(builder: ReturnType<typeof buildBuilder>) {
         nullable: true,
         resolve: () => null,
       }),
-    })
+    }),
   });
 }

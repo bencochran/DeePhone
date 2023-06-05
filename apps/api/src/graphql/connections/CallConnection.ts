@@ -3,7 +3,10 @@ import { prismaConnectionHelpers } from '@pothos/plugin-prisma';
 import { buildBuilder } from '../builder';
 import { Types } from '../types';
 
-export function addCallConnectionToBuilder(builder: ReturnType<typeof buildBuilder>, types: Types) {
+export function addCallConnectionToBuilder(
+  builder: ReturnType<typeof buildBuilder>,
+  types: Types
+) {
   const { Call } = types;
 
   const downloadCallConnectionHelpers = prismaConnectionHelpers(
@@ -11,15 +14,14 @@ export function addCallConnectionToBuilder(builder: ReturnType<typeof buildBuild
     'CallEvent',
     {
       cursor: 'date_id',
-      select: (nodeSelection) => ({
-        call: nodeSelection({
-        }),
+      select: nodeSelection => ({
+        call: nodeSelection({}),
       }),
-      resolveNode: (callEvent) => callEvent.call,
-    },
+      resolveNode: callEvent => callEvent.call,
+    }
   );
 
-  builder.prismaObjectField('EpisodeDownload', 'calls', (t) =>
+  builder.prismaObjectField('EpisodeDownload', 'calls', t =>
     t.connection({
       type: Call,
       select: (args, ctx, nestedSelection) => ({
@@ -29,11 +31,8 @@ export function addCallConnectionToBuilder(builder: ReturnType<typeof buildBuild
           orderBy: { date: 'desc' },
         },
       }),
-      resolve: (download, args, ctx) => downloadCallConnectionHelpers.resolve(
-        download.callEvents,
-        args,
-        ctx
-      ),
+      resolve: (download, args, ctx) =>
+        downloadCallConnectionHelpers.resolve(download.callEvents, args, ctx),
     })
   );
 }

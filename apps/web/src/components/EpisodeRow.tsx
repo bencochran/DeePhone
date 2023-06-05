@@ -1,5 +1,5 @@
 import React from 'react';
-import { twMerge as cn } from 'tailwind-merge'
+import { twMerge as cn } from 'tailwind-merge';
 import { graphql, useFragment, useSubscription } from 'react-relay';
 import { PhoneArrowDownLeftIcon } from '@heroicons/react/24/outline';
 import { GraphQLSubscriptionConfig } from 'relay-runtime';
@@ -15,8 +15,10 @@ interface Props {
 }
 
 const useEpisodeUpdateSubscription = (episodeIdentifier: number) => {
-  const config = React.useMemo<GraphQLSubscriptionConfig<EpisodeRowSubscription>>(() => {
-    return {
+  const config = React.useMemo<
+    GraphQLSubscriptionConfig<EpisodeRowSubscription>
+  >(
+    () => ({
       subscription: graphql`
         subscription EpisodeRowSubscription($episodeIdentifier: Int!) {
           episodeUpdated(episodeIdentifier: $episodeIdentifier) {
@@ -29,13 +31,16 @@ const useEpisodeUpdateSubscription = (episodeIdentifier: number) => {
       variables: {
         episodeIdentifier,
       },
-    };
-  }, [episodeIdentifier]);
+    }),
+    [episodeIdentifier]
+  );
 
   useSubscription<EpisodeRowSubscription>(config);
-}
+};
 
-export const EpisodeRow: React.FC<Props & Omit<React.HTMLProps<HTMLDivElement>, 'data'>> = ({ data, className, ...props }) => {
+export const EpisodeRow: React.FC<
+  Props & Omit<React.HTMLProps<HTMLDivElement>, 'data'>
+> = ({ data, className, ...props }) => {
   const episode = useFragment(
     graphql`
       fragment EpisodeRow_episode on Episode {
@@ -58,34 +63,39 @@ export const EpisodeRow: React.FC<Props & Omit<React.HTMLProps<HTMLDivElement>, 
   });
 
   return (
-    <div className={cn('flex flex-row gap-2 items-center group', className)} {...props}>
-      {episode.imageURL &&
-        <div className='flex-grow-0 flex-shrink-0 aspect-square w-12 rounded overflow-hidden'>
-          <img src={episode.imageURL} className='w-full h-full object-cover' />
+    <div
+      className={cn('flex flex-row gap-2 items-center group', className)}
+      {...props}
+    >
+      {episode.imageURL && (
+        <div className="flex-grow-0 flex-shrink-0 aspect-square w-12 rounded overflow-hidden">
+          <img
+            className="w-full h-full object-cover"
+            src={episode.imageURL}
+            alt={episode.title}
+          />
         </div>
-      }
-      <div className='flex-grow flex flex-col min-w-0'>
-        <p
-          className='font-medium text-slate-900 dark:text-slate-100 group-hover:dark:text-slate-50 group-active:dark:text-slate-50 truncate'
-        >
+      )}
+      <div className="flex-grow flex flex-col min-w-0">
+        <p className="font-medium text-slate-900 dark:text-slate-100 group-hover:dark:text-slate-50 group-active:dark:text-slate-50 truncate">
           {episode.title}
         </p>
-        <p
-          className='text-sm text-slate-400 dark:text-slate-400 group-hover:text-slate-500 group-hover:dark:text-slate-300 group-active:text-slate-600 group-active:dark:text-slate-100 truncate'
-        >
+        <p className="text-sm text-slate-400 dark:text-slate-400 group-hover:text-slate-500 group-hover:dark:text-slate-300 group-active:text-slate-600 group-active:dark:text-slate-100 truncate">
           {formattedPublishDate}
         </p>
       </div>
-      {episode.callCount> 0 &&
+      {episode.callCount > 0 && (
         <div
-          className='ml-auto text-lg font-light text-slate-600 group-hover:text-slate-700 dark:text-slate-400 group-hover:dark:text-slate-300 flex flex-row items-center gap-1'
-          data-tooltip-content={`Episode has received ${episode.callCount} ${episode.callCount === 1 ? 'call' : 'calls'}`}
-          data-tooltip-id='dee-tooltip'
+          className="ml-auto text-lg font-light text-slate-600 group-hover:text-slate-700 dark:text-slate-400 group-hover:dark:text-slate-300 flex flex-row items-center gap-1"
+          data-tooltip-content={`Episode has received ${episode.callCount} ${
+            episode.callCount === 1 ? 'call' : 'calls'
+          }`}
+          data-tooltip-id="dee-tooltip"
         >
           <p>{episode.callCount}</p>
-          <PhoneArrowDownLeftIcon className='w-5 h-5 inline-block align-text-bottom' />
+          <PhoneArrowDownLeftIcon className="w-5 h-5 inline-block align-text-bottom" />
         </div>
-      }
+      )}
     </div>
   );
-}
+};
