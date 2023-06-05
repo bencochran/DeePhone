@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { PrismaClient } from '@prisma/client';
 
 import logger, { loggableError } from './logger';
 
@@ -47,9 +48,8 @@ interface LatitudeAndLongitude {
   longitude: number;
 }
 
-const geocodeCache: Record<string, LatitudeAndLongitude> = {};
-
 export async function geocodeVoiceRequestFrom(
+  prisma: PrismaClient,
   voiceRequest: VoiceRequest
 ): Promise<LatitudeAndLongitude | null> {
   if (
@@ -59,16 +59,28 @@ export async function geocodeVoiceRequestFrom(
   ) {
     return null;
   }
-  try {
-    const cacheKey = `${voiceRequest.FromCountry}-${voiceRequest.FromZip}`;
-    if (cacheKey in geocodeCache) {
-      const cached = geocodeCache[cacheKey];
-      logger.debug(`Geocoding cache hit for "${cacheKey}"`, {
+
+  const cached = await prisma.postalCodeLocation.findUnique({
+    where: {
+      postalCode_country: {
+        postalCode: voiceRequest.FromZip,
+        country: voiceRequest.FromCountry,
+      },
+    },
+  });
+
+  if (cached) {
+    logger.debug(
+      `Geocoding cache hit for ${voiceRequest.FromZip} in ${voiceRequest.FromCountry}`,
+      {
         voiceRequest,
         cached,
-      });
-      return cached;
-    }
+      }
+    );
+    return { latitude: cached.latitude, longitude: cached.longitude };
+  }
+
+  try {
     const searchParams = new URLSearchParams();
     searchParams.set('maxRows', '1');
     searchParams.set('username', process.env.GEONAMES_USERNAME);
@@ -91,7 +103,16 @@ export async function geocodeVoiceRequestFrom(
       if ('lng' in first && 'lat' in first) {
         const result = { longitude: first.lng, latitude: first.lat };
         logger.info(`Geocoding result: ${url.toString()}`);
-        geocodeCache[cacheKey] = result;
+
+        await prisma.postalCodeLocation.create({
+          data: {
+            postalCode: voiceRequest.FromZip,
+            country: voiceRequest.FromCountry,
+            latitude: result.latitude,
+            longitude: result.longitude,
+            fetchDate: new Date(),
+          },
+        });
         return result;
       }
     }

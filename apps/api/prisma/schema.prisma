@@ -121,3 +121,14 @@ enum CallEventType {
   ENDING_EPISODE
   ENDED
 }
+
+model PostalCodeLocation {
+  id         Int      @id @default(autoincrement())
+  postalCode String
+  country    String
+  latitude   Float
+  longitude  Float
+  fetchDate  DateTime
+
+  @@unique([postalCode, country])
+}

@@ -87,7 +87,10 @@ export function buildRouter(prisma: PrismaClient, podcast: Podcast) {
       );
 
       (async () => {
-        const geocodedFrom = await geocodeVoiceRequestFrom(voiceRequest);
+        const geocodedFrom = await geocodeVoiceRequestFrom(
+          prisma,
+          voiceRequest
+        );
         logger.info(`Handling voice request from ${voiceRequest.From}`, {
           voiceRequest,
           callResponse: loggableObject(callResponse, { maxDepth: 4 }),
