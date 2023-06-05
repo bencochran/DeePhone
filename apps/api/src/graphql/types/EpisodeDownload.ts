@@ -6,6 +6,7 @@ export function addEpisodeDownloadToBuilder(
   return builder.prismaNode('EpisodeDownload', {
     id: { field: 'id' },
     fields: t => ({
+      identifier: t.exposeInt('id'),
       contentURL: t.expose('contentURL', {
         type: 'URL',
       }),

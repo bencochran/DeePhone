@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f90aef93f69109ee165ce9cd160ce2ab>>
+ * @generated SignedSource<<edd0c2c0af70d3a6377dafb237f613b1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -243,6 +243,7 @@ return {
                     "plural": false,
                     "selections": [
                       (v2/*: any*/),
+                      (v3/*: any*/),
                       {
                         "alias": null,
                         "args": null,
@@ -428,12 +429,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "1ab13d2174ebae5de396bc2ac18627bf",
+    "cacheID": "aee809c437c8427ef1e47e2cb21c899b",
     "id": null,
     "metadata": {},
     "name": "EpisodeQuery",
     "operationKind": "query",
-    "text": "query EpisodeQuery(\n  $episodeId: Int!\n) {\n  episode(identifier: $episodeId) {\n    id\n    identifier\n    podcast {\n      ...PodcastHeader_podcast\n      id\n    }\n    ...EpisodeHeader_episode\n  }\n  ...CallListQuery_2kAcFf\n  ...DownloadListQuery_2kAcFf\n}\n\nfragment CallListQuery_2kAcFf on Query {\n  calls(first: 10, episodeIdentifier: $episodeId) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  status\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n\nfragment DownloadListQuery_2kAcFf on Query {\n  episode(identifier: $episodeId) {\n    downloads(first: 10) {\n      edges {\n        node {\n          id\n          ...DownloadRow_episodeDownload\n          __typename\n        }\n        cursor\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n    id\n  }\n}\n\nfragment DownloadRow_episodeDownload on EpisodeDownload {\n  downloadDate\n  partCount\n  finished\n  deleted\n  callCount\n}\n\nfragment EpisodeHeader_episode on Episode {\n  title\n  publishDate\n  imageURL\n  description\n}\n\nfragment PodcastHeader_podcast on Podcast {\n  title\n  imageURL\n}\n"
+    "text": "query EpisodeQuery(\n  $episodeId: Int!\n) {\n  episode(identifier: $episodeId) {\n    id\n    identifier\n    podcast {\n      ...PodcastHeader_podcast\n      id\n    }\n    ...EpisodeHeader_episode\n  }\n  ...CallListQuery_2kAcFf\n  ...DownloadListQuery_2kAcFf\n}\n\nfragment CallListQuery_2kAcFf on Query {\n  calls(first: 10, episodeIdentifier: $episodeId) {\n    edges {\n      node {\n        id\n        identifier\n        ...CallRow_call\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment CallRow_call on Call {\n  identifier\n  callerName\n  phoneNumber\n  startDate\n  endDate\n  status\n  episode {\n    title\n    imageURL\n    podcast {\n      title\n      imageURL\n      id\n    }\n    id\n  }\n}\n\nfragment DownloadListQuery_2kAcFf on Query {\n  episode(identifier: $episodeId) {\n    downloads(first: 10) {\n      edges {\n        node {\n          id\n          ...DownloadRow_episodeDownload\n          __typename\n        }\n        cursor\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n    id\n  }\n}\n\nfragment DownloadRow_episodeDownload on EpisodeDownload {\n  identifier\n  downloadDate\n  partCount\n  finished\n  deleted\n  callCount\n}\n\nfragment EpisodeHeader_episode on Episode {\n  title\n  publishDate\n  imageURL\n  description\n}\n\nfragment PodcastHeader_podcast on Podcast {\n  title\n  imageURL\n}\n"
   }
 };
 })();

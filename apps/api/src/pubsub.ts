@@ -26,6 +26,10 @@ export interface PubSubEpisodeNewDownload extends PubSubEvent {
   episodeDownload: EpisodeDownload;
 }
 
+export interface PubSubEpisodeDownloadUpdated extends PubSubEvent {
+  episodeDownload: EpisodeDownload;
+}
+
 export interface PubSubEvents
   extends Record<string, [PubSubEvent] | [string | number, PubSubEvent]> {
   callUpdated: [number, PubSubCallUpdated];
@@ -33,6 +37,7 @@ export interface PubSubEvents
   episodeUpdated: [number, PubSubEpisodeUpdated];
   episodeNewCall: [number, PubSubEpisodeNewCall];
   episodeNewDownload: [number, PubSubEpisodeNewDownload];
+  episodeDownloadUpdated: [number, PubSubEpisodeDownloadUpdated];
 }
 
 export const pubsub = createPubSub<PubSubEvents>({});

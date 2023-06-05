@@ -1,5 +1,6 @@
 import React from 'react';
-import { graphql, useFragment } from 'react-relay';
+import { graphql, useFragment, useSubscription } from 'react-relay';
+import { GraphQLSubscriptionConfig } from 'relay-runtime';
 import { twMerge as cn } from 'tailwind-merge';
 import { XMarkIcon, ArrowPathIcon } from '@heroicons/react/20/solid';
 import { PhoneArrowDownLeftIcon } from '@heroicons/react/24/outline';
@@ -7,28 +8,60 @@ import { PhoneArrowDownLeftIcon } from '@heroicons/react/24/outline';
 import { useYearOptionalFormattedDate } from '@/hooks/dates';
 
 import { DownloadRow_episodeDownload$key } from './__generated__/DownloadRow_episodeDownload.graphql';
+import { DownloadRowSubscription } from './__generated__/DownloadRowSubscription.graphql';
 
 interface DownloadRowProps {
   data: DownloadRow_episodeDownload$key;
   className?: string;
 }
 
+const useEpisodeDownloadUpdateSubscription = (
+  episodeDownloadIdentifier: number
+) => {
+  const config = React.useMemo<
+    GraphQLSubscriptionConfig<DownloadRowSubscription>
+  >(
+    () => ({
+      subscription: graphql`
+        subscription DownloadRowSubscription($episodeDownloadIdentifier: Int!) {
+          episodeDownloadUpdated(
+            episodeDownloadIdentifier: $episodeDownloadIdentifier
+          ) {
+            download {
+              ...DownloadRow_episodeDownload
+            }
+          }
+        }
+      `,
+      variables: {
+        episodeDownloadIdentifier,
+      },
+    }),
+    [episodeDownloadIdentifier]
+  );
+
+  useSubscription<DownloadRowSubscription>(config);
+};
+
 export const DownloadRow: React.FC<DownloadRowProps> = ({
   data,
   className,
 }) => {
-  const { downloadDate, partCount, finished, deleted, callCount } = useFragment(
-    graphql`
-      fragment DownloadRow_episodeDownload on EpisodeDownload {
-        downloadDate
-        partCount
-        finished
-        deleted
-        callCount
-      }
-    `,
-    data
-  );
+  const { identifier, downloadDate, partCount, finished, deleted, callCount } =
+    useFragment(
+      graphql`
+        fragment DownloadRow_episodeDownload on EpisodeDownload {
+          identifier
+          downloadDate
+          partCount
+          finished
+          deleted
+          callCount
+        }
+      `,
+      data
+    );
+  useEpisodeDownloadUpdateSubscription(identifier);
 
   const formattedDate = useYearOptionalFormattedDate(downloadDate, {
     year: 'numeric',

@@ -114,6 +114,7 @@ type EpisodeDownload implements Node {
   episode: Episode!
   finished: Boolean!
   id: ID!
+  identifier: Int!
   partCount: Int!
   parts(
     after: ID
@@ -141,6 +142,10 @@ type EpisodeDownloadPartsConnection {
 type EpisodeDownloadPartsConnectionEdge {
   cursor: String!
   node: EpisodePart!
+}
+
+type EpisodeDownloadUpdatedSubscription {
+  download: EpisodeDownload!
 }
 
 type EpisodeDownloadsConnection {
@@ -290,6 +295,9 @@ type QueryPodcastsConnectionEdge {
 
 type Subscription {
   callUpdated(callIdentifier: Int!): CallUpdatedSubscription!
+  episodeDownloadUpdated(
+    episodeDownloadIdentifier: Int!
+  ): EpisodeDownloadUpdatedSubscription!
   episodeUpdated(episodeIdentifier: Int!): EpisodeUpdatedSubscription!
   newCalls(episodeIdentifier: Int): NewCallsConnection!
   newEpisodeDownlaods(episodeIdentifier: Int): NewEpisodeDownloadsConnection!

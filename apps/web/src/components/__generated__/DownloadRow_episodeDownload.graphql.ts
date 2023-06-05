@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<3a4400b20d12ed30fcaea7bd32e39d37>>
+ * @generated SignedSource<<2e125d9174bd3d438508dfac8d6dc9a3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type DownloadRow_episodeDownload$data = {
   readonly deleted: boolean;
   readonly downloadDate: any;
   readonly finished: boolean;
+  readonly identifier: number;
   readonly partCount: number;
   readonly " $fragmentType": "DownloadRow_episodeDownload";
 };
@@ -29,6 +30,13 @@ const node: ReaderFragment = {
   "metadata": null,
   "name": "DownloadRow_episodeDownload",
   "selections": [
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "identifier",
+      "storageKey": null
+    },
     {
       "alias": null,
       "args": null,
@@ -69,6 +77,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "bcf91d92db70a65035075d514ad40a75";
+(node as any).hash = "ac2ab046da01f457fc6defcf7a95a902";
 
 export default node;

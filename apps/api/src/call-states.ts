@@ -215,6 +215,9 @@ function enqueueFetch(
             parts: { orderBy: { sortOrder: 'asc' } },
           },
         });
+        pubsub.publish('episodeDownloadUpdated', downloadToPlay.id, {
+          episodeDownload: downloadToPlay,
+        });
       }
       const event = await prisma.callEvent.create({
         data: {
@@ -478,6 +481,9 @@ export async function handleVoiceRequest(
     pubsub.publish('episodeNewCall', createdEvent.download.episode.id, {
       episode: createdEvent.download.episode,
       call,
+    });
+    pubsub.publish('episodeDownloadUpdated', createdEvent.download.id, {
+      episodeDownload: createdEvent.download,
     });
   }
 

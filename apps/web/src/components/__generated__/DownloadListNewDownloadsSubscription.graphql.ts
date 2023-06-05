@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<48fbc0022ac25a7d753057794e773b6f>>
+ * @generated SignedSource<<d5d0c1e75fdc51a84cb876ae775a2927>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -135,6 +135,13 @@ return {
                     "alias": null,
                     "args": null,
                     "kind": "ScalarField",
+                    "name": "identifier",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
                     "name": "downloadDate",
                     "storageKey": null
                   },
@@ -201,12 +208,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "ecc925e0c869bc239afef791c59bb67e",
+    "cacheID": "abb081dd3a9023d529c6e1c88e4cf3f7",
     "id": null,
     "metadata": {},
     "name": "DownloadListNewDownloadsSubscription",
     "operationKind": "subscription",
-    "text": "subscription DownloadListNewDownloadsSubscription(\n  $episodeIdentifier: Int\n) {\n  newEpisodeDownlaods(episodeIdentifier: $episodeIdentifier) {\n    edges {\n      node {\n        ...DownloadRow_episodeDownload\n        id\n      }\n    }\n  }\n}\n\nfragment DownloadRow_episodeDownload on EpisodeDownload {\n  downloadDate\n  partCount\n  finished\n  deleted\n  callCount\n}\n"
+    "text": "subscription DownloadListNewDownloadsSubscription(\n  $episodeIdentifier: Int\n) {\n  newEpisodeDownlaods(episodeIdentifier: $episodeIdentifier) {\n    edges {\n      node {\n        ...DownloadRow_episodeDownload\n        id\n      }\n    }\n  }\n}\n\nfragment DownloadRow_episodeDownload on EpisodeDownload {\n  identifier\n  downloadDate\n  partCount\n  finished\n  deleted\n  callCount\n}\n"
   }
 };
 })();

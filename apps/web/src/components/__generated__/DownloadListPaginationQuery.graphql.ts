@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<236c2576589ac5514023492023246de2>>
+ * @generated SignedSource<<b1731447a60675d15519b2cce3341206>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -138,6 +138,13 @@ return {
                         "alias": null,
                         "args": null,
                         "kind": "ScalarField",
+                        "name": "identifier",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
                         "name": "downloadDate",
                         "storageKey": null
                       },
@@ -233,12 +240,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "e3b8cc3d7f5f90144c37a16bc1fb8d2d",
+    "cacheID": "94cbe5e56dd52cc51f3f848295ca25cb",
     "id": null,
     "metadata": {},
     "name": "DownloadListPaginationQuery",
     "operationKind": "query",
-    "text": "query DownloadListPaginationQuery(\n  $cursor: ID\n  $episodeIdentifier: Int!\n  $first: Int\n) {\n  ...DownloadListQuery_2Q8tVP\n}\n\nfragment DownloadListQuery_2Q8tVP on Query {\n  episode(identifier: $episodeIdentifier) {\n    downloads(first: $first, after: $cursor) {\n      edges {\n        node {\n          id\n          ...DownloadRow_episodeDownload\n          __typename\n        }\n        cursor\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n    id\n  }\n}\n\nfragment DownloadRow_episodeDownload on EpisodeDownload {\n  downloadDate\n  partCount\n  finished\n  deleted\n  callCount\n}\n"
+    "text": "query DownloadListPaginationQuery(\n  $cursor: ID\n  $episodeIdentifier: Int!\n  $first: Int\n) {\n  ...DownloadListQuery_2Q8tVP\n}\n\nfragment DownloadListQuery_2Q8tVP on Query {\n  episode(identifier: $episodeIdentifier) {\n    downloads(first: $first, after: $cursor) {\n      edges {\n        node {\n          id\n          ...DownloadRow_episodeDownload\n          __typename\n        }\n        cursor\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n    id\n  }\n}\n\nfragment DownloadRow_episodeDownload on EpisodeDownload {\n  identifier\n  downloadDate\n  partCount\n  finished\n  deleted\n  callCount\n}\n"
   }
 };
 })();
