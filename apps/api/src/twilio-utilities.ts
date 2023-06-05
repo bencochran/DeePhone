@@ -104,7 +104,7 @@ export async function geocodeVoiceRequestFrom(
         const result = { longitude: first.lng, latitude: first.lat };
         logger.info(`Geocoding result: ${url.toString()}`);
 
-        prisma.postalCodeLocation.upsert({
+        await prisma.postalCodeLocation.upsert({
           where: {
             postalCode_country: {
               postalCode: voiceRequest.FromZip,
@@ -127,7 +127,7 @@ export async function geocodeVoiceRequestFrom(
         return result;
       }
     }
-    logger.warning(`Geocoding got no results`, {
+    logger.warning('Geocoding got no results', {
       voiceRequest,
       response: { data: response.data },
     });
