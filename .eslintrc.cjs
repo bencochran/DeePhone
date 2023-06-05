@@ -29,7 +29,7 @@ module.exports = {
       { namedComponents: 'arrow-function' },
     ],
     'import/prefer-default-export': 'off',
-    'no-unused-vars': ['error', { destructuredArrayIgnorePattern: '^_' }],
+    'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': [
       'error',
       { destructuredArrayIgnorePattern: '^_' },
